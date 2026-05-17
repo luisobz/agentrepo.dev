@@ -1,0 +1,6 @@
+.nx/polygraph
+.claude/worktrees
+.claude/settings.local.json
+/specs
+node_modules
+dist

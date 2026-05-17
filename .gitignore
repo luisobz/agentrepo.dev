@@ -1,6 +1,25 @@
+# Nx
+.nx/cache
+.nx/workspace-data
+.nx/cloud
+.nx/temp
 .nx/polygraph
+
+# Dependencies
+node_modules
+
+# Bundlers
+dist
+vitest.config.*.timestamp*
+
+# AI
 .claude/worktrees
 .claude/settings.local.json
+
+# Testing
+/coverage
+
+# Others
+.tmp
+*.tsbuildinfo
 /specs
-node_modules
-dist

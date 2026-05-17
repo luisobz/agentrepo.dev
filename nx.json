@@ -1,4 +1,15 @@
 {
   "$schema": "./node_modules/nx/schemas/nx-schema.json",
-  "nxCloudId": "6a0a039aa359ea180da3350c"
+  "nxCloudId": "6a0a039aa359ea180da3350c",
+  "analytics": true,
+  "plugins": [
+    {
+      "plugin": "@nx/vitest",
+      "options": {
+        "testTargetName": "test",
+        "ciTargetName": "test-ci",
+        "testMode": "watch"
+      }
+    }
+  ]
 }

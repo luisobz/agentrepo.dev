@@ -1,0 +1,19 @@
+{
+  "name": "domain",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "packages/domain/src",
+  "projectType": "library",
+  "tags": [],
+  "targets": {
+    "build": {
+      "executor": "@nx/js:swc",
+      "outputs": ["{options.outputPath}"],
+      "options": {
+        "outputPath": "dist/packages/domain",
+        "main": "packages/domain/src/index.ts",
+        "tsConfig": "packages/domain/tsconfig.lib.json",
+        "assets": ["packages/domain/*.md"]
+      }
+    }
+  }
+}

@@ -23,3 +23,7 @@ vitest.config.*.timestamp*
 .tmp
 *.tsbuildinfo
 /specs
+
+# Next.js
+.next
+out

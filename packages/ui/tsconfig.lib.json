@@ -6,7 +6,15 @@
       "node",
       "@nx/react/typings/cssmodule.d.ts",
       "@nx/react/typings/image.d.ts"
-    ]
+    ],
+    "paths": {
+      "@agentrepo/ui": [
+        "./packages/ui/src/index.ts"
+      ],
+      "@agentrepo/ui/*": [
+        "./packages/ui/src/*"
+      ]
+    }
   },
   "exclude": [
     "jest.config.ts",
@@ -24,5 +32,10 @@
     "vitest.config.ts",
     "vitest.config.mts"
   ],
-  "include": ["src/**/*.js", "src/**/*.jsx", "src/**/*.ts", "src/**/*.tsx"]
+  "include": [
+    "src/**/*.js",
+    "src/**/*.jsx",
+    "src/**/*.ts",
+    "src/**/*.tsx"
+  ]
 }

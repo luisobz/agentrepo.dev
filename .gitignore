@@ -11,6 +11,7 @@ node_modules
 # Bundlers
 dist
 vitest.config.*.timestamp*
+tsconfig.generated.*.json
 
 # AI
 .claude/worktrees
@@ -28,3 +29,9 @@ vitest.config.*.timestamp*
 .next
 out
 /generated/prisma
+
+# Exclude ENVs
+.env
+.env.*
+!.env.example
+!.env.*.example

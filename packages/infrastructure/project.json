@@ -3,7 +3,7 @@
   "$schema": "../../node_modules/nx/schemas/project-schema.json",
   "sourceRoot": "packages/infrastructure/src",
   "projectType": "library",
-  "tags": [],
+  "tags": ["scope:infrastructure"],
   "targets": {
     "build": {
       "executor": "@nx/js:swc",

@@ -47,7 +47,8 @@
       "dependsOn": ["build"],
       "options": {
         "buildTarget": "backend-ai:build",
-        "runBuildTargetDependencies": false
+        "runBuildTargetDependencies": false,
+        "port": 9230
       },
       "configurations": {
         "development": {

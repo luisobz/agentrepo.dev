@@ -47,7 +47,8 @@
       "dependsOn": ["build"],
       "options": {
         "buildTarget": "backend-web:build",
-        "runBuildTargetDependencies": false
+        "runBuildTargetDependencies": false,
+        "port": 9229
       },
       "configurations": {
         "development": {

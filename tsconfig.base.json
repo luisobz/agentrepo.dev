@@ -4,23 +4,44 @@
     "rootDir": ".",
     "sourceMap": true,
     "declaration": false,
-    "moduleResolution": "node",
+    "module": "NodeNext",
+    "moduleResolution": "NodeNext",
     "emitDecoratorMetadata": true,
     "experimentalDecorators": true,
     "importHelpers": true,
     "target": "es2015",
-    "module": "esnext",
-    "lib": ["es2020", "dom"],
+    "lib": [
+      "es2020",
+      "dom"
+    ],
     "skipLibCheck": true,
     "skipDefaultLibCheck": true,
     "paths": {
-      "@agentrepo/domain": ["./packages/domain/src/index.ts"],
-      "@agentrepo/application": ["./packages/application/src/index.ts"],
-      "@agentrepo/infrastructure": ["./packages/infrastructure/src/index.ts"],
-      "@agentrepo/config": ["./packages/config/src/index.ts"],
-      "@agentrepo/trpc": ["./packages/trpc/src/index.ts"],
-      "@agentrepo/ui": ["./packages/ui/src/index.ts"]
+      "@agentrepo/domain": [
+        "./packages/domain/src/index.ts"
+      ],
+      "@agentrepo/application": [
+        "./packages/application/src/index.ts"
+      ],
+      "@agentrepo/infrastructure": [
+        "./packages/infrastructure/src/index.ts"
+      ],
+      "@agentrepo/config": [
+        "./packages/config/src/index.ts"
+      ],
+      "@agentrepo/trpc": [
+        "./packages/trpc/src/index.ts"
+      ],
+      "@agentrepo/ui": [
+        "./packages/ui/src/index.ts"
+      ],
+      "@agentrepo/ui/*": [
+        "./packages/ui/src/*"
+      ]
     }
   },
-  "exclude": ["node_modules", "tmp"]
+  "exclude": [
+    "node_modules",
+    "tmp"
+  ]
 }

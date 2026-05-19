@@ -16,6 +16,7 @@ tsconfig.generated.*.json
 # AI
 .claude/worktrees
 .claude/settings.local.json
+AGENTS_LOCAL.md
 
 # Testing
 /coverage

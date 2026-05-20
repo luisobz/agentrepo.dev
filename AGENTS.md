@@ -38,6 +38,9 @@ It records mandatory rules derived from code reviews to prevent repeating past m
   output if you don't need it in full. For test runs, skip coverage output — what
   matters is pass/fail and, on failure, the specific error.
 
+- **Clean Code:** Always read and follow the conventions in `skills/clean-code.md` when developing — never  bypass the structural and code quality guidelines outlined there.
+
 <!-- Add project-specific rules below as they emerge from code reviews. -->
 <!-- Format: "- **<Topic>:** <what to do> — never <what to avoid>." -->
+
 

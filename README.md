@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="docs/assets/banner.png" alt="AgentRepo.dev Banner" width="100%">
+  <img src="docs/assets/banner.png" alt="AgentRepo.dev Banner" width="60%">
 </p>
 
 <p align="center">
@@ -21,37 +21,26 @@ Construido bajo los principios de **Arquitectura Hexagonal (DDD)**, este monorep
 
 ---
 
-## ✨ Características Principales
-
-*   **🧩 Catálogo de Habilidades (Skills):** Prompts, sistemas, configuraciones y plantillas markdown editables en tiempo real con integración de Monaco Editor.
-*   **🤖 Hub de Agentes:** Modelado completo de agentes de IA con árboles de directorios interactivos, gestión de versiones e IDE integrado.
-*   **🔮 Playground de Agentes:** Entorno interactivo para probar el comportamiento de los agentes con control fino de tokens y trazabilidad.
-*   **🔗 Flujos de Trabajo Avanzados:** Integración fluida con **DeepSeek** y **LangChain** para generar contenido, enviar correos a través de SMTP seguro y generar reportes en PDF dinámicos.
-*   **🛡️ Arquitectura Ultra-Limpia:** Separación estricta de responsabilidades (Hexagonal / Domain-Driven Design) para una mantenibilidad y testing sin esfuerzo.
-*   **🎨 Diseño Premium:** Sistema de diseño de alta fidelidad basado en CSS dinámico, animaciones fluidas, modo oscuro nativo, avatares interactivos y componentes premium basados en Radix/shadcn.
-
----
-
 ## 🏛️ Estructura del Monorepo
 
 Este proyecto utiliza **Nx** para gestionar de forma eficiente sus aplicaciones y paquetes:
 
 ```mermaid
 graph TD
-    subgraph Apps (Frontend & API)
-        web[Next.js Public Web App]
-        admin[Next.js Admin Panel]
-        api_web[NestJS Main API & tRPC]
-        api_ai[NestJS AI Workflows API]
+    subgraph apps ["Aplicaciones (Frontend & API)"]
+        web["web (Next.js Public Web App)"]
+        admin["admin (Next.js Panel de Control)"]
+        api_web["backend-web (NestJS Main API & tRPC)"]
+        api_ai["backend-ai (NestJS AI Workflows API)"]
     end
 
-    subgraph Shared Packages
-        trpc[tRPC Router & Schemas]
-        ui[Shared UI Design System]
-        config[Global Configurations]
-        app[packages/application - Use Cases & Ports]
-        domain[packages/domain - Pure Business Logic]
-        infra[packages/infrastructure - DB Adapters & SMTP]
+    subgraph shared ["Paquetes Compartidos"]
+        trpc["trpc (Shared Routers & Schemas)"]
+        ui["ui (Shared UI Design System)"]
+        config["config (Global Configurations)"]
+        app["application (Hexagonal Use Cases & Ports)"]
+        domain["domain (Pure Business Logic)"]
+        infra["infrastructure (DB & External Adapters)"]
     end
 
     web --> trpc
@@ -61,7 +50,7 @@ graph TD
     api_ai --> app
     app --> domain
     app --> infra
-    infra --> db[(PostgreSQL / Prisma)]
+    infra --> db[("PostgreSQL (Prisma)")]
 ```
 
 ### Aplicaciones (`apps/`)
@@ -147,4 +136,4 @@ Para asegurar que el proyecto se mantiene limpio y sin vulnerabilidades:
 
 ## 📄 Licencia
 
-Este proyecto está licenciado bajo la **Licencia GNU Affero General Public License v3 (AGPL-3.0)**. Para más detalles, consulta el archivo [LICENSE](LICENSE).
+Este proyecto estálicensed bajo la **Licencia GNU Affero General Public License v3 (AGPL-3.0)**. Para más detalles, consulta el archivo [LICENSE](LICENSE).

@@ -191,14 +191,14 @@ El proyecto AgentRepo.dev es un monorepo gestionado con Nx y pnpm. Se basa en un
       - task-4-admin-contacts-log.md
 
 16. **16-playground-system**
-    - **Objetivo:** Interfaces dummy y real para demos de agentes.
-    - **Dependencias:** 02-fundacion-core-components.
-    - **Criterio de aceptación:** Se puede ejecutar una simulación visual, o usar un token para ver un streaming real de IA.
+    - **Objetivo:** Interfaz interactiva estilo Trello Kanban para demostración visual (mock) y ejecución real en streaming de subagentes IA de desarrollo.
+    - **Dependencias:** 02-fundacion-core-components, 04-fundacion-avatar-system.
+    - **Criterio de aceptación:** Se puede ejecutar una simulación guiada interactiva de Kanban con test fallidos y reparaciones de bugs, o usar un token para crear features personalizadas con streaming real de IA y previsualizaciones funcionales.
     - **Tasks:**
       - task-1-tokens-admin-backend.md
-      - task-2-playground-dummy-ui.md
-      - task-3-playground-real-ui.md
-      - task-4-playground-streaming-api.md
+      - task-2-playground-board-ui.md
+      - task-3-playground-mock-flow.md
+      - task-4-playground-real-flow.md
 
 ### Fase 5 — Pulido y lanzamiento
 17. **17-easter-egg-avatar**
@@ -208,11 +208,10 @@ El proyecto AgentRepo.dev es un monorepo gestionado con Nx y pnpm. Se basa en un
     - **Tasks:**
       - task-1-avatar-click-sequence.md
 
-18. **18-final-polish**
-    - **Objetivo:** Rematar la experiencia (SEO, animaciones, Sentry).
-    - **Dependencias:** Todas.
-    - **Criterio de aceptación:** Proyecto listo para deploy con métricas y metadatos correctos.
-    - **Tasks:**
-      - task-1-seo-metadata.md
-      - task-2-sentry-integration.md
-      - task-3-motion-refinements.md
+211: 18. **18-final-polish**
+212:     - **Objetivo:** Rematar la experiencia (SEO, animaciones, Sentry).
+213:     - **Dependencias:** Todas.
+214:     - **Criterio de aceptación:** Proyecto listo para deploy con métricas y metadatos correctos.
+215:     - **Tasks:**
+216:       - task-1-seo-metadata.md
+217:       - task-2-sentry-integration.md

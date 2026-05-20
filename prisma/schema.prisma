@@ -7,3 +7,38 @@ datasource db {
   provider = "postgresql"
 }
 
+model Skill {
+  id          String   @id @default(uuid())
+  slug        String   @unique
+  title       String
+  description String?
+  content     String   // Markdown content
+  type        String   // prompt, system, config, template
+  isPublished Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model Agent {
+  id               String   @id @default(uuid())
+  slug             String   @unique
+  title            String
+  shortDescription String
+  version          String   @default("1.0.0")
+  readmeContent    String?  // Main markdown content
+  fileTree         Json     // JSON representing the directory structure
+  isPublished      Boolean  @default(false)
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+}
+
+model BlogPost {
+  id          String   @id @default(uuid())
+  slug        String   @unique
+  title       String
+  excerpt     String?
+  content     String
+  isPublished Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}

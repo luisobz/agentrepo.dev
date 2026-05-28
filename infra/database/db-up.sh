@@ -1,22 +1,17 @@
 #!/usr/bin/env bash
-# =========================================================================
-# AgentRepo.dev — Local Database Setup & Startup Script
-# =========================================================================
-
 set -e
 
-# Colors for nice logging
+# Colors
 GREEN='\033[0;32m'
 BLUE='\033[0;34m'
 YELLOW='\033[1;33m'
-NC='\033[0m' # No Color
+NC='\033[0m'
 
-echo -e "${BLUE}🚀 Starting local PostgreSQL database container...${NC}"
-sudo docker compose up -d
+echo -e "${BLUE}🚀 Starting local PostgreSQL database container (infra/database/docker-compose.dev.yml)...${NC}"
+docker compose -f infra/database/docker-compose.dev.yml up -d
 
 echo -e "${BLUE}⏳ Waiting for PostgreSQL to be healthy and ready to accept connections...${NC}"
-# Loop to wait for postgres to be ready
-until sudo docker exec agentrepo-postgres pg_isready -U postgres >/dev/null 2>&1; do
+until docker exec agentrepo-postgres pg_isready -U postgres >/dev/null 2>&1; do
   echo -e "${YELLOW}🕒 Database is starting up... waiting 2s...${NC}"
   sleep 2
 done

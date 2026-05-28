@@ -2,7 +2,10 @@ import nx from '@nx/eslint-plugin';
 import baseConfig from '../../eslint.config.mjs';
 
 export default [
-  ...nx.configs['flat/react'],
+  {
+    plugins: { react: (await import('@eslint-react/eslint-plugin')).default },
+    rules: { 'react/rules-of-hooks': 'error', 'react/exhaustive-deps': 'warn' },
+  },
   ...baseConfig,
   {
     files: ['**/*.ts', '**/*.tsx', '**/*.js', '**/*.jsx'],

@@ -1,0 +1,17 @@
+{
+  "name": "@agentrepo/database",
+  "version": "0.0.1",
+  "private": true,
+  "type": "commonjs",
+  "main": "./src/index.js",
+  "types": "./src/index.d.ts",
+  "dependencies": {
+    "@prisma/client": "^7.8.0",
+    "@agentrepo/config": "workspace:*",
+    "prisma": "^7.8.0",
+    "ts-node": "^10.9.1"
+  },
+  "prisma": {
+    "seed": "ts-node prisma/seeds/index.ts"
+  }
+}

@@ -43,4 +43,6 @@ It records mandatory rules derived from code reviews to prevent repeating past m
 <!-- Add project-specific rules below as they emerge from code reviews. -->
 <!-- Format: "- **<Topic>:** <what to do> — never <what to avoid>." -->
 
+- **Testing:** This project uses Vitest for testing. import { ... } from "vitest";
+
 

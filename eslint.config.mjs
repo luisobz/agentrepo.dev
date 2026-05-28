@@ -5,6 +5,9 @@ export default [
   ...nx.configs['flat/typescript'],
   ...nx.configs['flat/javascript'],
   {
+    ignores: ['**/node_modules/**', '**/dist/**', '**/.next/**'],
+  },
+  {
     ignores: ['**/dist', '**/out-tsc', '**/vitest.config.*.timestamp*'],
   },
   {
@@ -27,6 +30,14 @@ export default [
             {
               sourceTag: 'scope:infrastructure',
               onlyDependOnLibsWithTags: ['scope:domain', 'scope:application', 'scope:infrastructure'],
+            },
+            {
+              sourceTag: 'scope:frontend',
+              onlyDependOnLibsWithTags: ['scope:frontend'],
+            },
+            {
+              sourceTag: 'scope:backend',
+              onlyDependOnLibsWithTags: ['scope:backend'],
             },
             {
               sourceTag: '*',

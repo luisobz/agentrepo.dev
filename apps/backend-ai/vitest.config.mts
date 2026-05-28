@@ -17,5 +17,9 @@ export default defineConfig(() => ({
       reportsDirectory: '../../coverage/apps/backend-ai',
       provider: 'v8' as const,
     },
+    env: {
+      DATABASE_URL: 'postgresql://postgres:postgres@localhost:5432/agentrepo_test',
+      NODE_ENV: 'test',
+    }
   },
 }));

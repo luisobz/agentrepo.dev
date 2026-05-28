@@ -6,6 +6,9 @@
   "main": "./src/index.js",
   "types": "./src/index.d.ts",
   "dependencies": {
-    "@swc/helpers": "~0.5.18"
+    "@swc/helpers": "~0.5.18",
+    "dotenv": "17.4.2",
+    "@t3-oss/env-core": "^0.13.11",
+    "zod": "^4.4.3"
   }
 }

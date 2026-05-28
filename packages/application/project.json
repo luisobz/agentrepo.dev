@@ -3,16 +3,23 @@
   "$schema": "../../node_modules/nx/schemas/project-schema.json",
   "sourceRoot": "packages/application/src",
   "projectType": "library",
-  "tags": ["scope:application"],
+  "tags": [
+    "scope:application",
+    "scope:backend"
+  ],
   "targets": {
     "build": {
       "executor": "@nx/js:swc",
-      "outputs": ["{options.outputPath}"],
+      "outputs": [
+        "{options.outputPath}"
+      ],
       "options": {
         "outputPath": "dist/packages/application",
         "main": "packages/application/src/index.ts",
         "tsConfig": "packages/application/tsconfig.lib.json",
-        "assets": ["packages/application/*.md"]
+        "assets": [
+          "packages/application/*.md"
+        ]
       }
     }
   }

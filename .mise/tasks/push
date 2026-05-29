@@ -1,0 +1,43 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+#MISE description="Push Docker image(s) to the registry for the given app or all apps"
+#USAGE arg "<app>" help="App to push (subfolder of infra/) or 'all'" {
+#USAGE   choices "backend-web" "backend-ai" "web" "admin" "database" "all"
+#USAGE }
+#USAGE flag "-t --tag <tag>" help="Image tag (default: latest)" default="latest"
+
+# ── Configuration ────────────────────────────────────────────────
+REGISTRY="${AGENTREPO_REGISTRY:-registry.agentrepo.dev}"
+PROJECT="${AGENTREPO_PROJECT:-agentrepo}"
+APPS=("backend-web" "backend-ai" "web" "admin" "database")
+
+# ── Helpers ──────────────────────────────────────────────────────
+
+push_app() {
+  local app="$1"
+  local tag="${usage_tag:-latest}"
+  local image="${REGISTRY}/${PROJECT}/${PROJECT}-${app}:${tag}"
+
+  if ! docker image inspect "${image}" &>/dev/null; then
+    echo "❌ Image not found locally: ${image}" >&2
+    echo "   Run 'mise build ${app}' first." >&2
+    exit 1
+  fi
+
+  echo "🚀 Pushing ${image}"
+  docker push "${image}"
+  echo "✅ Pushed ${image}"
+}
+
+# ── Main ─────────────────────────────────────────────────────────
+
+app="${usage_app?}"
+
+if [[ "${app}" == "all" ]]; then
+  for a in "${APPS[@]}"; do
+    push_app "${a}"
+  done
+else
+  push_app "${app}"
+fi

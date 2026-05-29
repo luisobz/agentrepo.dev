@@ -5,3 +5,7 @@ starship = "latest"
 
 [settings]
 experimental = true
+
+[env]
+AGENTREPO_REGISTRY = "registry.agentrepo.dev"
+AGENTREPO_PROJECT = "agentrepo"

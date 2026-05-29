@@ -1,0 +1,42 @@
+# Dependencies (reinstalled inside the container)
+node_modules/
+
+# Build output (rebuilt inside the container)
+dist/
+.next/
+.turbo/
+
+# Version control
+.git/
+.gitignore
+
+# IDE & editor
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Environment & secrets
+.env
+.env.local
+.env.*.local
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Mise & tooling
+.mise/
+mise.toml
+
+# Documentation & non-runtime files
+docs/
+features/
+specs/
+skills/
+*.md
+LICENSE
+
+# Test artifacts
+coverage/
+tmp/

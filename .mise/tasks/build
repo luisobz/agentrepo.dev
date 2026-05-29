@@ -1,0 +1,48 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+#MISE description="Build Docker image(s) for the given app or all apps"
+#USAGE arg "<app>" help="App to build (subfolder of infra/) or 'all'" {
+#USAGE   choices "backend-web" "backend-ai" "web" "admin" "database" "all"
+#USAGE }
+#USAGE flag "-t --tag <tag>" help="Image tag (default: latest)" default="latest"
+
+# ── Configuration ────────────────────────────────────────────────
+REGISTRY="${AGENTREPO_REGISTRY:-registry.agentrepo.dev}"
+PROJECT="${AGENTREPO_PROJECT:-agentrepo}"
+APPS=("backend-web" "backend-ai" "web" "admin" "database")
+ROOT_DIR="$(git rev-parse --show-toplevel)"
+
+# ── Helpers ──────────────────────────────────────────────────────
+
+build_app() {
+  local app="$1"
+  local tag="${usage_tag:-latest}"
+  local dockerfile="${ROOT_DIR}/infra/${app}/Dockerfile"
+  local image="${REGISTRY}/${PROJECT}/${PROJECT}-${app}:${tag}"
+
+  if [[ ! -f "${dockerfile}" ]]; then
+    echo "❌ Dockerfile not found: ${dockerfile}" >&2
+    exit 1
+  fi
+
+  echo "🔨 Building ${image}"
+  docker build \
+    -f "${dockerfile}" \
+    -t "${image}" \
+    "${ROOT_DIR}"
+
+  echo "✅ Built ${image}"
+}
+
+# ── Main ─────────────────────────────────────────────────────────
+
+app="${usage_app?}"
+
+if [[ "${app}" == "all" ]]; then
+  for a in "${APPS[@]}"; do
+    build_app "${a}"
+  done
+else
+  build_app "${app}"
+fi

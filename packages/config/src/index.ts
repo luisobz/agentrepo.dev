@@ -1,2 +1,1 @@
-export * from './lib/config';
-export { backendEnv } from './env/backend';
+export { BackendEnvironments, BackendEnvironment } from './env/backend';

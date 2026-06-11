@@ -1,0 +1,30 @@
+{
+    "name": "backend-ai",
+    "version": "0.0.0",
+    "private": true,
+    "dependencies": {
+        "@nestjs/common": "^11.1.21",
+        "@nestjs/core": "^11.1.21",
+        "@nestjs/platform-express": "^11.1.21",
+        "reflect-metadata": "^0.2.2",
+        "rxjs": "^7.8.2",
+        "@langchain/community": "^1.1.28",
+        "@langchain/core": "^1.1.46",
+        "@langchain/openai": "^1.4.5",
+        "langchain": "^1.4.0",
+        "langfuse": "^3.38.20",
+        "@agentrepo/infrastructure": "workspace:*",
+        "@agentrepo/trpc": "workspace:*",
+        "@agentrepo/config": "workspace:*",
+        "@agentrepo/database": "workspace:*",
+        "@sentry/nestjs": "^10.53.1",
+        "@sentry/node": "^10.53.1",
+        "zod": "^4.4.3",
+        "superjson": "^2.2.6"
+    },
+    "devDependencies": {
+        "@nestjs/schematics": "^11.0.0",
+        "@nestjs/testing": "^11.0.0",
+        "typescript": "^6.0.3"
+    }
+}

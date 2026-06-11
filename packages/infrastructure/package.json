@@ -3,11 +3,14 @@
   "version": "0.0.1",
   "private": true,
   "type": "commonjs",
-  "main": "./src/index.js",
-  "types": "./src/index.d.ts",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
   "dependencies": {
-    "@swc/helpers": "~0.5.18",
     "@nestjs/common": "^11.1.21",
-    "@prisma/client": "^7.8.0"
+    "@prisma/client": "^7.8.0",
+    "@agentrepo/database": "workspace:*"
+  },
+  "devDependencies": {
+    "@swc/helpers": "~0.5.18"
   }
 }

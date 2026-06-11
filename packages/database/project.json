@@ -10,35 +10,35 @@
     "generate": {
       "executor": "nx:run-commands",
       "options": {
-        "command": "pnpm prisma generate --config=packages/database/prisma/prisma.config.ts",
+        "command": "pnpm prisma generate --config=packages/database/prisma.config.ts",
         "cwd": "."
       }
     },
     "migrate-dev": {
       "executor": "nx:run-commands",
       "options": {
-        "command": "pnpm prisma migrate dev --config=packages/database/prisma/prisma.config.ts",
+        "command": "pnpm prisma migrate dev --config=packages/database/prisma.config.ts",
         "cwd": "."
       }
     },
     "migrate-deploy": {
       "executor": "nx:run-commands",
       "options": {
-        "command": "pnpm prisma migrate deploy --config=packages/database/prisma/prisma.config.ts",
+        "command": "pnpm prisma migrate deploy --config=packages/database/prisma.config.ts",
         "cwd": "."
       }
     },
     "studio": {
       "executor": "nx:run-commands",
       "options": {
-        "command": "pnpm prisma studio --config=packages/database/prisma/prisma.config.ts",
+        "command": "pnpm prisma studio --config=packages/database/prisma.config.ts",
         "cwd": "."
       }
     },
     "seed": {
       "executor": "nx:run-commands",
       "options": {
-        "command": "pnpm ts-node packages/database/prisma/seeds/index.ts",
+        "command": "pnpm prisma db seed --config=packages/database/prisma.config.ts",
         "cwd": "."
       }
     }

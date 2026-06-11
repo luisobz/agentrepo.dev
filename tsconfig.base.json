@@ -37,6 +37,12 @@
       ],
       "@agentrepo/ui/*": [
         "./packages/ui/src/*"
+      ],
+      "@agentrepo/avatar": [
+        "./packages/avatar/src/index.ts"
+      ],
+      "@agentrepo/avatar/*": [
+        "./packages/avatar/src/*"
       ]
     }
   },

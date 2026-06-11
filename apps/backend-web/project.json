@@ -13,7 +13,7 @@
         "{options.outputPath}"
       ],
       "options": {
-        "outputPath": "dist/apps/backend-web",
+        "outputPath": "apps/backend-web/dist",
         "main": "apps/backend-web/src/main.ts",
         "tsConfig": "apps/backend-web/tsconfig.app.json",
         "assets": []
@@ -26,8 +26,8 @@
       "cache": true,
       "executor": "@nx/js:prune-lockfile",
       "outputs": [
-        "{workspaceRoot}/dist/apps/backend-web/package.json",
-        "{workspaceRoot}/dist/apps/backend-web/pnpm-lock.yaml"
+        "{workspaceRoot}/apps/backend-web/dist/package.json",
+        "{workspaceRoot}/apps/backend-web/dist/pnpm-lock.yaml"
       ],
       "options": {
         "buildTarget": "build"
@@ -39,7 +39,7 @@
       ],
       "cache": true,
       "outputs": [
-        "{workspaceRoot}/dist/apps/backend-web/workspace_modules"
+        "{workspaceRoot}/apps/backend-web/dist/workspace_modules"
       ],
       "executor": "@nx/js:copy-workspace-modules",
       "options": {

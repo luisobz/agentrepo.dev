@@ -3,9 +3,13 @@
   "version": "0.0.1",
   "private": true,
   "type": "commonjs",
-  "main": "./src/index.js",
-  "types": "./src/index.d.ts",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
   "dependencies": {
+    "@agentrepo/domain": "workspace:*",
+    "@agentrepo/infrastructure": "workspace:*"
+  },
+  "devDependencies": {
     "@swc/helpers": "~0.5.18"
   }
 }

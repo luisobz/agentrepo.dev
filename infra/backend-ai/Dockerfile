@@ -21,7 +21,7 @@ WORKDIR /app
 ENV NODE_ENV=production
 
 # Copy pruned output (includes package.json, pnpm-lock.yaml, workspace_modules)
-COPY --from=builder /app/dist/apps/backend-ai ./
+COPY --from=builder /app/apps/backend-ai/dist ./
 
 # Install only production dependencies from the pruned lockfile
 RUN corepack enable && corepack prepare pnpm@latest --activate \

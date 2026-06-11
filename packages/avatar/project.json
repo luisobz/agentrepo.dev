@@ -1,0 +1,11 @@
+{
+  "name": "avatar",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "packages/avatar/src",
+  "projectType": "library",
+  "tags": [
+    "scope:frontend"
+  ],
+  "// targets": "to see all targets run: nx show project avatar --web",
+  "targets": {}
+}

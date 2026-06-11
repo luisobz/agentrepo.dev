@@ -9,7 +9,7 @@
       "executor": "@nx/js:swc",
       "outputs": ["{options.outputPath}"],
       "options": {
-        "outputPath": "dist/apps/backend-ai",
+        "outputPath": "apps/backend-ai/dist",
         "main": "apps/backend-ai/src/main.ts",
         "tsConfig": "apps/backend-ai/tsconfig.app.json",
         "assets": []
@@ -20,8 +20,8 @@
       "cache": true,
       "executor": "@nx/js:prune-lockfile",
       "outputs": [
-        "{workspaceRoot}/dist/apps/backend-ai/package.json",
-        "{workspaceRoot}/dist/apps/backend-ai/pnpm-lock.yaml"
+        "{workspaceRoot}/apps/backend-ai/dist/package.json",
+        "{workspaceRoot}/apps/backend-ai/dist/pnpm-lock.yaml"
       ],
       "options": {
         "buildTarget": "build"
@@ -30,7 +30,7 @@
     "copy-workspace-modules": {
       "dependsOn": ["build"],
       "cache": true,
-      "outputs": ["{workspaceRoot}/dist/apps/backend-ai/workspace_modules"],
+      "outputs": ["{workspaceRoot}/apps/backend-ai/dist/workspace_modules"],
       "executor": "@nx/js:copy-workspace-modules",
       "options": {
         "buildTarget": "build"

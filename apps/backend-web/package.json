@@ -1,0 +1,33 @@
+{
+    "name": "backend-web",
+    "version": "0.0.0",
+    "private": true,
+    "dependencies": {
+        "@nestjs/common": "^11.1.21",
+        "@nestjs/core": "^11.1.21",
+        "@nestjs/platform-express": "^11.1.21",
+        "@nestjs/swagger": "^11.4.3",
+        "class-transformer": "^0.5.1",
+        "class-validator": "^0.15.1",
+        "reflect-metadata": "^0.2.2",
+        "rxjs": "^7.8.2",
+        "swagger-ui-express": "^5.0.1",
+        "@agentrepo/infrastructure": "workspace:*",
+        "@agentrepo/trpc": "workspace:*",
+        "@agentrepo/config": "workspace:*",
+        "@agentrepo/database": "workspace:*",
+        "better-auth": "^1.6.11",
+        "@sentry/nestjs": "^10.53.1",
+        "nodemailer": "^8.0.7",
+        "@aws-sdk/client-s3": "^3.1048.0",
+        "zod": "^4.4.3",
+        "superjson": "^2.2.6",
+        "@trpc/server": "11.17.0"
+    },
+    "devDependencies": {
+        "@nestjs/schematics": "^11.0.0",
+        "@nestjs/testing": "^11.0.0",
+        "@types/nodemailer": "^8.0.0",
+        "typescript": "^6.0.3"
+    }
+}

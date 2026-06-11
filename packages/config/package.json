@@ -3,12 +3,13 @@
   "version": "0.0.1",
   "private": true,
   "type": "commonjs",
-  "main": "./src/index.js",
-  "types": "./src/index.d.ts",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
   "dependencies": {
-    "@swc/helpers": "~0.5.18",
     "dotenv": "17.4.2",
-    "@t3-oss/env-core": "^0.13.11",
     "zod": "^4.4.3"
+  },
+  "devDependencies": {
+    "@swc/helpers": "~0.5.18"
   }
 }

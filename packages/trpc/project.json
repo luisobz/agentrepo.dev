@@ -14,7 +14,7 @@
         "{options.outputPath}"
       ],
       "options": {
-        "outputPath": "dist/packages/trpc",
+        "outputPath": "packages/trpc/dist",
         "main": "packages/trpc/src/index.ts",
         "tsConfig": "packages/trpc/tsconfig.lib.json",
         "assets": [

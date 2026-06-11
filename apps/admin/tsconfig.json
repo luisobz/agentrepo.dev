@@ -27,7 +27,6 @@
     "**/*.js",
     "**/*.jsx",
     "../../apps/admin/.next/types/**/*.ts",
-    "../../dist/apps/admin/.next/types/**/*.ts",
     "next-env.d.ts"
   ],
   "exclude": [

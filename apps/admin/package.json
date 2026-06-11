@@ -1,0 +1,30 @@
+{
+    "name": "admin",
+    "version": "0.0.0",
+    "private": true,
+    "dependencies": {
+        "next": "~16.1.6",
+        "react": "^19.0.0",
+        "react-dom": "^19.0.0",
+        "@agentrepo/ui": "workspace:*",
+        "@agentrepo/trpc": "workspace:*",
+        "@agentrepo/config": "workspace:*",
+        "@trpc/client": "^11.17.0",
+        "@trpc/react-query": "^11.17.0",
+        "@trpc/tanstack-react-query": "^11.17.0",
+        "@tanstack/react-query": "^5.100.10",
+        "@t3-oss/env-nextjs": "^0.13.11",
+        "@sentry/nextjs": "^10.53.1",
+        "superjson": "^2.2.6",
+        "zod": "^4.4.3",
+        "geist": "^1.7.0",
+        "lucide-react": "^1.16.0"
+    },
+    "devDependencies": {
+        "@types/react": "^19.0.0",
+        "@types/react-dom": "^19.0.0",
+        "tailwindcss": "^4.3.0",
+        "@tailwindcss/postcss": "^4.3.0",
+        "typescript": "^6.0.3"
+    }
+}

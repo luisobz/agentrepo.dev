@@ -3,13 +3,17 @@
   "version": "0.0.1",
   "private": true,
   "type": "commonjs",
-  "main": "./src/index.js",
-  "types": "./src/index.d.ts",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
   "dependencies": {
     "@prisma/client": "^7.8.0",
-    "@agentrepo/config": "workspace:*",
+    "@prisma/adapter-pg": "^7.8.0",
+    "@agentrepo/config": "workspace:*"
+  },
+  "devDependencies": {
     "prisma": "^7.8.0",
-    "ts-node": "^10.9.1"
+    "ts-node": "^10.9.1",
+    "@swc/helpers": "~0.5.18"
   },
   "prisma": {
     "seed": "ts-node prisma/seeds/index.ts"

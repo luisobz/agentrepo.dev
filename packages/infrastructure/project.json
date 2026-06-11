@@ -14,7 +14,7 @@
         "{options.outputPath}"
       ],
       "options": {
-        "outputPath": "dist/packages/infrastructure",
+        "outputPath": "packages/infrastructure/dist",
         "main": "packages/infrastructure/src/index.ts",
         "tsConfig": "packages/infrastructure/tsconfig.lib.json",
         "assets": [

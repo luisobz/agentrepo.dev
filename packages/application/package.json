@@ -2,12 +2,10 @@
   "name": "@agentrepo/application",
   "version": "0.0.1",
   "private": true,
-  "type": "commonjs",
-  "main": "./dist/index.js",
-  "types": "./dist/index.d.ts",
+  "main": "./dist/src/index.js",
+  "types": "./dist/src/index.d.ts",
   "dependencies": {
-    "@agentrepo/domain": "workspace:*",
-    "@agentrepo/infrastructure": "workspace:*"
+    "@agentrepo/domain": "workspace:*"
   },
   "devDependencies": {
     "@swc/helpers": "~0.5.18"

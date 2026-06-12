@@ -17,7 +17,7 @@
     "build:api": "nx build backend-web",
     "build:ai": "nx build backend-ai",
     "build:all": "nx run-many -t build --all",
-    "clean": "rm -rf node_modules packages/*/node_modules apps/*/node_modules .nx dist",
+    "clean": "rm -rf node_modules packages/*/node_modules apps/*/node_modules packages/*/dist apps/*/dist .nx",
     "clean:full": "pnpm clean && rm -rf pnpm-lock.yaml",
     "reinstall": "pnpm clean && pnpm install",
     "reinstall:full": "pnpm clean:full && pnpm install",

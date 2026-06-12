@@ -1,11 +1,11 @@
-import { initTRPC } from "@trpc/server";
+import type { inferRouterInputs, inferRouterOutputs } from "@trpc/server";
 import { z } from "zod";
-import { searchRouter, TRPCContext } from "./search";
-
-export const t = initTRPC.context<TRPCContext>().create();
-
-export const publicProcedure = t.procedure;
-export const router = t.router;
+import { publicProcedure, router } from "../trpc";
+import { agentsRouter } from "./agents";
+import { blogRouter } from "./blog";
+import { blogPostsRouter } from "./blog-posts";
+import { searchRouter } from "./search";
+import { skillsRouter } from "./skills";
 
 const helloRouter = router({
   greeting: publicProcedure
@@ -20,7 +20,12 @@ const helloRouter = router({
 export const appRouter = router({
   hello: helloRouter,
   search: searchRouter,
+  skills: skillsRouter,
+  agents: agentsRouter,
+  blogPosts: blogPostsRouter,
+  blog: blogRouter,
 });
 
 export type AppRouter = typeof appRouter;
-export type { TRPCContext };
+export type RouterInputs = inferRouterInputs<AppRouter>;
+export type RouterOutputs = inferRouterOutputs<AppRouter>;

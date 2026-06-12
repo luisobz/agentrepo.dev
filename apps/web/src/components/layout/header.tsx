@@ -2,10 +2,13 @@
 
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
+import { AvatarSlot } from "@agentrepo/avatar";
 import { cn } from "@agentrepo/ui";
 import { Menu, X, ArrowUpRight, Search } from "lucide-react";
 
 export function Header() {
+  const pathname = usePathname();
   const [isScrolled, setIsScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
@@ -21,6 +24,11 @@ export function Header() {
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
+
+  // The portfolio is an immersive standalone pitch: no repo chrome there.
+  if (pathname?.startsWith("/portfolio")) {
+    return null;
+  }
 
   return (
     <>
@@ -56,6 +64,13 @@ export function Header() {
                 agentrepo<span className="text-[var(--color-brand-garnet)]">.dev</span>
               </span>
             </Link>
+
+            {/* Avatar perch: it flies here when it leaves the home hero */}
+            <AvatarSlot
+              id="header"
+              preserveSpace={false}
+              className="hidden items-center sm:flex [&>*]:scale-75"
+            />
 
             {/* Navigation links */}
             <nav className="hidden md:flex items-center gap-6">

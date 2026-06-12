@@ -2,16 +2,30 @@
   "name": "@agentrepo/trpc",
   "version": "0.0.0",
   "private": true,
-  "main": "./dist/index.js",
-  "types": "./dist/index.d.ts",
+  "main": "./dist/src/index.js",
+  "types": "./dist/src/index.d.ts",
   "dependencies": {
     "@trpc/server": "^11.17.0",
-    "@prisma/client": "^7.8.0",
     "superjson": "^2.2.6",
     "zod": "^4.4.3",
-    "@agentrepo/database": "workspace:*"
+    "@agentrepo/application": "workspace:*",
+    "@agentrepo/domain": "workspace:*"
   },
   "devDependencies": {
     "@swc/helpers": "~0.5.18"
+  },
+  "exports": {
+    ".": {
+      "types": "./dist/src/index.d.ts",
+      "default": "./dist/src/index.js"
+    },
+    "./schemas": {
+      "types": "./dist/src/schemas.d.ts",
+      "default": "./dist/src/schemas.js"
+    },
+    "./auth": {
+      "types": "./dist/src/auth.d.ts",
+      "default": "./dist/src/auth.js"
+    }
   }
 }

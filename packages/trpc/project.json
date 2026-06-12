@@ -4,8 +4,7 @@
   "sourceRoot": "packages/trpc/src",
   "projectType": "library",
   "tags": [
-    "scope:frontend",
-    "scope:backend"
+    "scope:shared"
   ],
   "targets": {
     "build": {

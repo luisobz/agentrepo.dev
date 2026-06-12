@@ -10,6 +10,7 @@ import { AppModule } from './app/app.module';
 import * as trpcExpress from '@trpc/server/adapters/express';
 import { appRouter } from '@agentrepo/trpc';
 import { BackendEnvironments } from '@agentrepo/config';
+import { buildCreateContext } from './trpc/trpc-context';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -24,7 +25,7 @@ async function bootstrap() {
     '/api/trpc',
     trpcExpress.createExpressMiddleware({
       router: appRouter,
-      createContext: () => ({ prisma }),
+      createContext: buildCreateContext(prisma),
     })
   );
 

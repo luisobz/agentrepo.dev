@@ -32,6 +32,12 @@
       "@agentrepo/trpc": [
         "./packages/trpc/src/index.ts"
       ],
+      "@agentrepo/trpc/schemas": [
+        "./packages/trpc/src/schemas.ts"
+      ],
+      "@agentrepo/trpc/auth": [
+        "./packages/trpc/src/auth.ts"
+      ],
       "@agentrepo/ui": [
         "./packages/ui/src/index.ts"
       ],

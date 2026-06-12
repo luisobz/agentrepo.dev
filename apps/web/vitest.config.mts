@@ -18,7 +18,9 @@ export default defineConfig(() => ({
     environment: 'jsdom',
     include: ['{src,tests}/**/*.{test,spec}.{js,mjs,cjs,ts,mts,cts,jsx,tsx}'],
     reporters: ['default'],
-    setupFiles: ['./vitest.setup.ts'],
+    setupFiles: ['./vitest.setup.mts'],
+    // geist ships ESM with directory imports; let vite resolve it.
+    server: { deps: { inline: ['geist'] } },
     coverage: {
       reportsDirectory: '../../coverage/apps/web',
       provider: 'v8' as const,

@@ -33,11 +33,21 @@ export default [
             },
             {
               sourceTag: 'scope:frontend',
-              onlyDependOnLibsWithTags: ['scope:frontend'],
+              onlyDependOnLibsWithTags: ['scope:frontend', 'scope:shared'],
             },
             {
               sourceTag: 'scope:backend',
-              onlyDependOnLibsWithTags: ['scope:backend'],
+              onlyDependOnLibsWithTags: ['scope:backend', 'scope:shared'],
+            },
+            {
+              // Shared interface-adapter layer (tRPC contract): may only reach
+              // inward (application/domain), never infrastructure or apps.
+              sourceTag: 'scope:shared',
+              onlyDependOnLibsWithTags: [
+                'scope:shared',
+                'scope:application',
+                'scope:domain',
+              ],
             },
             {
               sourceTag: '*',

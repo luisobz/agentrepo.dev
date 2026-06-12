@@ -3,6 +3,9 @@ import { GeistMono } from 'geist/font/mono';
 import '@agentrepo/ui/styles/globals.css';
 import { TRPCProvider } from '../components/providers/trpc-provider';
 import { Header } from '../components/layout/header';
+import { Footer } from '../components/layout/footer';
+import { CommandPalette } from '../components/search/command-palette';
+import { CommandPaletteProvider } from '../components/search/command-palette-provider';
 import { AvatarProvider } from '@agentrepo/avatar';
 import type { Metadata } from 'next';
 
@@ -24,10 +27,14 @@ export default function RootLayout({
 
         <TRPCProvider>
           <AvatarProvider>
-            <Header />
-            <main className="pt-24 min-h-screen">
-              {children}
-            </main>
+            <CommandPaletteProvider>
+              <Header />
+              <main className="pt-24 min-h-screen">
+                {children}
+              </main>
+              <Footer />
+              <CommandPalette />
+            </CommandPaletteProvider>
           </AvatarProvider>
         </TRPCProvider>
       </body>

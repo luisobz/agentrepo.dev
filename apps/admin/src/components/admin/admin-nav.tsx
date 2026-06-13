@@ -3,14 +3,18 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 
-const NAV_ITEMS = [
-  { href: '/admin', label: 'Dashboard', exact: true },
-  { href: '/admin/skills', label: 'Skills', exact: false },
-  { href: '/admin/agents', label: 'Agents', exact: false },
-  { href: '/admin/blog', label: 'Blog', exact: false },
+import { useT } from '../../lib/i18n/use-t';
+import type { AdminDictionaryKey } from '../../lib/i18n/dictionary';
+
+const NAV_ITEMS: { href: string; labelKey: AdminDictionaryKey; exact: boolean }[] = [
+  { href: '/admin', labelKey: 'nav.dashboard', exact: true },
+  { href: '/admin/skills', labelKey: 'nav.skills', exact: false },
+  { href: '/admin/agents', labelKey: 'nav.agents', exact: false },
+  { href: '/admin/blog', labelKey: 'nav.blog', exact: false },
 ];
 
 export function AdminNav() {
+  const t = useT();
   const pathname = usePathname();
 
   return (
@@ -29,7 +33,7 @@ export function AdminNav() {
                 : 'text-[var(--color-text-secondary)] hover:bg-[var(--color-bg-surface)] hover:text-[var(--color-text-primary)]'
             }`}
           >
-            {item.label}
+            {t(item.labelKey)}
           </Link>
         );
       })}

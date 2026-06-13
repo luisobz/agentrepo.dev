@@ -6,8 +6,11 @@ import { usePathname } from "next/navigation";
 import { AvatarSlot } from "@agentrepo/avatar";
 import { cn } from "@agentrepo/ui";
 import { Menu, X, ArrowUpRight, Search } from "lucide-react";
+import { useT } from "../../lib/i18n/use-t";
+import { LocaleSwitcher } from "./locale-switcher";
 
 export function Header() {
+  const t = useT();
   const pathname = usePathname();
   const [isScrolled, setIsScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -78,31 +81,32 @@ export function Header() {
                 href="/skills"
                 className="font-sans text-xs uppercase tracking-wider font-semibold text-[var(--color-text-secondary)] hover:text-[var(--color-brand-garnet)] transition-colors"
               >
-                Skills
+                {t('nav.skills')}
               </Link>
               <Link
                 href="/agents"
                 className="font-sans text-xs uppercase tracking-wider font-semibold text-[var(--color-text-secondary)] hover:text-[var(--color-brand-garnet)] transition-colors"
               >
-                Agents
+                {t('nav.agents')}
               </Link>
               <Link
                 href="/blog"
                 className="font-sans text-xs uppercase tracking-wider font-semibold text-[var(--color-text-secondary)] hover:text-[var(--color-brand-garnet)] transition-colors"
               >
-                Blog
+                {t('nav.blog')}
               </Link>
               <Link
                 href="/portfolio/luisbz"
                 className="font-sans text-xs uppercase tracking-wider font-semibold text-[var(--color-text-secondary)] hover:text-[var(--color-brand-garnet)] transition-colors inline-flex items-center gap-0.5"
               >
-                Portfolio
+                {t('nav.portfolio')}
                 <ArrowUpRight className="w-3.5 h-3.5 opacity-60" />
               </Link>
             </nav>
 
             {/* CTA/Actions */}
             <div className="flex items-center gap-3">
+              <LocaleSwitcher className="hidden sm:flex" />
               {/* Cmd+K trigger hint inside the header when full-sized */}
               {!isScrolled && (
                 <button
@@ -117,7 +121,7 @@ export function Header() {
                   className="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-lg bg-[var(--color-bg-surface)] text-[var(--color-text-muted)] border border-[var(--color-border-soft)] hover:border-[var(--color-border-medium)] transition-colors text-xs font-mono focus:outline-none"
                 >
                   <Search className="w-3.5 h-3.5" />
-                  <span>Search</span>
+                  <span>{t('nav.search')}</span>
                   <kbd className="bg-[var(--color-bg-base)] px-1.5 py-0.5 rounded text-[10px] border border-[var(--color-border-soft)]">
                     ⌘K
                   </kbd>
@@ -133,7 +137,7 @@ export function Header() {
                     : "px-5 py-2 text-[var(--color-brand-garnet)] bg-transparent hover:bg-[var(--color-brand-garnet)] hover:text-[var(--color-bg-warm-white)]"
                 )}
               >
-                Hire Luis
+                {t('nav.hire')}
               </Link>
 
               {/* Mobile menu trigger */}

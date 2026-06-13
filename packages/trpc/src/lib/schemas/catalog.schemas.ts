@@ -24,6 +24,29 @@ export const adminListSchema = paginationSchema.extend({
 export const idInputSchema = z.object({ id: z.uuid() });
 export const slugInputSchema = z.object({ slug: slugSchema });
 
+export const currencySchema = z.enum(['EUR', 'USD']);
+
+const premiumFieldsSchema = {
+  headerImageUrl: z.url().max(500).nullable(),
+  isPremium: z.boolean(),
+  priceCents: z.number().int().min(100).max(10_000_000).nullable(),
+  currency: currencySchema,
+  previewContent: z.string().max(10_000).nullable(),
+};
+
+function requirePriceWhenPremium(
+  value: { isPremium?: boolean; priceCents?: number | null },
+  ctx: z.RefinementCtx
+) {
+  if (value.isPremium && value.priceCents == null) {
+    ctx.addIssue({
+      code: 'custom',
+      path: ['priceCents'],
+      message: 'Premium assets need a price',
+    });
+  }
+}
+
 // ─── Skill ──────────────────────────────────────
 
 export const skillTypeSchema = z.enum(SKILL_TYPES);
@@ -37,14 +60,24 @@ const skillBaseSchema = z.object({
   content: z.string().min(1, 'Markdown content is required'),
   type: skillTypeSchema,
   isPublished: z.boolean(),
+  ...premiumFieldsSchema,
 });
 
-export const createSkillSchema = skillBaseSchema.extend({
-  description: skillBaseSchema.shape.description.default(null),
-  isPublished: z.boolean().default(false),
-});
+export const createSkillSchema = skillBaseSchema
+  .extend({
+    description: skillBaseSchema.shape.description.default(null),
+    isPublished: z.boolean().default(false),
+    headerImageUrl: premiumFieldsSchema.headerImageUrl.default(null),
+    isPremium: z.boolean().default(false),
+    priceCents: premiumFieldsSchema.priceCents.default(null),
+    currency: currencySchema.default('EUR'),
+    previewContent: premiumFieldsSchema.previewContent.default(null),
+  })
+  .superRefine(requirePriceWhenPremium);
 
-export const updateSkillSchema = skillBaseSchema.partial();
+export const updateSkillSchema = skillBaseSchema
+  .partial()
+  .superRefine(requirePriceWhenPremium);
 
 export const searchSkillsSchema = paginationSchema.extend({
   query: z.string().trim().min(1).max(200),
@@ -81,15 +114,25 @@ const agentBaseSchema = z.object({
   readmeContent: z.string().nullable(),
   fileTree: fileTreeSchema,
   isPublished: z.boolean(),
+  ...premiumFieldsSchema,
 });
 
-export const createAgentSchema = agentBaseSchema.extend({
-  version: agentBaseSchema.shape.version.default('1.0.0'),
-  readmeContent: agentBaseSchema.shape.readmeContent.default(null),
-  isPublished: z.boolean().default(false),
-});
+export const createAgentSchema = agentBaseSchema
+  .extend({
+    version: agentBaseSchema.shape.version.default('1.0.0'),
+    readmeContent: agentBaseSchema.shape.readmeContent.default(null),
+    isPublished: z.boolean().default(false),
+    headerImageUrl: premiumFieldsSchema.headerImageUrl.default(null),
+    isPremium: z.boolean().default(false),
+    priceCents: premiumFieldsSchema.priceCents.default(null),
+    currency: currencySchema.default('EUR'),
+    previewContent: premiumFieldsSchema.previewContent.default(null),
+  })
+  .superRefine(requirePriceWhenPremium);
 
-export const updateAgentSchema = agentBaseSchema.partial();
+export const updateAgentSchema = agentBaseSchema
+  .partial()
+  .superRefine(requirePriceWhenPremium);
 
 // ─── BlogPost ───────────────────────────────────
 
@@ -99,11 +142,13 @@ const blogPostBaseSchema = z.object({
   excerpt: z.string().trim().max(500).nullable(),
   content: z.string().min(1, 'Markdown content is required'),
   isPublished: z.boolean(),
+  headerImageUrl: z.url().max(500).nullable(),
 });
 
 export const createBlogPostSchema = blogPostBaseSchema.extend({
   excerpt: blogPostBaseSchema.shape.excerpt.default(null),
   isPublished: z.boolean().default(false),
+  headerImageUrl: blogPostBaseSchema.shape.headerImageUrl.default(null),
 });
 
 export const updateBlogPostSchema = blogPostBaseSchema.partial();

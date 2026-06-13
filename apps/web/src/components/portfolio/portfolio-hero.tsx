@@ -63,10 +63,21 @@ export function PortfolioHero({ profile }: { profile: PortfolioProfile }) {
 
         <motion.div
           variants={fadeUp}
-          className="mt-12 flex items-center gap-3 font-mono text-xs text-[#8d8273]"
+          className="mt-12 flex flex-wrap items-center gap-3 font-mono text-xs text-[#8d8273]"
         >
           <span className="h-px w-12 bg-gradient-to-r from-[#7a2230] to-transparent" />
-          autonomous agents · LLM systems · hexagonal backends
+          <span>{profile.location}</span>
+          <span>·</span>
+          <a
+            href={profile.linkedinUrl}
+            target="_blank"
+            rel="noreferrer"
+            className="text-[#c4909a] underline-offset-4 hover:underline"
+          >
+            LinkedIn
+          </a>
+          <span>·</span>
+          agentic workflows · LLM orchestration · RAG
         </motion.div>
       </motion.div>
     </section>

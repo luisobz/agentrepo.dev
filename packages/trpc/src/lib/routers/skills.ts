@@ -1,3 +1,4 @@
+import { redactPremiumSkill } from '@agentrepo/domain';
 import {
   adminListSchema,
   createSkillSchema,
@@ -12,19 +13,28 @@ import { adminProcedure, publicProcedure, router } from '../trpc';
 export const skillsRouter = router({
   list: publicProcedure
     .input(paginationSchema)
-    .query(({ input, ctx }) =>
-      ctx.catalog.skills.list.execute({ ...input, publishedOnly: true })
-    ),
+    .query(async ({ input, ctx }) => {
+      const page = await ctx.catalog.skills.list.execute({
+        ...input,
+        publishedOnly: true,
+      });
+      return { ...page, items: page.items.map(redactPremiumSkill) };
+    }),
 
   bySlug: publicProcedure
     .input(slugInputSchema)
-    .query(({ input, ctx }) =>
-      ctx.catalog.skills.getPublishedBySlug.execute(input.slug)
+    .query(async ({ input, ctx }) =>
+      redactPremiumSkill(
+        await ctx.catalog.skills.getPublishedBySlug.execute(input.slug)
+      )
     ),
 
   search: publicProcedure
     .input(searchSkillsSchema)
-    .query(({ input, ctx }) => ctx.catalog.skills.searchPublished.execute(input)),
+    .query(async ({ input, ctx }) => {
+      const page = await ctx.catalog.skills.searchPublished.execute(input);
+      return { ...page, items: page.items.map(redactPremiumSkill) };
+    }),
 
   admin: router({
     list: adminProcedure

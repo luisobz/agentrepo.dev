@@ -134,6 +134,11 @@ describe('input validation', () => {
       ...validSkill,
       description: null,
       isPublished: false,
+      headerImageUrl: null,
+      isPremium: false,
+      priceCents: null,
+      currency: 'EUR',
+      previewContent: null,
     });
   });
 
@@ -250,6 +255,54 @@ describe('global search', () => {
 
     await expect(caller.search.global({ query: ' a ' })).resolves.toEqual([]);
     expect(globalSearch.execute).not.toHaveBeenCalled();
+  });
+});
+
+describe('premium content', () => {
+  const premiumSkill = {
+    id: '4dcbd6f1-9c44-4b9a-9a55-2f2f3a111111',
+    slug: 'premium-skill',
+    title: 'Premium Skill',
+    description: 'Paid asset',
+    content: 'SECRET BODY',
+    type: 'prompt',
+    isPublished: true,
+    headerImageUrl: null,
+    isPremium: true,
+    priceCents: 1999,
+    currency: 'EUR',
+    previewContent: 'A teaser',
+    createdAt: new Date(),
+    updatedAt: new Date(),
+  };
+
+  it('rejects creating a premium skill without a price', async () => {
+    const caller = createCaller({ isAdmin: true });
+
+    await expectTRPCCode(
+      caller.skills.admin.create({
+        slug: 'paid-skill',
+        title: 'Paid',
+        content: 'x',
+        type: 'prompt',
+        isPremium: true,
+      }),
+      'BAD_REQUEST'
+    );
+  });
+
+  it('strips premium skill content from public reads', async () => {
+    const catalog = buildCatalogStub();
+    catalog.skills.getPublishedBySlug = stubUseCase(
+      premiumSkill
+    ) as unknown as typeof catalog.skills.getPublishedBySlug;
+    const caller = createCaller({ catalog });
+
+    const result = await caller.skills.bySlug({ slug: 'premium-skill' });
+
+    expect(result.isLocked).toBe(true);
+    expect(result.content).toBe('');
+    expect(result.previewContent).toBe('A teaser');
   });
 });
 

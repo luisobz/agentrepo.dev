@@ -2,8 +2,8 @@
   "name": "@agentrepo/trpc",
   "version": "0.0.0",
   "private": true,
-  "main": "./src/index.js",
-  "types": "./src/index.d.ts",
+  "main": "./dist/src/index.js",
+  "types": "./dist/src/index.d.ts",
   "dependencies": {
     "@trpc/server": "^11.17.0",
     "superjson": "^2.2.6",
@@ -16,15 +16,15 @@
   },
   "exports": {
     ".": {
-      "types": "./src/index.d.ts",
+      "types": "./dist/src/index.d.ts",
       "default": "./dist/src/index.js"
     },
     "./schemas": {
-      "types": "./src/schemas.d.ts",
+      "types": "./dist/src/schemas.d.ts",
       "default": "./dist/src/schemas.js"
     },
     "./auth": {
-      "types": "./src/auth.d.ts",
+      "types": "./dist/src/auth.d.ts",
       "default": "./dist/src/auth.js"
     }
   }

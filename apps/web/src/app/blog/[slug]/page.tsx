@@ -1,7 +1,7 @@
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import type { Metadata } from 'next';
-import { MarkdownContent } from '../../../components/markdown/markdown-content';
+import { ContentCover, MarkdownContent } from '@agentrepo/ui';
 import { getPublishedPostBySlug } from '../../../lib/blog';
 import { formatDate } from '../../../lib/public-content';
 
@@ -80,6 +80,15 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
           </p>
         )}
       </header>
+
+      {post.headerImageUrl && (
+        <ContentCover
+          title={post.title}
+          kind="blog"
+          imageUrl={post.headerImageUrl}
+          className="mb-10 h-48 w-full rounded-[12px] sm:h-64"
+        />
+      )}
 
       <MarkdownContent content={post.content} className="prose-lg" />
     </article>

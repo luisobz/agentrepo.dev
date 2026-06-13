@@ -1,5 +1,6 @@
 import { redirect } from 'next/navigation';
 import { AdminNav } from '../../components/admin/admin-nav';
+import { LocaleSwitcher } from '../../components/admin/locale-switcher';
 import { LogoutButton } from '../../components/admin/logout-button';
 import { hasValidAdminSession } from '../../lib/auth/session';
 
@@ -24,7 +25,10 @@ export default async function AdminLayout({
           </div>
           <AdminNav />
         </div>
-        <LogoutButton />
+        <div className="flex flex-col gap-2">
+          <LocaleSwitcher />
+          <LogoutButton />
+        </div>
       </aside>
       <main className="flex-1 p-8">{children}</main>
     </div>

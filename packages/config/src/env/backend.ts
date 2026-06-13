@@ -23,6 +23,12 @@ const envSchema = z.object({
   HOST: z.string().default('0.0.0.0'),
   NODE_ENV: z.enum(['development', 'production', 'test']).default('development'),
 
+
+  // Supabase (production database + auth)
+  NEXT_PUBLIC_SUPABASE_URL: z.string().default(''),
+  NEXT_PUBLIC_SUPABASE_ANON_KEY: z.string().default(''),
+  SUPABASE_SERVICE_ROLE_KEY: z.string().default(''),
+
   // Autenticación
   NEXTAUTH_SECRET: z.string().default('dev-nextauth-secret-change-me'),
   NEXTAUTH_URL: z.string().url().default('http://localhost:3000'),

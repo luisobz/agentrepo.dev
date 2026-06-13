@@ -3,8 +3,10 @@
 import { Button } from '@agentrepo/ui';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
+import { useT } from '../../lib/i18n/use-t';
 
 export function LogoutButton() {
+  const t = useT();
   const router = useRouter();
   const [isLoggingOut, setIsLoggingOut] = useState(false);
 
@@ -22,7 +24,7 @@ export function LogoutButton() {
       onClick={handleLogout}
       disabled={isLoggingOut}
     >
-      {isLoggingOut ? 'Signing out…' : 'Sign out'}
+      {isLoggingOut ? '…' : t('nav.signOut')}
     </Button>
   );
 }

@@ -4,8 +4,10 @@ import { AvatarSlot, useAvatar } from '@agentrepo/avatar';
 import { Search } from 'lucide-react';
 import { useEffect, useRef } from 'react';
 import { useCommandPalette } from '../search/command-palette-provider';
+import { useT } from '../../lib/i18n/use-t';
 
 export function Hero() {
+  const t = useT();
   const { setAvatarPosition } = useAvatar();
   const { open } = useCommandPalette();
   const heroRef = useRef<HTMLElement>(null);
@@ -40,8 +42,7 @@ export function Hero() {
         <span className="text-[var(--color-brand-garnet)]">more signal</span>
       </h1>
       <p className="max-w-xl text-base leading-relaxed text-[var(--color-text-secondary)] sm:text-lg">
-        Curated skills, agents and notes for building with AI — no fluff,
-        ready to copy into your own stack.
+{t('hero.subtitle')}
       </p>
 
       <button
@@ -52,7 +53,7 @@ export function Hero() {
       >
         <Search className="h-5 w-5 shrink-0 text-[var(--color-brand-garnet)]" />
         <span className="flex-1 truncate text-[15px] text-[var(--color-text-placeholder)]">
-          Search skills, agents and blog posts…
+          {t('hero.searchPlaceholder')}
         </span>
         <kbd className="hidden shrink-0 rounded-md border border-[var(--color-border-soft)] bg-[var(--color-bg-surface)] px-2 py-1 font-mono text-xs text-[var(--color-text-muted)] sm:block">
           ⌘K

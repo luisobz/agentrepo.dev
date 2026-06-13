@@ -1,3 +1,4 @@
+import { redactPremiumAgent } from '@agentrepo/domain';
 import {
   adminListSchema,
   createAgentSchema,
@@ -11,14 +12,20 @@ import { adminProcedure, publicProcedure, router } from '../trpc';
 export const agentsRouter = router({
   list: publicProcedure
     .input(paginationSchema)
-    .query(({ input, ctx }) =>
-      ctx.catalog.agents.list.execute({ ...input, publishedOnly: true })
-    ),
+    .query(async ({ input, ctx }) => {
+      const page = await ctx.catalog.agents.list.execute({
+        ...input,
+        publishedOnly: true,
+      });
+      return { ...page, items: page.items.map(redactPremiumAgent) };
+    }),
 
   bySlug: publicProcedure
     .input(slugInputSchema)
-    .query(({ input, ctx }) =>
-      ctx.catalog.agents.getPublishedBySlug.execute(input.slug)
+    .query(async ({ input, ctx }) =>
+      redactPremiumAgent(
+        await ctx.catalog.agents.getPublishedBySlug.execute(input.slug)
+      )
     ),
 
   admin: router({

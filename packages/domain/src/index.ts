@@ -6,3 +6,4 @@ export * from './catalog/file-tree';
 export * from './catalog/agent';
 export * from './catalog/blog-post';
 export * from './catalog/search';
+export * from './catalog/premium';

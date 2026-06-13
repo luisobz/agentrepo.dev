@@ -12,6 +12,11 @@ export interface Skill {
   content: string;
   type: SkillType;
   isPublished: boolean;
+  headerImageUrl: string | null;
+  isPremium: boolean;
+  priceCents: number | null;
+  currency: string;
+  previewContent: string | null;
   createdAt: Date;
   updatedAt: Date;
 }

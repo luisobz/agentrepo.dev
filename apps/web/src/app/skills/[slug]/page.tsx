@@ -1,7 +1,8 @@
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import type { Metadata } from 'next';
-import { TypeChip } from '@agentrepo/ui';
+import { ContentCover, TypeChip } from '@agentrepo/ui';
+import { PremiumGate } from '../../../components/premium/premium-gate';
 import { SkillContentViewer } from '../../../components/skills/skill-content-viewer';
 import { formatDate } from '../../../lib/public-content';
 import { getPublishedSkillBySlug } from '../../../lib/skills';
@@ -86,10 +87,25 @@ export default async function SkillPage({ params }: SkillPageProps) {
         </dl>
       </header>
 
-      <SkillContentViewer
-        content={skill.content}
-        downloadFileName={`${skill.slug}.md`}
+      <ContentCover
+        title={skill.title}
+        kind="skill"
+        imageUrl={skill.headerImageUrl}
+        className="mb-8 h-44 w-full rounded-[12px] sm:h-56"
       />
+
+      {skill.isLocked ? (
+        <PremiumGate
+          priceCents={skill.priceCents}
+          currency={skill.currency}
+          previewContent={skill.previewContent}
+        />
+      ) : (
+        <SkillContentViewer
+          content={skill.content}
+          downloadFileName={`${skill.slug}.md`}
+        />
+      )}
     </div>
   );
 }

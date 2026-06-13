@@ -3,3 +3,7 @@ export * from './components/base/button';
 export * from './components/base/input';
 export * from './components/base/card';
 export * from './components/ds/type-chip';
+export * from './components/content/markdown-content';
+export * from './components/content/content-cover';
+export * from './i18n/locale-core';
+export * from './i18n/locale';

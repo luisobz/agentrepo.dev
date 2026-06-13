@@ -38,8 +38,8 @@
     "seed": {
       "executor": "nx:run-commands",
       "options": {
-        "command": "pnpm prisma db seed --config=packages/database/prisma.config.ts",
-        "cwd": "."
+        "command": "pnpm prisma db seed --config=prisma.config.ts",
+        "cwd": "packages/database"
       }
     }
   }

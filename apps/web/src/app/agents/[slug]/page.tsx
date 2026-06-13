@@ -1,9 +1,11 @@
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import type { Metadata } from 'next';
+import { ContentCover } from '@agentrepo/ui';
 import { Play } from 'lucide-react';
+import { PremiumGate } from '../../../components/premium/premium-gate';
 import { AgentWorkbench } from '../../../components/agents/workbench/agent-workbench';
-import { MarkdownContent } from '../../../components/markdown/markdown-content';
+import { MarkdownContent } from '@agentrepo/ui';
 import {
   countFiles,
   getPublishedAgentBySlug,
@@ -81,22 +83,39 @@ export default async function AgentPage({ params }: AgentPageProps) {
         </p>
       </header>
 
-      <AgentWorkbench
-        fileTree={agent.fileTree}
-        meta={{
-          slug: agent.slug,
-          version: agent.version,
-          updatedAt: formatDate(agent.updatedAt),
-          fileCount: countFiles(agent.fileTree),
-          hasPlayground: playgroundIncluded,
-        }}
+      <ContentCover
+        title={agent.title}
+        kind="agent"
+        imageUrl={agent.headerImageUrl}
+        className="mb-8 h-44 w-full rounded-[12px] sm:h-56"
       />
 
-      {agent.readmeContent && (
-        <section className="mt-12">
-          <h2 className="mb-4 text-xl font-semibold tracking-tight">About</h2>
-          <MarkdownContent content={agent.readmeContent} />
-        </section>
+      {agent.isLocked ? (
+        <PremiumGate
+          priceCents={agent.priceCents}
+          currency={agent.currency}
+          previewContent={agent.previewContent}
+        />
+      ) : (
+        <>
+          <AgentWorkbench
+            fileTree={agent.fileTree}
+            meta={{
+              slug: agent.slug,
+              version: agent.version,
+              updatedAt: formatDate(agent.updatedAt),
+              fileCount: countFiles(agent.fileTree),
+              hasPlayground: playgroundIncluded,
+            }}
+          />
+
+          {agent.readmeContent && (
+            <section className="mt-12">
+              <h2 className="mb-4 text-xl font-semibold tracking-tight">About</h2>
+              <MarkdownContent content={agent.readmeContent} />
+            </section>
+          )}
+        </>
       )}
     </div>
   );

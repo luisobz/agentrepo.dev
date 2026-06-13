@@ -3,8 +3,10 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { AvatarSlot } from '@agentrepo/avatar';
+import { useT } from '../../lib/i18n/use-t';
 
 export function Footer() {
+  const t = useT();
   const pathname = usePathname();
 
   // The portfolio is an immersive standalone pitch: no repo chrome there.
@@ -23,19 +25,19 @@ export function Footer() {
               <span className="text-[var(--color-brand-garnet)]">.dev</span>
             </p>
             <p className="text-xs text-[var(--color-text-muted)]">
-              Less noise, more signal.
+              {t('footer.tagline')}
             </p>
           </div>
         </div>
         <nav className="flex items-center gap-6 font-sans text-xs font-semibold uppercase tracking-wider text-[var(--color-text-secondary)]">
           <Link href="/skills" className="transition-colors hover:text-[var(--color-brand-garnet)]">
-            Skills
+            {t('nav.skills')}
           </Link>
           <Link href="/agents" className="transition-colors hover:text-[var(--color-brand-garnet)]">
-            Agents
+            {t('nav.agents')}
           </Link>
           <Link href="/blog" className="transition-colors hover:text-[var(--color-brand-garnet)]">
-            Blog
+            {t('nav.blog')}
           </Link>
         </nav>
       </div>

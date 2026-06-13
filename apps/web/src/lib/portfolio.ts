@@ -19,6 +19,8 @@ export interface PortfolioProfile {
   name: string;
   role: string;
   headline: string;
+  location: string;
+  linkedinUrl: string;
   manifesto: string[];
   experience: ExperienceEntry[];
   capabilities: Capability[];
@@ -26,41 +28,43 @@ export interface PortfolioProfile {
 
 const LUISBZ: PortfolioProfile = {
   slug: 'luisbz',
-  name: 'Luisbz',
-  role: 'AI Engineer & Senior Fullstack Developer',
-  headline: 'I build agents that ship.',
+  name: 'Luis Ballester Zafra',
+  role: 'Senior Full-Stack Engineer & Tech Lead · AI Platform Builder',
+  headline: 'Valencia, Spain · 8+ years shipping products',
+  location: 'Valencia, Spain',
+  linkedinUrl: 'https://linkedin.com/in/luisbz/',
   manifesto: [
-    'Autonomous agents are only useful when they are accountable: validated inputs, hexagonal boundaries and observable pipelines — or it does not go to production.',
-    'I design LLM systems the same way I design backends: small contracts, strict types and tests first. The model is just another adapter.',
+    'Senior Full-Stack Engineer & Tech Lead with 8+ years building scalable digital products from scratch. The past 2 years focused on AI platforms, agentic workflows and LLM orchestration: RAG pipelines, automated content generation and AI-powered lead intelligence.',
+    'I seek complex problems and full product ownership — and I enjoy making teams faster: internal tools, reusable libraries, NPM packages, scaffolding templates and AI utilities. Direct teams, high standards, genuine commitment.',
   ],
   experience: [
     {
-      period: '2024 — Now',
-      role: 'AI Engineer',
-      company: 'AgentRepo.dev',
+      period: 'Mar 2022 — May 2026',
+      role: 'Senior Full-Stack Developer & Tech Lead',
+      company: 'Dekalabs',
       achievement:
-        'Designed an autonomous contact-triage agent and a multi-step content pipeline; cut manual review time by 60% while keeping every LLM call traced in Langfuse.',
+        'Architected an end-to-end AI generation platform for personalised landing pages and marketing content per lead, cutting production time from months to 1–2 weeks. Typed LLM pipelines (Zod + JSON Schema as output contracts with retries and fallbacks), RAG context-injection, AI lead scoring from voice and chat, Replicate image generation, BullMQ async orchestration, SSO via AWS Cognito and a Web3 SDK suite (gasless transactions, ERC20/721/1155). Led cross-functional teams and technical discovery for clients in New York, Switzerland and France.',
     },
     {
-      period: '2021 — 2024',
-      role: 'Senior Fullstack Developer',
-      company: 'Nexa Labs',
+      period: 'Mar 2020 — Mar 2022',
+      role: 'Senior Full-Stack Developer (Java & Vue.js)',
+      company: 'Prodevelop',
       achievement:
-        'Led the migration of a legacy monolith to a hexagonal Nx monorepo (NestJS + tRPC + Prisma); production incidents dropped 40% and median deploy time fell from 45 to 8 minutes.',
+        'Port terminal management for vessel discharge and cargo logistics: a new timeslot scheduling module increased truck loading efficiency by 100%. Refactored a mission-critical legacy billing microservice, significantly increasing processing speed and unlocking modular billing features. Contributed to the company framework and mentored junior developers.',
     },
     {
-      period: '2019 — 2021',
-      role: 'Fullstack Developer',
-      company: 'Bluekite Studio',
+      period: 'Apr 2019 — Mar 2020',
+      role: 'Full-Stack Developer',
+      company: 'Prodevelop',
       achievement:
-        'Shipped a multi-tenant SaaS dashboard used by 30k monthly users at 99.9% uptime; introduced typed API contracts that removed an entire class of runtime errors.',
+        'Designed and built the first web applications for port operations management from scratch, focused on real-time data visualisation and database performance (Java/Spring Boot, Vue.js, PostgreSQL, Oracle).',
     },
     {
-      period: '2017 — 2019',
-      role: 'Frontend Developer',
-      company: 'Studio K',
+      period: 'Mar 2018 — Apr 2019',
+      role: 'Full-Stack Developer',
+      company: 'Indra',
       achievement:
-        'Built a reusable component library adopted across 6 client projects, halving the average time-to-first-prototype.',
+        'Developed and maintained features for Public Administration projects with Java on the backend and PHP on the frontend.',
     },
   ],
   capabilities: [
@@ -68,42 +72,42 @@ const LUISBZ: PortfolioProfile = {
       key: 'ai',
       title: 'AI & Agentic Orchestration',
       description:
-        'Agents with guardrails: structured outputs, evaluation loops and full tracing.',
+        'LLM systems with contracts: typed outputs, retries, evaluation and tracing.',
       technologies: [
-        'LLM pipelines',
-        'Agent orchestration',
+        'Claude / OpenAI / Replicate',
         'RAG',
-        'Langfuse',
-        'Prompt engineering',
-        'MCP',
+        'Agentic workflows',
+        'Function calling',
+        'Structured generation',
+        'BullMQ pipelines',
       ],
     },
     {
       key: 'backend',
-      title: 'Robust Backend',
+      title: 'Robust Backend & Cloud',
       description:
-        'Hexagonal services with strict contracts, built to be tested and operated.',
+        'Microservices and APIs built to be operated: typed, tested, observable.',
       technologies: [
-        'NestJS',
-        'tRPC',
-        'Prisma',
-        'PostgreSQL',
-        'Hexagonal architecture',
-        'Nx monorepo',
+        'Node.js (NestJS, Fastify)',
+        'Java (Spring Boot)',
+        'Python (Django)',
+        'PostgreSQL · MongoDB · Redis',
+        'AWS (Cognito, Lambda, S3, EC2)',
+        'GCP · Terraform · Docker',
       ],
     },
     {
       key: 'ui',
-      title: 'Premium UI/UX',
+      title: 'Frontend & Product',
       description:
-        'Interfaces with intent: design tokens, motion and accessibility by default.',
+        'Interfaces with intent, from design system to OAuth flows.',
       technologies: [
-        'Next.js',
-        'React 19',
-        'Tailwind 4',
-        'Framer Motion',
-        'Design systems',
-        'Radix UI',
+        'React',
+        'Vue.js',
+        'TypeScript',
+        'Refine.dev',
+        'OAuth / SSO',
+        'WebSockets · Web3',
       ],
     },
   ],

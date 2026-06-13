@@ -1,6 +1,8 @@
 import { PrismaClient } from '@prisma/client';
+import { seedRoles } from './roles.seed';
 
 export async function seed(prisma: PrismaClient) {
+  await seedRoles(prisma);
   console.log('dev.seed: Starting development seed');
 
   try {

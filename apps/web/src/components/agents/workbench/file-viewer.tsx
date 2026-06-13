@@ -1,7 +1,7 @@
 'use client';
 
 import { MousePointerClick } from 'lucide-react';
-import { MarkdownContent } from '../../markdown/markdown-content';
+import { MarkdownContent } from '@agentrepo/ui';
 import { isMarkdownFile } from './file-tree-utils';
 import { useWorkbench } from './workbench-context';
 

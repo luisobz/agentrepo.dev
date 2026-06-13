@@ -3,7 +3,7 @@
 import { Button } from '@agentrepo/ui';
 import { Check, Copy, Download } from 'lucide-react';
 import { useState } from 'react';
-import { MarkdownContent } from '../markdown/markdown-content';
+import { MarkdownContent } from '@agentrepo/ui';
 
 type ViewerTab = 'rendered' | 'raw';
 

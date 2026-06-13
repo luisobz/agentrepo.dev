@@ -9,15 +9,20 @@ datasource db {
 }
 
 model Skill {
-  id          String   @id @default(uuid())
-  slug        String   @unique
-  title       String
-  description String?
-  content     String   // Markdown content
-  type        String   // prompt, system, config, template
-  isPublished Boolean  @default(false)
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  id             String   @id @default(uuid())
+  slug           String   @unique
+  title          String
+  description    String?
+  content        String // Markdown content
+  type           String // prompt, system, config, template
+  isPublished    Boolean  @default(false)
+  headerImageUrl String? // Optional cover; the web falls back to a generated template
+  isPremium      Boolean  @default(false)
+  priceCents     Int? // Required when isPremium
+  currency       String   @default("EUR")
+  previewContent String? // Public teaser shown instead of content for premium assets
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
 }
 
 model Agent {
@@ -26,20 +31,88 @@ model Agent {
   title            String
   shortDescription String
   version          String   @default("1.0.0")
-  readmeContent    String?  // Main markdown content
-  fileTree         Json     // JSON representing the directory structure
+  readmeContent    String? // Main markdown content
+  fileTree         Json // JSON representing the directory structure
   isPublished      Boolean  @default(false)
+  headerImageUrl   String?
+  isPremium        Boolean  @default(false)
+  priceCents       Int?
+  currency         String   @default("EUR")
+  previewContent   String?
   createdAt        DateTime @default(now())
   updatedAt        DateTime @updatedAt
 }
 
 model BlogPost {
+  id             String   @id @default(uuid())
+  slug           String   @unique
+  title          String
+  excerpt        String?
+  content        String
+  isPublished    Boolean  @default(false)
+  headerImageUrl String?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+}
+
+// ─── Identity & access (Supabase Auth is the identity provider) ───
+
+model User {
+  id         String     @id @default(uuid())
+  supabaseId String?    @unique // auth.users id in Supabase
+  email      String     @unique
+  name       String?
+  avatarUrl  String?
+  provider   String     @default("email") // google | github | apple | email
+  createdAt  DateTime   @default(now())
+  updatedAt  DateTime   @updatedAt
+  roles      UserRole[]
+  purchases  Purchase[]
+}
+
+model Role {
+  id          String           @id @default(uuid())
+  name        String           @unique // admin | editor | member
+  description String?
+  users       UserRole[]
+  permissions RolePermission[]
+}
+
+model Permission {
+  id          String           @id @default(uuid())
+  key         String           @unique // e.g. content.manage, asset.purchase
+  description String?
+  roles       RolePermission[]
+}
+
+model UserRole {
+  userId String
+  roleId String
+  user   User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  role   Role @relation(fields: [roleId], references: [id], onDelete: Cascade)
+
+  @@id([userId, roleId])
+}
+
+model RolePermission {
+  roleId       String
+  permissionId String
+  role         Role       @relation(fields: [roleId], references: [id], onDelete: Cascade)
+  permission   Permission @relation(fields: [permissionId], references: [id], onDelete: Cascade)
+
+  @@id([roleId, permissionId])
+}
+
+// A completed purchase unlocks a premium Skill or Agent for a user.
+model Purchase {
   id          String   @id @default(uuid())
-  slug        String   @unique
-  title       String
-  excerpt     String?
-  content     String
-  isPublished Boolean  @default(false)
+  userId      String
+  assetType   String // skill | agent
+  assetId     String
+  amountCents Int
+  currency    String   @default("EUR")
   createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, assetType, assetId])
 }

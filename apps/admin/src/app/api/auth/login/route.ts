@@ -1,13 +1,32 @@
-import { createSessionToken } from '@agentrepo/trpc/auth';
+import { FixedWindowRateLimiter, secureCompare } from '@agentrepo/trpc/auth';
 import { NextResponse } from 'next/server';
-import { ADMIN_SESSION_COOKIE, ADMIN_SESSION_TTL_MS } from '../../../../lib/auth/constants';
+import { issueSessionCookies } from '../../../../lib/auth/cookies';
+import { getAuthSecret } from '../../../../lib/auth/secret';
+
+const loginRateLimiter = new FixedWindowRateLimiter({
+  maxAttempts: 5,
+  windowMs: 15 * 60 * 1000,
+});
+
+function getClientKey(request: Request): string {
+  return request.headers.get('x-forwarded-for')?.split(',')[0]?.trim() ?? 'unknown';
+}
 
 export async function POST(request: Request) {
+  const secret = getAuthSecret();
   const expectedPassword = process.env.ADMIN_PASSWORD;
-  if (!expectedPassword) {
+  if (!secret || !expectedPassword) {
     return NextResponse.json(
-      { error: 'ADMIN_PASSWORD is not configured' },
+      { error: 'Authentication is not configured' },
       { status: 500 }
+    );
+  }
+
+  const clientKey = getClientKey(request);
+  if (!loginRateLimiter.consume(clientKey)) {
+    return NextResponse.json(
+      { error: 'Too many attempts, try again later' },
+      { status: 429 }
     );
   }
 
@@ -17,18 +36,12 @@ export async function POST(request: Request) {
       ? (body as Record<string, unknown>)['password']
       : undefined;
 
-  if (typeof password !== 'string' || password !== expectedPassword) {
+  if (typeof password !== 'string' || !(await secureCompare(password, expectedPassword))) {
     return NextResponse.json({ error: 'Invalid password' }, { status: 401 });
   }
 
-  const token = await createSessionToken(getAuthSecret(), ADMIN_SESSION_TTL_MS);
+  loginRateLimiter.reset(clientKey);
   const response = NextResponse.json({ ok: true });
-  response.cookies.set(ADMIN_SESSION_COOKIE, token, {
-    httpOnly: true,
-    sameSite: 'lax',
-    secure: process.env.NODE_ENV === 'production',
-    path: '/',
-    maxAge: ADMIN_SESSION_TTL_MS / 1000,
-  });
+  await issueSessionCookies(response, secret);
   return response;
 }

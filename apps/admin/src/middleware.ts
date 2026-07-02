@@ -1,24 +1,35 @@
+import { verifySessionToken } from '@agentrepo/trpc/auth';
 import { NextRequest, NextResponse } from 'next/server';
-import { ADMIN_SESSION_COOKIE } from './lib/auth/constants';
+import {
+  ADMIN_ACCESS_COOKIE,
+  ADMIN_REFRESH_COOKIE,
+} from './lib/auth/constants';
 
 /**
- * Cheap cookie-presence gate. The signature is verified server-side in the
- * /admin layout and on every API call, so a forged cookie only reaches an
- * empty shell.
+ * Verifies the access token signature at the edge. When it is missing or
+ * expired but a refresh cookie exists, the request detours through
+ * /api/auth/refresh, which rotates the pair and redirects back.
  */
-export function middleware(request: NextRequest) {
-  const hasSessionCookie = Boolean(
-    request.cookies.get(ADMIN_SESSION_COOKIE)?.value
-  );
+export async function middleware(request: NextRequest) {
+  const secret = process.env.AUTH_SECRET;
+  const accessToken = request.cookies.get(ADMIN_ACCESS_COOKIE)?.value;
+  const hasValidAccess = secret
+    ? await verifySessionToken(accessToken, secret)
+    : false;
   const { pathname } = request.nextUrl;
 
-  if (pathname.startsWith('/admin') && !hasSessionCookie) {
+  if (pathname.startsWith('/admin') && !hasValidAccess) {
+    if (request.cookies.get(ADMIN_REFRESH_COOKIE)?.value) {
+      const refreshUrl = new URL('/api/auth/refresh', request.url);
+      refreshUrl.searchParams.set('from', pathname);
+      return NextResponse.redirect(refreshUrl);
+    }
     const loginUrl = new URL('/login', request.url);
     loginUrl.searchParams.set('from', pathname);
     return NextResponse.redirect(loginUrl);
   }
 
-  if (pathname === '/login' && hasSessionCookie) {
+  if (pathname === '/login' && hasValidAccess) {
     return NextResponse.redirect(new URL('/admin', request.url));
   }
 

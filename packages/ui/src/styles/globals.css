@@ -4,6 +4,7 @@
 /* Explicit sources so utilities are generated for every consumer app,
    regardless of the working directory Tailwind is invoked from. */
 @source "../../";
+@source "../../../avatar/src";
 @source "../../../../apps/web/src";
 @source "../../../../apps/admin/src";
 

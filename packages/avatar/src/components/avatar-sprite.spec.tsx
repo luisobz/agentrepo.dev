@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { render, screen } from '@testing-library/react';
+import { render, screen, fireEvent } from '@testing-library/react';
 import { AvatarProvider } from './avatar-context';
 import { AvatarSprite } from './avatar-sprite';
 
@@ -38,5 +38,34 @@ describe('AvatarSprite', () => {
     const { container: happy } = renderWithEmotion('happy');
     const happySvg = happy.querySelector('svg')!.innerHTML;
     expect(idleSvg).not.toEqual(happySvg);
+  });
+
+  it('clickar el sprite avanza la secuencia del easter egg', () => {
+    render(
+      <AvatarProvider>
+        <AvatarSprite />
+      </AvatarProvider>,
+    );
+    const sprite = screen.getByTestId('avatar-sprite');
+    fireEvent.click(sprite);
+    fireEvent.click(sprite);
+    expect(sprite).toHaveAttribute('data-emotion', 'idle');
+    fireEvent.click(sprite);
+    expect(sprite).toHaveAttribute('data-emotion', 'surprised');
+  });
+
+  it('expone el estado de vibración vía data-shaking', () => {
+    render(
+      <AvatarProvider>
+        <AvatarSprite />
+      </AvatarProvider>,
+    );
+    const sprite = screen.getByTestId('avatar-sprite');
+    expect(sprite).toHaveAttribute('data-shaking', 'false');
+    for (let i = 0; i < 4; i += 1) {
+      fireEvent.click(sprite);
+    }
+    expect(sprite).toHaveAttribute('data-emotion', 'happy');
+    expect(sprite).toHaveAttribute('data-shaking', 'true');
   });
 });

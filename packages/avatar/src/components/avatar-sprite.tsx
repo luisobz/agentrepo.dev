@@ -37,19 +37,29 @@ function Face({ emotion }: { emotion: AvatarEmotion }) {
   );
 }
 
+// El spring global no soporta keyframes múltiples: la vibración lleva su propia duración.
+const SHAKE_KEYFRAMES = {
+  x: [0, -3, 3, -3, 3, 0],
+  transition: { duration: 0.4 },
+};
+
 export function AvatarSprite() {
-  const { emotion } = useAvatar();
+  const { emotion, isShaking, registerAvatarClick } = useAvatar();
   const reducedMotion = useReducedMotion();
+  const shake = isShaking && !reducedMotion;
 
   return (
     <motion.div
       layoutId="avatar-sprite"
       layout={reducedMotion ? false : 'position'}
       transition={reducedMotion ? { duration: 0 } : SPRING}
+      animate={shake ? SHAKE_KEYFRAMES : { x: 0 }}
+      onClick={registerAvatarClick}
       aria-hidden="true"
       data-testid="avatar-sprite"
       data-emotion={emotion}
-      className="flex size-12 items-center justify-center rounded-2xl border shadow-sm transition-transform hover:rotate-3"
+      data-shaking={isShaking}
+      className="flex size-12 cursor-pointer select-none items-center justify-center rounded-2xl border shadow-sm transition-transform hover:rotate-3"
       style={{
         backgroundColor: 'var(--color-bg-surface)',
         borderColor: 'var(--color-brand-garnet-muted)',

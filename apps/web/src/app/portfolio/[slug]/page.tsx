@@ -3,6 +3,7 @@ import type { Metadata } from 'next';
 import { CapabilitiesGrid } from '../../../components/portfolio/capabilities-grid';
 import { ContactForm } from '../../../components/portfolio/contact-form';
 import { ExperienceTimeline } from '../../../components/portfolio/experience-timeline';
+import { PortfolioAccessGate } from '../../../components/portfolio/portfolio-access-gate';
 import { PortfolioHero } from '../../../components/portfolio/portfolio-hero';
 import { getPortfolioProfile } from '../../../lib/portfolio';
 
@@ -33,7 +34,8 @@ export default async function PortfolioPage({ params }: PortfolioPageProps) {
   }
 
   return (
-    // -mt-24 reclaims the global <main> top padding: this page has no header.
+    <PortfolioAccessGate>
+    {/* -mt-24 reclaims the global <main> top padding: this page has no header. */}
     <div className="-mt-24 min-h-screen bg-[#14110f] text-[#fdf8ef]">
       {/* Premium dark backdrop: garnet glow, blue counter-glow and vignette */}
       <div aria-hidden="true" className="pointer-events-none fixed inset-0">
@@ -53,5 +55,6 @@ export default async function PortfolioPage({ params }: PortfolioPageProps) {
         </p>
       </div>
     </div>
+    </PortfolioAccessGate>
   );
 }

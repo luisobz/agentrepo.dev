@@ -1,13 +1,18 @@
 /**
- * Minimal HMAC-SHA256 signed session token, shared by the admin app (signs
+ * Minimal HMAC-SHA256 signed session tokens, shared by the admin app (signs
  * at login, verifies in middleware) and the API (verifies per request).
+ * Tokens are typed: short-lived `access` tokens authenticate requests and
+ * long-lived `refresh` tokens can only mint new pairs, never call the API.
  * Built on Web Crypto so it runs in Node and edge runtimes alike.
  */
 
 const encoder = new TextEncoder();
 
+export type SessionTokenType = 'access' | 'refresh';
+
 interface SessionTokenPayload {
   sub: 'admin';
+  typ: SessionTokenType;
   exp: number;
 }
 
@@ -46,29 +51,53 @@ function timingSafeEqual(a: string, b: string): boolean {
   return mismatch === 0;
 }
 
+/**
+ * Constant-time comparison of two secrets of arbitrary length. Both inputs
+ * are hashed first so length differences do not leak through timing.
+ */
+export async function secureCompare(a: string, b: string): Promise<boolean> {
+  const [digestA, digestB] = await Promise.all([
+    crypto.subtle.digest('SHA-256', encoder.encode(a)),
+    crypto.subtle.digest('SHA-256', encoder.encode(b)),
+  ]);
+  return timingSafeEqual(
+    base64UrlEncode(new Uint8Array(digestA)),
+    base64UrlEncode(new Uint8Array(digestB))
+  );
+}
+
 function isSessionTokenPayload(value: unknown): value is SessionTokenPayload {
+  if (typeof value !== 'object' || value === null) {
+    return false;
+  }
+  const candidate = value as Record<string, unknown>;
   return (
-    typeof value === 'object' &&
-    value !== null &&
-    (value as Record<string, unknown>)['sub'] === 'admin' &&
-    typeof (value as Record<string, unknown>)['exp'] === 'number'
+    candidate['sub'] === 'admin' &&
+    (candidate['typ'] === 'access' || candidate['typ'] === 'refresh') &&
+    typeof candidate['exp'] === 'number'
   );
 }
 
 export async function createSessionToken(
   secret: string,
-  ttlMs: number
+  ttlMs: number,
+  type: SessionTokenType = 'access'
 ): Promise<string> {
-  const payload: SessionTokenPayload = { sub: 'admin', exp: Date.now() + ttlMs };
+  const payload: SessionTokenPayload = {
+    sub: 'admin',
+    typ: type,
+    exp: Date.now() + ttlMs,
+  };
   const encodedPayload = base64UrlEncode(encoder.encode(JSON.stringify(payload)));
   return `${encodedPayload}.${await hmacSign(encodedPayload, secret)}`;
 }
 
 export async function verifySessionToken(
   token: string | null | undefined,
-  secret: string
+  secret: string,
+  type: SessionTokenType = 'access'
 ): Promise<boolean> {
-  if (!token) {
+  if (!token || !secret) {
     return false;
   }
 
@@ -84,7 +113,11 @@ export async function verifySessionToken(
 
   try {
     const payload: unknown = JSON.parse(base64UrlDecode(encodedPayload));
-    return isSessionTokenPayload(payload) && payload.exp > Date.now();
+    return (
+      isSessionTokenPayload(payload) &&
+      payload.typ === type &&
+      payload.exp > Date.now()
+    );
   } catch {
     return false;
   }

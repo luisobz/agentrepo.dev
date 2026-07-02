@@ -61,6 +61,17 @@ const envSchema = z.object({
   KEYWORD_MIN_SIMILARITY: z.coerce.number().min(0).max(1).default(0.35),
   KEYWORD_POSITIVE_THRESHOLD: z.coerce.number().min(0).max(1).default(0.25),
   KEYWORD_NEGATIVE_WEIGHT: z.coerce.number().min(0).default(1.2),
+}).superRefine((env, ctx) => {
+  const isWeakAuthSecret =
+    env.AUTH_SECRET === 'dev-auth-secret-change-me' || env.AUTH_SECRET.length < 32;
+  if (env.NODE_ENV === 'production' && isWeakAuthSecret) {
+    ctx.addIssue({
+      code: 'custom',
+      path: ['AUTH_SECRET'],
+      message:
+        'AUTH_SECRET debe ser un valor aleatorio de al menos 32 caracteres en producción',
+    });
+  }
 });
 
 // ─── Tipo inferido ──────────────────────────────

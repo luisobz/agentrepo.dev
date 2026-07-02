@@ -4,7 +4,7 @@ Next.js Admin panel for managing Skills, Agents and Blog posts.
 
 ## Routes
 
-- `/login` — password login (`ADMIN_PASSWORD` env). Sets an HttpOnly cookie with an HMAC-signed session token (secret: `NEXTAUTH_SECRET`).
+- `/login` — password login (`ADMIN_PASSWORD` env). Sets an HttpOnly cookie with an HMAC-signed session token (secret: `AUTH_SECRET`).
 - `/admin` — dashboard with content counts. All `/admin/*` routes are protected by `src/middleware.ts` (cookie presence) and the `/admin` layout (signature verification).
 - `/admin/skills`, `/admin/agents`, `/admin/blog` — table listings with search, pagination, edit and delete.
 - `…/new` and `…/[id]` — create/edit forms. Markdown content uses a Monaco editor; the Agent FileTree uses a Monaco JSON editor validated against `fileTreeSchema` from `@agentrepo/trpc`.
@@ -16,5 +16,5 @@ The browser never talks to the backend directly: `src/app/api/trpc/[trpc]/route.
 ## Env
 
 - `ADMIN_PASSWORD` — login password (required).
-- `NEXTAUTH_SECRET` — shared HMAC secret with `backend-web`.
+- `AUTH_SECRET` — shared HMAC secret with `backend-web`.
 - `NEXT_PUBLIC_API_URL` — backend base URL (default `http://localhost:4000`).

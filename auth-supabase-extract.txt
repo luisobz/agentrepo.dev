@@ -1,0 +1,282 @@
+=== EXTRACCIÓN DE ARCHIVOS DE AUTENTICACIÓN Y SUPABASE - dom 14 jun 2026 22:07:21 CEST ===
+=== Auth + TRPC + Session ===\n
+═══════════════════════════════════════════════════════════════
+📄 ARCHIVO: apps/admin/src/lib/auth/session.ts
+═══════════════════════════════════════════════════════════════
+
+import { verifySessionToken } from '@agentrepo/trpc/auth';
+import { cookies } from 'next/headers';
+import { ADMIN_SESSION_COOKIE } from './constants';
+
+
+export async function hasValidAdminSession(): Promise<boolean> {
+  const cookieStore = await cookies();
+  const token = cookieStore.get(ADMIN_SESSION_COOKIE)?.value;
+  // TODO pending to secure access to auth secret
+  return verifySessionToken(token, '');
+}
+\n\n
+═══════════════════════════════════════════════════════════════
+📄 ARCHIVO: packages/trpc/src/lib/auth/session-token.ts
+═══════════════════════════════════════════════════════════════
+
+/**
+ * Minimal HMAC-SHA256 signed session token, shared by the admin app (signs
+ * at login, verifies in middleware) and the API (verifies per request).
+ * Built on Web Crypto so it runs in Node and edge runtimes alike.
+ */
+
+const encoder = new TextEncoder();
+
+interface SessionTokenPayload {
+  sub: 'admin';
+  exp: number;
+}
+
+function base64UrlEncode(bytes: Uint8Array): string {
+  let binary = '';
+  for (const byte of bytes) {
+    binary += String.fromCharCode(byte);
+  }
+  return btoa(binary).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+}
+
+function base64UrlDecode(value: string): string {
+  return atob(value.replace(/-/g, '+').replace(/_/g, '/'));
+}
+
+async function hmacSign(payload: string, secret: string): Promise<string> {
+  const key = await crypto.subtle.importKey(
+    'raw',
+    encoder.encode(secret),
+    { name: 'HMAC', hash: 'SHA-256' },
+    false,
+    ['sign']
+  );
+  const signature = await crypto.subtle.sign('HMAC', key, encoder.encode(payload));
+  return base64UrlEncode(new Uint8Array(signature));
+}
+
+function timingSafeEqual(a: string, b: string): boolean {
+  if (a.length !== b.length) {
+    return false;
+  }
+  let mismatch = 0;
+  for (let i = 0; i < a.length; i++) {
+    mismatch |= a.charCodeAt(i) ^ b.charCodeAt(i);
+  }
+  return mismatch === 0;
+}
+
+function isSessionTokenPayload(value: unknown): value is SessionTokenPayload {
+  return (
+    typeof value === 'object' &&
+    value !== null &&
+    (value as Record<string, unknown>)['sub'] === 'admin' &&
+    typeof (value as Record<string, unknown>)['exp'] === 'number'
+  );
+}
+
+export async function createSessionToken(
+  secret: string,
+  ttlMs: number
+): Promise<string> {
+  const payload: SessionTokenPayload = { sub: 'admin', exp: Date.now() + ttlMs };
+  const encodedPayload = base64UrlEncode(encoder.encode(JSON.stringify(payload)));
+  return `${encodedPayload}.${await hmacSign(encodedPayload, secret)}`;
+}
+
+export async function verifySessionToken(
+  token: string | null | undefined,
+  secret: string
+): Promise<boolean> {
+  if (!token) {
+    return false;
+  }
+
+  const [encodedPayload, signature] = token.split('.');
+  if (!encodedPayload || !signature) {
+    return false;
+  }
+
+  const expectedSignature = await hmacSign(encodedPayload, secret);
+  if (!timingSafeEqual(signature, expectedSignature)) {
+    return false;
+  }
+
+  try {
+    const payload: unknown = JSON.parse(base64UrlDecode(encodedPayload));
+    return isSessionTokenPayload(payload) && payload.exp > Date.now();
+  } catch {
+    return false;
+  }
+}
+\n\n
+═══════════════════════════════════════════════════════════════
+📄 ARCHIVO: apps/backend-web/src/trpc/trpc-context.ts
+═══════════════════════════════════════════════════════════════
+
+import { createCatalogUseCases, SearchCatalog } from '@agentrepo/application';
+import { BackendEnvironments } from '@agentrepo/config';
+import {
+  PrismaAgentRepository,
+  PrismaBlogPostRepository,
+  PrismaGlobalSearchRepository,
+  PrismaService,
+  PrismaSkillRepository,
+} from '@agentrepo/infrastructure';
+import { TRPCContext, verifySessionToken } from '@agentrepo/trpc';
+import type { CreateExpressContextOptions } from '@trpc/server/adapters/express';
+
+const BEARER_PREFIX = 'Bearer ';
+
+function extractBearerToken(authorization: string | undefined): string | undefined {
+  if (!authorization?.startsWith(BEARER_PREFIX)) {
+    return undefined;
+  }
+  return authorization.slice(BEARER_PREFIX.length);
+}
+
+/**
+ * Composition root for the tRPC layer: wires Prisma repositories into the
+ * application use cases and resolves the admin session per request.
+ */
+export function buildCreateContext(prisma: PrismaService) {
+  const catalog = createCatalogUseCases({
+    skillRepository: new PrismaSkillRepository(prisma),
+    agentRepository: new PrismaAgentRepository(prisma),
+    blogPostRepository: new PrismaBlogPostRepository(prisma),
+  });
+  const globalSearch = new SearchCatalog(new PrismaGlobalSearchRepository(prisma));
+
+  return async function createContext({
+    req,
+  }: CreateExpressContextOptions): Promise<TRPCContext> {
+    const token = extractBearerToken(req.headers.authorization);
+    const isAdmin = await verifySessionToken(
+      token,
+      BackendEnvironments.AUTH_SECRET
+    );
+
+    return { isAdmin, catalog, globalSearch };
+  };
+}
+\n\n
+═══════════════════════════════════════════════════════════════
+📄 ARCHIVO: apps/admin/src/app/api/auth/login/route.ts
+═══════════════════════════════════════════════════════════════
+
+import { createSessionToken } from '@agentrepo/trpc/auth';
+import { NextResponse } from 'next/server';
+import { ADMIN_SESSION_COOKIE, ADMIN_SESSION_TTL_MS } from '../../../../lib/auth/constants';
+
+export async function POST(request: Request) {
+  const expectedPassword = process.env.ADMIN_PASSWORD;
+  if (!expectedPassword) {
+    return NextResponse.json(
+      { error: 'ADMIN_PASSWORD is not configured' },
+      { status: 500 }
+    );
+  }
+
+  const body: unknown = await request.json().catch(() => null);
+  const password =
+    typeof body === 'object' && body !== null
+      ? (body as Record<string, unknown>)['password']
+      : undefined;
+
+  if (typeof password !== 'string' || password !== expectedPassword) {
+    return NextResponse.json({ error: 'Invalid password' }, { status: 401 });
+  }
+
+  const token = await createSessionToken(getAuthSecret(), ADMIN_SESSION_TTL_MS);
+  const response = NextResponse.json({ ok: true });
+  response.cookies.set(ADMIN_SESSION_COOKIE, token, {
+    httpOnly: true,
+    sameSite: 'lax',
+    secure: process.env.NODE_ENV === 'production',
+    path: '/',
+    maxAge: ADMIN_SESSION_TTL_MS / 1000,
+  });
+  return response;
+}
+\n\n
+═══════════════════════════════════════════════════════════════
+📄 ARCHIVO: apps/admin/src/app/api/auth/logout/route.ts
+═══════════════════════════════════════════════════════════════
+
+import { NextResponse } from 'next/server';
+import { ADMIN_SESSION_COOKIE } from '../../../../lib/auth/constants';
+
+export async function POST() {
+  const response = NextResponse.json({ ok: true });
+  response.cookies.delete(ADMIN_SESSION_COOKIE);
+  return response;
+}
+\n\n
+═══════════════════════════════════════════════════════════════
+📄 ARCHIVO: apps/web/src/app/auth/callback/route.ts
+═══════════════════════════════════════════════════════════════
+
+import { createServerClient } from '@supabase/ssr';
+import { cookies } from 'next/headers';
+import { NextRequest, NextResponse } from 'next/server';
+
+/** OAuth code exchange: Supabase redirects here after a social login. */
+export async function GET(request: NextRequest) {
+  const code = request.nextUrl.searchParams.get('code');
+  const next = request.nextUrl.searchParams.get('next') ?? '/';
+
+  if (code && process.env.NEXT_PUBLIC_SUPABASE_URL) {
+    const cookieStore = await cookies();
+    const supabase = createServerClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL,
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ?? '',
+      {
+        cookies: {
+          getAll: () => cookieStore.getAll(),
+          setAll: (cookiesToSet) => {
+            for (const { name, value, options } of cookiesToSet) {
+              cookieStore.set(name, value, options);
+            }
+          },
+        },
+      }
+    );
+    await supabase.auth.exchangeCodeForSession(code);
+    // TODO(feature-auth): upsert the user + default `member` role in our DB.
+  }
+
+  return NextResponse.redirect(new URL(next, request.url));
+}
+\n\n
+═══════════════════════════════════════════════════════════════
+📄 ARCHIVO: apps/web/src/lib/supabase/client.ts
+═══════════════════════════════════════════════════════════════
+
+'use client';
+
+import { createBrowserClient } from '@supabase/ssr';
+import type { SupabaseClient } from '@supabase/supabase-js';
+
+export function isSupabaseConfigured(): boolean {
+  return Boolean(
+    process.env.NEXT_PUBLIC_SUPABASE_URL &&
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+  );
+}
+
+let client: SupabaseClient | null = null;
+
+/** Browser Supabase client; null when the env keys are not configured. */
+export function getSupabaseBrowserClient(): SupabaseClient | null {
+  if (!isSupabaseConfigured()) {
+    return null;
+  }
+  client ??= createBrowserClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL as string,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY as string
+  );
+  return client;
+}
+\n\n

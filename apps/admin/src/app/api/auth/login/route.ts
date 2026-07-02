@@ -1,7 +1,6 @@
 import { createSessionToken } from '@agentrepo/trpc/auth';
 import { NextResponse } from 'next/server';
 import { ADMIN_SESSION_COOKIE, ADMIN_SESSION_TTL_MS } from '../../../../lib/auth/constants';
-import { getAuthSecret } from '../../../../lib/auth/session';
 
 export async function POST(request: Request) {
   const expectedPassword = process.env.ADMIN_PASSWORD;

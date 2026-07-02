@@ -30,8 +30,7 @@ const envSchema = z.object({
   SUPABASE_SERVICE_ROLE_KEY: z.string().default(''),
 
   // Autenticación
-  NEXTAUTH_SECRET: z.string().default('dev-nextauth-secret-change-me'),
-  NEXTAUTH_URL: z.string().url().default('http://localhost:3000'),
+  AUTH_SECRET: z.string().default('dev-auth-secret-change-me'),
 
   // AI
   DEEPSEEK_API_KEY: z.string().default(''),
@@ -119,8 +118,7 @@ export class BackendEnvironments {
   static get INTERNAL_API_SECRET() { return BackendEnvironments.env.INTERNAL_API_SECRET; }
   static get HOST() { return BackendEnvironments.env.HOST; }
   static get NODE_ENV() { return BackendEnvironments.env.NODE_ENV; }
-  static get NEXTAUTH_SECRET() { return BackendEnvironments.env.NEXTAUTH_SECRET; }
-  static get NEXTAUTH_URL() { return BackendEnvironments.env.NEXTAUTH_URL; }
+  static get AUTH_SECRET() { return BackendEnvironments.env.AUTH_SECRET; }
   static get DEEPSEEK_API_KEY() { return BackendEnvironments.env.DEEPSEEK_API_KEY; }
   static get DEEPSEEK_MODEL() { return BackendEnvironments.env.DEEPSEEK_MODEL; }
   static get LANGFUSE_PUBLIC_KEY() { return BackendEnvironments.env.LANGFUSE_PUBLIC_KEY; }

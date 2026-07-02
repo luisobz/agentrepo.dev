@@ -37,7 +37,7 @@ export function buildCreateContext(prisma: PrismaService) {
     const token = extractBearerToken(req.headers.authorization);
     const isAdmin = await verifySessionToken(
       token,
-      BackendEnvironments.NEXTAUTH_SECRET
+      BackendEnvironments.AUTH_SECRET
     );
 
     return { isAdmin, catalog, globalSearch };

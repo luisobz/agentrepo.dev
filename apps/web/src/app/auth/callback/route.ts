@@ -1,30 +1,28 @@
-import { createServerClient } from '@supabase/ssr';
-import { cookies } from 'next/headers';
 import { NextRequest, NextResponse } from 'next/server';
+import { getSupabaseServerClient } from '../../../lib/supabase/server';
 
-/** OAuth code exchange: Supabase redirects here after a social login. */
+/** Only allow same-origin path redirects (no `//host` or absolute URLs). */
+function sanitizeReturnPath(path: string | null): string {
+  return path && path.startsWith('/') && !path.startsWith('//') ? path : '/';
+}
+
+/**
+ * OAuth code exchange: Supabase redirects here after a social login. The
+ * server client writes the session cookies as HttpOnly.
+ */
 export async function GET(request: NextRequest) {
   const code = request.nextUrl.searchParams.get('code');
-  const next = request.nextUrl.searchParams.get('next') ?? '/';
+  const next = sanitizeReturnPath(request.nextUrl.searchParams.get('next'));
 
-  if (code && process.env.NEXT_PUBLIC_SUPABASE_URL) {
-    const cookieStore = await cookies();
-    const supabase = createServerClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL,
-      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ?? '',
-      {
-        cookies: {
-          getAll: () => cookieStore.getAll(),
-          setAll: (cookiesToSet) => {
-            for (const { name, value, options } of cookiesToSet) {
-              cookieStore.set(name, value, options);
-            }
-          },
-        },
+  if (code) {
+    const supabase = await getSupabaseServerClient();
+    if (supabase) {
+      const { error } = await supabase.auth.exchangeCodeForSession(code);
+      if (error) {
+        return NextResponse.redirect(new URL('/auth/login?error=oauth', request.url));
       }
-    );
-    await supabase.auth.exchangeCodeForSession(code);
-    // TODO(feature-auth): upsert the user + default `member` role in our DB.
+      // TODO(feature-auth): upsert the user + default `member` role in our DB.
+    }
   }
 
   return NextResponse.redirect(new URL(next, request.url));

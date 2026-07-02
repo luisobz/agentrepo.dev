@@ -3,10 +3,7 @@
 import { Button, Card, CardContent, CardHeader, CardTitle, Input } from '@agentrepo/ui';
 import { FormEvent, useState } from 'react';
 import { useT } from '../../../lib/i18n/use-t';
-import {
-  getSupabaseBrowserClient,
-  isSupabaseConfigured,
-} from '../../../lib/supabase/client';
+import { isSupabaseConfigured } from '../../../lib/supabase/config';
 
 type SocialProvider = 'github' | 'google' | 'apple';
 
@@ -42,34 +39,36 @@ export default function LoginPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
 
-  const signInWithProvider = async (provider: SocialProvider) => {
-    const supabase = getSupabaseBrowserClient();
-    if (!supabase) {
+  // Auth happens in server route handlers so tokens stay in HttpOnly cookies.
+  const signInWithProvider = (provider: SocialProvider) => {
+    if (!configured) {
       setError(t('auth.notConfigured'));
       return;
     }
-    await supabase.auth.signInWithOAuth({
-      provider,
-      options: { redirectTo: `${window.location.origin}/auth/callback` },
-    });
+    window.location.assign(`/auth/oauth/${provider}?next=/`);
   };
 
   const signInWithEmail = async (event: FormEvent) => {
     event.preventDefault();
-    const supabase = getSupabaseBrowserClient();
-    if (!supabase) {
+    if (!configured) {
       setError(t('auth.notConfigured'));
       return;
     }
-    const { error: authError } = await supabase.auth.signInWithPassword({
-      email,
-      password,
+    const response = await fetch('/auth/signin', {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ email, password }),
     });
-    if (authError) {
-      setError(authError.message);
-    } else {
+    if (response.ok) {
       window.location.assign('/');
+      return;
     }
+    const body: unknown = await response.json().catch(() => null);
+    const message =
+      typeof body === 'object' && body !== null && 'error' in body
+        ? String((body as Record<string, unknown>)['error'])
+        : t('auth.notConfigured');
+    setError(message);
   };
 
   return (

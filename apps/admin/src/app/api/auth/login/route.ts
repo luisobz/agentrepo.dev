@@ -1,13 +1,24 @@
-import { createSessionToken } from '@agentrepo/trpc/auth';
+import { FixedWindowRateLimiter } from '@agentrepo/trpc/auth';
+import { TRPCClientError } from '@trpc/client';
 import { NextResponse } from 'next/server';
-import { ADMIN_SESSION_COOKIE, ADMIN_SESSION_TTL_MS } from '../../../../lib/auth/constants';
+import { backendTrpc } from '../../../../lib/auth/backend-client';
+import { applySessionCookies } from '../../../../lib/auth/cookies';
+
+const loginRateLimiter = new FixedWindowRateLimiter({
+  maxAttempts: 5,
+  windowMs: 15 * 60 * 1000,
+});
+
+function getClientKey(request: Request): string {
+  return request.headers.get('x-forwarded-for')?.split(',')[0]?.trim() ?? 'unknown';
+}
 
 export async function POST(request: Request) {
-  const expectedPassword = process.env.ADMIN_PASSWORD;
-  if (!expectedPassword) {
+  const clientKey = getClientKey(request);
+  if (!loginRateLimiter.consume(clientKey)) {
     return NextResponse.json(
-      { error: 'ADMIN_PASSWORD is not configured' },
-      { status: 500 }
+      { error: 'Too many attempts, try again later' },
+      { status: 429 }
     );
   }
 
@@ -17,18 +28,23 @@ export async function POST(request: Request) {
       ? (body as Record<string, unknown>)['password']
       : undefined;
 
-  if (typeof password !== 'string' || password !== expectedPassword) {
+  if (typeof password !== 'string' || !password) {
     return NextResponse.json({ error: 'Invalid password' }, { status: 401 });
   }
 
-  const token = await createSessionToken(getAuthSecret(), ADMIN_SESSION_TTL_MS);
-  const response = NextResponse.json({ ok: true });
-  response.cookies.set(ADMIN_SESSION_COOKIE, token, {
-    httpOnly: true,
-    sameSite: 'lax',
-    secure: process.env.NODE_ENV === 'production',
-    path: '/',
-    maxAge: ADMIN_SESSION_TTL_MS / 1000,
-  });
-  return response;
+  try {
+    const tokens = await backendTrpc.adminAuth.login.mutate({ password });
+    loginRateLimiter.reset(clientKey);
+    const response = NextResponse.json({ ok: true });
+    applySessionCookies(response, tokens);
+    return response;
+  } catch (error) {
+    if (error instanceof TRPCClientError && error.data?.code === 'UNAUTHORIZED') {
+      return NextResponse.json({ error: 'Invalid password' }, { status: 401 });
+    }
+    return NextResponse.json(
+      { error: 'Authentication service unavailable' },
+      { status: 502 }
+    );
+  }
 }

@@ -1,16 +1,23 @@
 import { initTRPC, TRPCError } from '@trpc/server';
 import superjson from 'superjson';
-import type { CatalogUseCases, GlobalSearchParams } from '@agentrepo/application';
+import type {
+  AdminAuthUseCases,
+  CatalogUseCases,
+  GlobalSearchParams,
+} from '@agentrepo/application';
 import type { UseCase } from '@agentrepo/application';
 import {
   DomainError,
   EntityNotFoundError,
+  InvalidCredentialsError,
+  InvalidRefreshTokenError,
   SlugAlreadyInUseError,
 } from '@agentrepo/domain';
 import type { SearchHit } from '@agentrepo/domain';
 
 export interface TRPCContext {
   isAdmin: boolean;
+  adminAuth: AdminAuthUseCases;
   catalog: CatalogUseCases;
   globalSearch: UseCase<GlobalSearchParams, SearchHit[]>;
 }
@@ -22,6 +29,12 @@ export const t = initTRPC.context<TRPCContext>().create({
 function toTRPCError(error: DomainError): TRPCError {
   if (error instanceof EntityNotFoundError) {
     return new TRPCError({ code: 'NOT_FOUND', message: error.message, cause: error });
+  }
+  if (
+    error instanceof InvalidCredentialsError ||
+    error instanceof InvalidRefreshTokenError
+  ) {
+    return new TRPCError({ code: 'UNAUTHORIZED', message: error.message, cause: error });
   }
   if (error instanceof SlugAlreadyInUseError) {
     return new TRPCError({ code: 'CONFLICT', message: error.message, cause: error });

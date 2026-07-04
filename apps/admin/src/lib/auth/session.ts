@@ -1,11 +1,13 @@
 import { verifySessionToken } from '@agentrepo/trpc/auth';
 import { cookies } from 'next/headers';
-import { ADMIN_SESSION_COOKIE } from './constants';
-
+import { ADMIN_ACCESS_COOKIE } from './constants';
+import { getAuthSecret } from './secret';
 
 export async function hasValidAdminSession(): Promise<boolean> {
+  const secret = getAuthSecret();
+  if (!secret) {
+    return false;
+  }
   const cookieStore = await cookies();
-  const token = cookieStore.get(ADMIN_SESSION_COOKIE)?.value;
-  // TODO pending to secure access to auth secret
-  return verifySessionToken(token, '');
+  return verifySessionToken(cookieStore.get(ADMIN_ACCESS_COOKIE)?.value, secret);
 }

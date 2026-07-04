@@ -103,6 +103,21 @@ model RolePermission {
   @@id([roleId, permissionId])
 }
 
+// Server-side admin refresh sessions: only the token hash is stored.
+// familyId groups a rotation chain; replacedById marks rotation-revocations
+// (eligible for the race grace window) apart from logout/family kills.
+model AdminSession {
+  id           String    @id @default(uuid())
+  tokenHash    String    @unique
+  familyId     String
+  expiresAt    DateTime
+  revokedAt    DateTime?
+  replacedById String?
+  createdAt    DateTime  @default(now())
+
+  @@index([familyId])
+}
+
 // A completed purchase unlocks a premium Skill or Agent for a user.
 model Purchase {
   id          String   @id @default(uuid())

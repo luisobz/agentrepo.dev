@@ -9,3 +9,6 @@ export * from './catalog/use-cases/content.use-cases';
 export * from './catalog/use-cases/search-skills.use-case';
 export * from './catalog/use-cases/search-catalog.use-case';
 export * from './catalog/catalog.use-cases';
+export * from './auth/ports/admin-session.repository';
+export * from './auth/ports/access-token-issuer';
+export * from './auth/use-cases/admin-auth.use-cases';

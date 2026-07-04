@@ -6,7 +6,7 @@ import { Header } from '../components/layout/header';
 import { Footer } from '../components/layout/footer';
 import { CommandPalette } from '../components/search/command-palette';
 import { CommandPaletteProvider } from '../components/search/command-palette-provider';
-import { AvatarProvider } from '@agentrepo/avatar';
+import { AvatarEasterEggProvider } from '../components/providers/avatar-provider';
 import { LocaleProvider } from '@agentrepo/ui';
 import { getServerLocale } from '../lib/i18n/server';
 import type { Metadata } from 'next';
@@ -30,7 +30,7 @@ export default async function RootLayout({
 
         <LocaleProvider initialLocale={locale}>
         <TRPCProvider>
-          <AvatarProvider>
+          <AvatarEasterEggProvider>
             <CommandPaletteProvider>
               <Header />
               <main className="pt-24 min-h-screen">
@@ -39,7 +39,7 @@ export default async function RootLayout({
               <Footer />
               <CommandPalette />
             </CommandPaletteProvider>
-          </AvatarProvider>
+          </AvatarEasterEggProvider>
         </TRPCProvider>
         </LocaleProvider>
       </body>

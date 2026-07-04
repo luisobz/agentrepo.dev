@@ -1,7 +1,8 @@
-import { FixedWindowRateLimiter, secureCompare } from '@agentrepo/trpc/auth';
+import { FixedWindowRateLimiter } from '@agentrepo/trpc/auth';
+import { TRPCClientError } from '@trpc/client';
 import { NextResponse } from 'next/server';
-import { issueSessionCookies } from '../../../../lib/auth/cookies';
-import { getAuthSecret } from '../../../../lib/auth/secret';
+import { backendTrpc } from '../../../../lib/auth/backend-client';
+import { applySessionCookies } from '../../../../lib/auth/cookies';
 
 const loginRateLimiter = new FixedWindowRateLimiter({
   maxAttempts: 5,
@@ -13,15 +14,6 @@ function getClientKey(request: Request): string {
 }
 
 export async function POST(request: Request) {
-  const secret = getAuthSecret();
-  const expectedPassword = process.env.ADMIN_PASSWORD;
-  if (!secret || !expectedPassword) {
-    return NextResponse.json(
-      { error: 'Authentication is not configured' },
-      { status: 500 }
-    );
-  }
-
   const clientKey = getClientKey(request);
   if (!loginRateLimiter.consume(clientKey)) {
     return NextResponse.json(
@@ -36,12 +28,23 @@ export async function POST(request: Request) {
       ? (body as Record<string, unknown>)['password']
       : undefined;
 
-  if (typeof password !== 'string' || !(await secureCompare(password, expectedPassword))) {
+  if (typeof password !== 'string' || !password) {
     return NextResponse.json({ error: 'Invalid password' }, { status: 401 });
   }
 
-  loginRateLimiter.reset(clientKey);
-  const response = NextResponse.json({ ok: true });
-  await issueSessionCookies(response, secret);
-  return response;
+  try {
+    const tokens = await backendTrpc.adminAuth.login.mutate({ password });
+    loginRateLimiter.reset(clientKey);
+    const response = NextResponse.json({ ok: true });
+    applySessionCookies(response, tokens);
+    return response;
+  } catch (error) {
+    if (error instanceof TRPCClientError && error.data?.code === 'UNAUTHORIZED') {
+      return NextResponse.json({ error: 'Invalid password' }, { status: 401 });
+    }
+    return NextResponse.json(
+      { error: 'Authentication service unavailable' },
+      { status: 502 }
+    );
+  }
 }

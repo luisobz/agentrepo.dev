@@ -1,48 +1,54 @@
-import { createSessionToken, verifySessionToken } from '@agentrepo/trpc/auth';
+import { verifySessionToken } from '@agentrepo/trpc/auth';
 import { NextRequest, NextResponse } from 'next/server';
+import { backendTrpc } from '../../../../lib/auth/backend-client';
 import {
   ADMIN_ACCESS_COOKIE,
-  ADMIN_ACCESS_TTL_MS,
   ADMIN_REFRESH_COOKIE,
 } from '../../../../lib/auth/constants';
-import { setAccessCookie } from '../../../../lib/auth/cookies';
+import {
+  AdminSessionTokens,
+  applySessionCookies,
+} from '../../../../lib/auth/cookies';
 import { getAuthSecret } from '../../../../lib/auth/secret';
 
 /**
  * Same-origin proxy to the tRPC API. It promotes the HttpOnly session cookie
  * to an Authorization header so the token never has to be readable by
- * client-side JavaScript. An expired access token is re-minted inline from a
- * valid refresh token so in-page API calls survive the short access TTL.
+ * client-side JavaScript. An expired access token is refreshed against the
+ * backend (rotating the pair) so in-page API calls survive the short access
+ * TTL; the rotation grace window absorbs parallel calls racing the refresh.
  */
 const API_BASE = (
   process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000'
 ).replace(/\/$/, '');
 
-interface ResolvedAccessToken {
-  token: string | undefined;
-  rotated: boolean;
+interface ResolvedSession {
+  accessToken: string;
+  /** Present only when the pair was just refreshed and cookies must be updated. */
+  refreshedTokens?: AdminSessionTokens;
 }
 
-async function resolveAccessToken(request: NextRequest): Promise<ResolvedAccessToken> {
+async function resolveSession(request: NextRequest): Promise<ResolvedSession | null> {
   const secret = getAuthSecret();
   if (!secret) {
-    return { token: undefined, rotated: false };
+    return null;
   }
 
   const accessToken = request.cookies.get(ADMIN_ACCESS_COOKIE)?.value;
-  if (await verifySessionToken(accessToken, secret)) {
-    return { token: accessToken, rotated: false };
+  if (accessToken && (await verifySessionToken(accessToken, secret))) {
+    return { accessToken };
   }
 
   const refreshToken = request.cookies.get(ADMIN_REFRESH_COOKIE)?.value;
-  if (await verifySessionToken(refreshToken, secret, 'refresh')) {
-    return {
-      token: await createSessionToken(secret, ADMIN_ACCESS_TTL_MS, 'access'),
-      rotated: true,
-    };
+  if (!refreshToken) {
+    return null;
   }
-
-  return { token: undefined, rotated: false };
+  try {
+    const refreshedTokens = await backendTrpc.adminAuth.refresh.mutate({ refreshToken });
+    return { accessToken: refreshedTokens.accessToken, refreshedTokens };
+  } catch {
+    return null;
+  }
 }
 
 async function forward(
@@ -58,9 +64,9 @@ async function forward(
   if (contentType) {
     headers.set('content-type', contentType);
   }
-  const { token, rotated } = await resolveAccessToken(request);
-  if (token) {
-    headers.set('authorization', `Bearer ${token}`);
+  const session = await resolveSession(request);
+  if (session) {
+    headers.set('authorization', `Bearer ${session.accessToken}`);
   }
 
   const isBodyless = request.method === 'GET' || request.method === 'HEAD';
@@ -77,8 +83,8 @@ async function forward(
       'content-type': response.headers.get('content-type') ?? 'application/json',
     },
   });
-  if (token && rotated) {
-    setAccessCookie(proxied, token);
+  if (session?.refreshedTokens) {
+    applySessionCookies(proxied, session.refreshedTokens);
   }
   return proxied;
 }

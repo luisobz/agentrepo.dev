@@ -1,6 +1,7 @@
 import type { inferRouterInputs, inferRouterOutputs } from "@trpc/server";
 import { z } from "zod";
 import { publicProcedure, router } from "../trpc";
+import { adminAuthRouter } from "./admin-auth";
 import { agentsRouter } from "./agents";
 import { blogRouter } from "./blog";
 import { blogPostsRouter } from "./blog-posts";
@@ -19,6 +20,7 @@ const helloRouter = router({
 
 export const appRouter = router({
   hello: helloRouter,
+  adminAuth: adminAuthRouter,
   search: searchRouter,
   skills: skillsRouter,
   agents: agentsRouter,

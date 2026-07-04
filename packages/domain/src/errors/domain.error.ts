@@ -23,6 +23,22 @@ export class SlugAlreadyInUseError extends DomainError {
   }
 }
 
+export class InvalidCredentialsError extends DomainError {
+  readonly code = 'INVALID_CREDENTIALS';
+
+  constructor() {
+    super('Invalid credentials');
+  }
+}
+
+export class InvalidRefreshTokenError extends DomainError {
+  readonly code = 'INVALID_REFRESH_TOKEN';
+
+  constructor() {
+    super('Refresh token is invalid, expired or has been revoked');
+  }
+}
+
 export class DataIntegrityError extends DomainError {
   readonly code = 'DATA_INTEGRITY';
 

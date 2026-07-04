@@ -1,9 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import {
-  createSessionToken,
-  secureCompare,
-  verifySessionToken,
-} from './session-token';
+import { createSessionToken, verifySessionToken } from './session-token';
 
 const SECRET = 'test-secret';
 
@@ -61,17 +57,5 @@ describe('session token', () => {
     await expect(verifySessionToken(null, SECRET)).resolves.toBe(false);
     await expect(verifySessionToken('', SECRET)).resolves.toBe(false);
     await expect(verifySessionToken('not-a-token', SECRET)).resolves.toBe(false);
-  });
-});
-
-describe('secureCompare', () => {
-  it('accepts equal strings', async () => {
-    await expect(secureCompare('hunter2', 'hunter2')).resolves.toBe(true);
-  });
-
-  it('rejects different strings, including different lengths', async () => {
-    await expect(secureCompare('hunter2', 'hunter3')).resolves.toBe(false);
-    await expect(secureCompare('hunter2', 'hunter22')).resolves.toBe(false);
-    await expect(secureCompare('', 'hunter2')).resolves.toBe(false);
   });
 });

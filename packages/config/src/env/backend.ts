@@ -31,6 +31,7 @@ const envSchema = z.object({
 
   // Autenticación
   AUTH_SECRET: z.string().default('dev-auth-secret-change-me'),
+  ADMIN_PASSWORD: z.string().default(''),
 
   // AI
   DEEPSEEK_API_KEY: z.string().default(''),
@@ -130,6 +131,7 @@ export class BackendEnvironments {
   static get HOST() { return BackendEnvironments.env.HOST; }
   static get NODE_ENV() { return BackendEnvironments.env.NODE_ENV; }
   static get AUTH_SECRET() { return BackendEnvironments.env.AUTH_SECRET; }
+  static get ADMIN_PASSWORD() { return BackendEnvironments.env.ADMIN_PASSWORD; }
   static get DEEPSEEK_API_KEY() { return BackendEnvironments.env.DEEPSEEK_API_KEY; }
   static get DEEPSEEK_MODEL() { return BackendEnvironments.env.DEEPSEEK_MODEL; }
   static get LANGFUSE_PUBLIC_KEY() { return BackendEnvironments.env.LANGFUSE_PUBLIC_KEY; }

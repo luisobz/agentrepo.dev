@@ -1,16 +1,25 @@
-import { createCatalogUseCases, SearchCatalog } from '@agentrepo/application';
+import {
+  createAdminAuthUseCases,
+  createCatalogUseCases,
+  SearchCatalog,
+} from '@agentrepo/application';
 import { BackendEnvironments } from '@agentrepo/config';
 import {
+  PrismaAdminSessionRepository,
   PrismaAgentRepository,
   PrismaBlogPostRepository,
   PrismaGlobalSearchRepository,
   PrismaService,
   PrismaSkillRepository,
 } from '@agentrepo/infrastructure';
-import { TRPCContext, verifySessionToken } from '@agentrepo/trpc';
+import { createSessionToken, TRPCContext, verifySessionToken } from '@agentrepo/trpc';
 import type { CreateExpressContextOptions } from '@trpc/server/adapters/express';
 
 const BEARER_PREFIX = 'Bearer ';
+
+const ACCESS_TTL_MS = 15 * 60 * 1000;
+const REFRESH_TTL_MS = 7 * 24 * 60 * 60 * 1000;
+const ROTATION_GRACE_MS = 30 * 1000;
 
 function extractBearerToken(authorization: string | undefined): string | undefined {
   if (!authorization?.startsWith(BEARER_PREFIX)) {
@@ -30,6 +39,19 @@ export function buildCreateContext(prisma: PrismaService) {
     blogPostRepository: new PrismaBlogPostRepository(prisma),
   });
   const globalSearch = new SearchCatalog(new PrismaGlobalSearchRepository(prisma));
+  const adminAuth = createAdminAuthUseCases({
+    sessions: new PrismaAdminSessionRepository(prisma),
+    accessTokens: {
+      issue: (ttlMs) =>
+        createSessionToken(BackendEnvironments.AUTH_SECRET, ttlMs, 'access'),
+    },
+    config: {
+      adminPassword: BackendEnvironments.ADMIN_PASSWORD,
+      accessTtlMs: ACCESS_TTL_MS,
+      refreshTtlMs: REFRESH_TTL_MS,
+      rotationGraceMs: ROTATION_GRACE_MS,
+    },
+  });
 
   return async function createContext({
     req,
@@ -40,6 +62,6 @@ export function buildCreateContext(prisma: PrismaService) {
       BackendEnvironments.AUTH_SECRET
     );
 
-    return { isAdmin, catalog, globalSearch };
+    return { isAdmin, adminAuth, catalog, globalSearch };
   };
 }

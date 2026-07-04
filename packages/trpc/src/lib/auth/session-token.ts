@@ -51,21 +51,6 @@ function timingSafeEqual(a: string, b: string): boolean {
   return mismatch === 0;
 }
 
-/**
- * Constant-time comparison of two secrets of arbitrary length. Both inputs
- * are hashed first so length differences do not leak through timing.
- */
-export async function secureCompare(a: string, b: string): Promise<boolean> {
-  const [digestA, digestB] = await Promise.all([
-    crypto.subtle.digest('SHA-256', encoder.encode(a)),
-    crypto.subtle.digest('SHA-256', encoder.encode(b)),
-  ]);
-  return timingSafeEqual(
-    base64UrlEncode(new Uint8Array(digestA)),
-    base64UrlEncode(new Uint8Array(digestB))
-  );
-}
-
 function isSessionTokenPayload(value: unknown): value is SessionTokenPayload {
   if (typeof value !== 'object' || value === null) {
     return false;

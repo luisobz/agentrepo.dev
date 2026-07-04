@@ -53,6 +53,11 @@ function buildContext(options?: {
 }): TRPCContext {
   return {
     isAdmin: options?.isAdmin ?? false,
+    adminAuth: {
+      login: stubUseCase(undefined),
+      refresh: stubUseCase(undefined),
+      logout: stubUseCase(undefined),
+    } as unknown as TRPCContext['adminAuth'],
     catalog: options?.catalog ?? buildCatalogStub(),
     globalSearch: (options?.globalSearch ??
       stubUseCase([])) as unknown as TRPCContext['globalSearch'],

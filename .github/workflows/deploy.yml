@@ -1,0 +1,274 @@
+name: Deploy (tag)
+
+# Despliega a Spaceship (cPanel/Passenger) al publicar un tag `vX.Y.Z`.
+#   - web         → app Node.js (Next.js standalone) — pública en agentrepo.dev
+#   - admin       → app Node.js (Next.js standalone) — panel de administración
+#   - backend-web → app Node.js (NestJS + tRPC, BFF)
+#   - backend-ai  → app Node.js (NestJS, workflows IA internos)
+#   - migrate     → prisma migrate deploy contra la BD de producción
+#
+# También se puede lanzar a mano desde la pestaña Actions (workflow_dispatch)
+# eligiendo qué desplegar.
+#
+# Los bundles se suben AUTOCONTENIDOS (incluyen node_modules y el cliente
+# Prisma ya generado): en cPanel NO hay que pulsar "Run NPM Install".
+#
+# Configuración (Settings → Secrets and variables → Actions):
+#   Secrets:  SSH_HOST, SSH_USER, SSH_KEY, DATABASE_URL (para migrate)
+#   Variables: SSH_PORT (def. 22), NODE_VERSION (def. 26),
+#              NEXT_PUBLIC_API_URL, NEXT_PUBLIC_SUPABASE_URL,
+#              NEXT_PUBLIC_SUPABASE_ANON_KEY,
+#              WEB_PATH, ADMIN_PATH, BACKEND_WEB_PATH, BACKEND_AI_PATH
+#              (rutas relativas al home del usuario SSH; defaults abajo)
+# Ver docs/DEPLOY.md para el detalle.
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+    inputs:
+      only:
+        description: '¿Qué desplegar?'
+        type: choice
+        default: all
+        options: [all, web, admin, backend-web, backend-ai, migrate]
+
+concurrency:
+  group: deploy-${{ github.ref }}
+  cancel-in-progress: false
+
+env:
+  NODE_VERSION: ${{ vars.NODE_VERSION || '26' }}
+  SSH_PORT: ${{ vars.SSH_PORT || '22' }}
+  # Dummy para el postinstall (prisma generate); nunca se conecta.
+  DATABASE_URL: postgresql://ci:ci@localhost:5432/ci?schema=public
+  # Variables públicas que Next.js inlinea en build:
+  NEXT_PUBLIC_API_URL: ${{ vars.NEXT_PUBLIC_API_URL || 'https://agentrepo.dev/web/api/v1' }}
+  NEXT_PUBLIC_SUPABASE_URL: ${{ vars.NEXT_PUBLIC_SUPABASE_URL }}
+  NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ vars.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
+
+jobs:
+  # ---------------------------------------------------------------- MIGRATE
+  migrate:
+    if: ${{ github.event_name != 'workflow_dispatch' || contains(fromJSON('["all","migrate","backend-web","backend-ai"]'), inputs.only) }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4 # versión leída de packageManager en package.json
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: pnpm
+
+      - run: pnpm install --frozen-lockfile
+
+      - name: Prisma migrate deploy (se salta si no hay secret DATABASE_URL)
+        env:
+          PROD_DATABASE_URL: ${{ secrets.DATABASE_URL }}
+        run: |
+          if [ -z "$PROD_DATABASE_URL" ]; then
+            echo "::notice::Secret DATABASE_URL no configurado — se omiten las migraciones."
+            exit 0
+          fi
+          DATABASE_URL="$PROD_DATABASE_URL" pnpm db:migrate:deploy
+
+  # ---------------------------------------------------------------- WEB
+  web:
+    # !cancelled(): el job corre aunque migrate se haya saltado (dispatch selectivo)
+    if: ${{ !cancelled() && (needs.migrate.result == 'success' || needs.migrate.result == 'skipped') && (github.event_name != 'workflow_dispatch' || inputs.only == 'all' || inputs.only == 'web') }}
+    needs: migrate
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Guard — secrets configurados
+        run: |
+          test -n "${{ secrets.SSH_HOST }}" || { echo "::error::Falta el secret SSH_HOST"; exit 1; }
+
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: pnpm
+
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm exec nx build web
+
+      - name: Preparar bundle standalone
+        run: |
+          mkdir -p deploy-out/web
+          rsync -a apps/web/.next/standalone/ deploy-out/web/
+          rsync -a apps/web/.next/static/ deploy-out/web/apps/web/.next/static/
+          rsync -a apps/web/public/ deploy-out/web/apps/web/public/
+
+      - name: Configurar SSH
+        run: |
+          mkdir -p ~/.ssh && chmod 700 ~/.ssh
+          printf '%s\n' "${{ secrets.SSH_KEY }}" > ~/.ssh/id_deploy
+          chmod 600 ~/.ssh/id_deploy
+          ssh-keyscan -p "${SSH_PORT}" "${{ secrets.SSH_HOST }}" >> ~/.ssh/known_hosts 2>/dev/null || true
+
+      - name: Subir web y reiniciar (rsync + Passenger)
+        env:
+          HOST: ${{ secrets.SSH_HOST }}
+          USER: ${{ secrets.SSH_USER }}
+          DEST: ${{ vars.WEB_PATH || 'backend/agentrepo.dev/web' }}
+        run: |
+          SSH="ssh -i ~/.ssh/id_deploy -p ${SSH_PORT} -o StrictHostKeyChecking=accept-new"
+          rsync -az --delete -e "$SSH" \
+            --exclude '.env' \
+            --exclude 'tmp/' \
+            --exclude '*.log' \
+            deploy-out/web/ "$USER@$HOST:$DEST/"
+          # Passenger recarga la app al ver cambiar tmp/restart.txt
+          $SSH "$USER@$HOST" "mkdir -p '$DEST/tmp' && touch '$DEST/tmp/restart.txt'"
+
+  # ---------------------------------------------------------------- ADMIN
+  admin:
+    if: ${{ !cancelled() && (needs.migrate.result == 'success' || needs.migrate.result == 'skipped') && (github.event_name != 'workflow_dispatch' || inputs.only == 'all' || inputs.only == 'admin') }}
+    needs: migrate
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Guard — secrets configurados
+        run: |
+          test -n "${{ secrets.SSH_HOST }}" || { echo "::error::Falta el secret SSH_HOST"; exit 1; }
+
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: pnpm
+
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm exec nx build admin
+
+      - name: Preparar bundle standalone
+        run: |
+          mkdir -p deploy-out/admin
+          rsync -a apps/admin/.next/standalone/ deploy-out/admin/
+          rsync -a apps/admin/.next/static/ deploy-out/admin/apps/admin/.next/static/
+          rsync -a apps/admin/public/ deploy-out/admin/apps/admin/public/
+
+      - name: Configurar SSH
+        run: |
+          mkdir -p ~/.ssh && chmod 700 ~/.ssh
+          printf '%s\n' "${{ secrets.SSH_KEY }}" > ~/.ssh/id_deploy
+          chmod 600 ~/.ssh/id_deploy
+          ssh-keyscan -p "${SSH_PORT}" "${{ secrets.SSH_HOST }}" >> ~/.ssh/known_hosts 2>/dev/null || true
+
+      - name: Subir admin y reiniciar (rsync + Passenger)
+        env:
+          HOST: ${{ secrets.SSH_HOST }}
+          USER: ${{ secrets.SSH_USER }}
+          DEST: ${{ vars.ADMIN_PATH || 'backend/agentrepo.dev/admin' }}
+        run: |
+          SSH="ssh -i ~/.ssh/id_deploy -p ${SSH_PORT} -o StrictHostKeyChecking=accept-new"
+          rsync -az --delete -e "$SSH" \
+            --exclude '.env' \
+            --exclude 'tmp/' \
+            --exclude '*.log' \
+            deploy-out/admin/ "$USER@$HOST:$DEST/"
+          $SSH "$USER@$HOST" "mkdir -p '$DEST/tmp' && touch '$DEST/tmp/restart.txt'"
+
+  # ---------------------------------------------------------------- BACKEND WEB
+  backend-web:
+    if: ${{ !cancelled() && (needs.migrate.result == 'success' || needs.migrate.result == 'skipped') && (github.event_name != 'workflow_dispatch' || inputs.only == 'all' || inputs.only == 'backend-web') }}
+    needs: migrate
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Guard — secrets configurados
+        run: |
+          test -n "${{ secrets.SSH_HOST }}" || { echo "::error::Falta el secret SSH_HOST"; exit 1; }
+
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: pnpm
+
+      - run: pnpm install --frozen-lockfile
+
+      - name: Empaquetar backend autocontenido (nx prune + deps de producción)
+        run: |
+          pnpm exec nx run backend-web:prune
+          # El lockfile podado modela workspace_modules/* como importers:
+          # el bundle necesita su propio pnpm-workspace.yaml para resolverlos.
+          printf "packages:\n  - 'workspace_modules/@agentrepo/*'\n" > apps/backend-web/dist/pnpm-workspace.yaml
+          pnpm --dir apps/backend-web/dist install --prod --frozen-lockfile
+          # Genera el cliente Prisma DENTRO del bundle (compilador WASM, portable)
+          pnpm exec prisma generate --schema apps/backend-web/dist/workspace_modules/@agentrepo/database/prisma/schema.prisma
+
+      - name: Configurar SSH
+        run: |
+          mkdir -p ~/.ssh && chmod 700 ~/.ssh
+          printf '%s\n' "${{ secrets.SSH_KEY }}" > ~/.ssh/id_deploy
+          chmod 600 ~/.ssh/id_deploy
+          ssh-keyscan -p "${SSH_PORT}" "${{ secrets.SSH_HOST }}" >> ~/.ssh/known_hosts 2>/dev/null || true
+
+      - name: Subir backend-web y reiniciar (rsync + Passenger)
+        env:
+          HOST: ${{ secrets.SSH_HOST }}
+          USER: ${{ secrets.SSH_USER }}
+          DEST: ${{ vars.BACKEND_WEB_PATH || 'backend/agentrepo.dev/backend-web' }}
+        run: |
+          SSH="ssh -i ~/.ssh/id_deploy -p ${SSH_PORT} -o StrictHostKeyChecking=accept-new"
+          rsync -az --delete -e "$SSH" \
+            --exclude '.env' \
+            --exclude 'tmp/' \
+            --exclude '*.log' \
+            apps/backend-web/dist/ "$USER@$HOST:$DEST/"
+          $SSH "$USER@$HOST" "mkdir -p '$DEST/tmp' && touch '$DEST/tmp/restart.txt'"
+
+  # ---------------------------------------------------------------- BACKEND AI
+  backend-ai:
+    if: ${{ !cancelled() && (needs.migrate.result == 'success' || needs.migrate.result == 'skipped') && (github.event_name != 'workflow_dispatch' || inputs.only == 'all' || inputs.only == 'backend-ai') }}
+    needs: migrate
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Guard — secrets configurados
+        run: |
+          test -n "${{ secrets.SSH_HOST }}" || { echo "::error::Falta el secret SSH_HOST"; exit 1; }
+
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: pnpm
+
+      - run: pnpm install --frozen-lockfile
+
+      - name: Empaquetar backend autocontenido (nx prune + deps de producción)
+        run: |
+          pnpm exec nx run backend-ai:prune
+          printf "packages:\n  - 'workspace_modules/@agentrepo/*'\n" > apps/backend-ai/dist/pnpm-workspace.yaml
+          pnpm --dir apps/backend-ai/dist install --prod --frozen-lockfile
+          pnpm exec prisma generate --schema apps/backend-ai/dist/workspace_modules/@agentrepo/database/prisma/schema.prisma
+
+      - name: Configurar SSH
+        run: |
+          mkdir -p ~/.ssh && chmod 700 ~/.ssh
+          printf '%s\n' "${{ secrets.SSH_KEY }}" > ~/.ssh/id_deploy
+          chmod 600 ~/.ssh/id_deploy
+          ssh-keyscan -p "${SSH_PORT}" "${{ secrets.SSH_HOST }}" >> ~/.ssh/known_hosts 2>/dev/null || true
+
+      - name: Subir backend-ai y reiniciar (rsync + Passenger)
+        env:
+          HOST: ${{ secrets.SSH_HOST }}
+          USER: ${{ secrets.SSH_USER }}
+          DEST: ${{ vars.BACKEND_AI_PATH || 'backend/agentrepo.dev/backend-ai' }}
+        run: |
+          SSH="ssh -i ~/.ssh/id_deploy -p ${SSH_PORT} -o StrictHostKeyChecking=accept-new"
+          rsync -az --delete -e "$SSH" \
+            --exclude '.env' \
+            --exclude 'tmp/' \
+            --exclude '*.log' \
+            apps/backend-ai/dist/ "$USER@$HOST:$DEST/"
+          $SSH "$USER@$HOST" "mkdir -p '$DEST/tmp' && touch '$DEST/tmp/restart.txt'"

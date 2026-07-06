@@ -4,6 +4,7 @@ export const webDictionary = {
   'nav.skills': { en: 'Skills', es: 'Skills' },
   'nav.agents': { en: 'Agents', es: 'Agentes' },
   'nav.blog': { en: 'Blog', es: 'Blog' },
+  'nav.playground': { en: 'Playground', es: 'Playground' },
   'nav.portfolio': { en: 'Portfolio', es: 'Portfolio' },
   'nav.search': { en: 'Search', es: 'Buscar' },
   'nav.hire': { en: 'Hire Luis', es: 'Contrata a Luis' },

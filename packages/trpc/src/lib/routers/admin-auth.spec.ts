@@ -19,6 +19,7 @@ function buildContext(adminAuth: Partial<TRPCContext['adminAuth']>): TRPCContext
     catalog: {} as CatalogUseCases,
     globalSearch: { execute: async () => [] },
     portfolio: {} as TRPCContext['portfolio'],
+    playground: {} as TRPCContext['playground'],
   };
 }
 

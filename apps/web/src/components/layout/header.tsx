@@ -96,6 +96,12 @@ export function Header() {
                 {t('nav.blog')}
               </Link>
               <Link
+                href="/playground"
+                className="font-sans text-xs uppercase tracking-wider font-semibold text-[var(--color-text-secondary)] hover:text-[var(--color-brand-garnet)] transition-colors"
+              >
+                {t('nav.playground')}
+              </Link>
+              <Link
                 href="/portfolio/luisbz"
                 className="font-sans text-xs uppercase tracking-wider font-semibold text-[var(--color-text-secondary)] hover:text-[var(--color-brand-garnet)] transition-colors inline-flex items-center gap-0.5"
               >

@@ -9,3 +9,4 @@ export * from './catalog/blog-post';
 export * from './catalog/search';
 export * from './catalog/premium';
 export * from './portfolio/contact-request';
+export * from './playground/playground-token';

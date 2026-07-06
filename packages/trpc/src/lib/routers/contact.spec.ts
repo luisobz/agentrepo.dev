@@ -9,6 +9,7 @@ function buildContext(options?: { isAdmin?: boolean }): TRPCContext {
     adminAuth: {} as TRPCContext['adminAuth'],
     catalog: {} as TRPCContext['catalog'],
     globalSearch: { execute: async () => [] },
+    playground: {} as TRPCContext['playground'],
     portfolio: {
       submitContact: {
         execute: vi.fn().mockResolvedValue({ success: true, id: 'contact-1' }),

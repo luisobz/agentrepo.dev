@@ -65,6 +65,7 @@ function buildContext(options?: {
       submitContact: stubUseCase({ success: true, id: 'contact-1' }),
       listContactRequests: stubUseCase(emptyPage),
     } as unknown as TRPCContext['portfolio'],
+    playground: {} as TRPCContext['playground'],
   };
 }
 

@@ -2,19 +2,24 @@ import { Logger } from '@nestjs/common';
 import {
   createAdminAuthUseCases,
   createCatalogUseCases,
+  createPlaygroundUseCases,
   createPortfolioUseCases,
   SearchCatalog,
 } from '@agentrepo/application';
 import { BackendEnvironments } from '@agentrepo/config';
 import {
+  DeepSeekCoderService,
   InternalWorkflowClient,
   PrismaAdminSessionRepository,
   PrismaAgentRepository,
   PrismaBlogPostRepository,
   PrismaContactRequestRepository,
   PrismaGlobalSearchRepository,
+  PrismaPlaygroundDeploymentRepository,
+  PrismaPlaygroundTokenRepository,
   PrismaService,
   PrismaSkillRepository,
+  StaticCodeValidator,
 } from '@agentrepo/infrastructure';
 import { createSessionToken, TRPCContext, verifySessionToken } from '@agentrepo/trpc';
 import type { CreateExpressContextOptions } from '@trpc/server/adapters/express';
@@ -55,6 +60,16 @@ export function buildCreateContext(prisma: PrismaService) {
       error: (message, stack) => portfolioLogger.error(message, stack),
     },
   });
+  const playground = createPlaygroundUseCases({
+    tokenRepository: new PrismaPlaygroundTokenRepository(prisma),
+    deploymentRepository: new PrismaPlaygroundDeploymentRepository(prisma),
+    codeGenerator: new DeepSeekCoderService({
+      apiKey: BackendEnvironments.DEEPSEEK_API_KEY,
+      model: BackendEnvironments.DEEPSEEK_MODEL,
+      baseUrl: BackendEnvironments.DEEPSEEK_BASE_URL,
+    }),
+    codeValidator: new StaticCodeValidator(),
+  });
   const adminAuth = createAdminAuthUseCases({
     sessions: new PrismaAdminSessionRepository(prisma),
     accessTokens: {
@@ -78,6 +93,6 @@ export function buildCreateContext(prisma: PrismaService) {
       BackendEnvironments.AUTH_SECRET
     );
 
-    return { isAdmin, adminAuth, catalog, globalSearch, portfolio };
+    return { isAdmin, adminAuth, catalog, globalSearch, portfolio, playground };
   };
 }

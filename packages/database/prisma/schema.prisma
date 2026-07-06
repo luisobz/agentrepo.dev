@@ -148,3 +148,36 @@ model ContactRequest {
   @@index([status])
   @@index([createdAt])
 }
+
+// ─── Playground (Feature 16) ───
+
+// Access tokens minted from the admin panel that gate the real AI flow.
+model PlaygroundToken {
+  id        String   @id @default(uuid())
+  token     String   @unique
+  label     String
+  maxUses   Int      @default(5)
+  usesCount Int      @default(0)
+  expiresAt DateTime
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  deployments PlaygroundDeployment[]
+}
+
+// A feature "deployed" from the playground real flow: the generated code is
+// persisted with its fictitious subdomain URL.
+model PlaygroundDeployment {
+  id        String   @id @default(uuid())
+  tokenId   String?
+  title     String
+  prompt    String
+  code      String
+  url       String
+  createdAt DateTime @default(now())
+
+  token PlaygroundToken? @relation(fields: [tokenId], references: [id], onDelete: SetNull)
+
+  @@index([createdAt])
+}

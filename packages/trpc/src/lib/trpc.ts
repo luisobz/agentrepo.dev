@@ -4,6 +4,7 @@ import type {
   AdminAuthUseCases,
   CatalogUseCases,
   GlobalSearchParams,
+  PlaygroundUseCases,
   PortfolioUseCases,
 } from '@agentrepo/application';
 import type { UseCase } from '@agentrepo/application';
@@ -22,6 +23,7 @@ export interface TRPCContext {
   catalog: CatalogUseCases;
   globalSearch: UseCase<GlobalSearchParams, SearchHit[]>;
   portfolio: PortfolioUseCases;
+  playground: PlaygroundUseCases;
 }
 
 export const t = initTRPC.context<TRPCContext>().create({

@@ -61,6 +61,7 @@ Notas importantes:
 | `NEXT_PUBLIC_API_URL` | `https://agentrepo.dev/web/api/v1` | Base pública de backend-web (build de web y admin) |
 | `NEXT_PUBLIC_SUPABASE_URL` | — | Supabase (build de web) |
 | `NEXT_PUBLIC_SUPABASE_ANON_KEY` | — | Supabase (build de web) |
+| `NEXT_PUBLIC_SENTRY_DSN` | — | Sentry del navegador (build de web y admin) |
 | `WEB_PATH` | `backend/agentrepo.dev/web` | Destino rsync (relativo al home SSH) |
 | `ADMIN_PATH` | `backend/agentrepo.dev/admin` | Destino rsync |
 | `BACKEND_WEB_PATH` | `backend/agentrepo.dev/backend-web` | Destino rsync |
@@ -69,7 +70,8 @@ Notas importantes:
 ## Variables de entorno en el hosting (por app)
 
 Configúralas en cPanel → Setup Node.js App → Environment variables.
-`NODE_ENV=production` en todas.
+`NODE_ENV=production` en todas. `SENTRY_DSN` (opcional) activa Sentry en
+cualquiera de las cuatro apps; sin él, la telemetría queda desactivada.
 
 - **web**: `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`,
   `SUPABASE_SERVICE_ROLE_KEY` (las `NEXT_PUBLIC_*` de runtime sólo afectan al

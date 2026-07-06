@@ -1,7 +1,4 @@
-/**
- * This is not a production server yet!
- * This is only a minimal backend to get started.
- */
+import './instrument';
 
 import { Logger } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';

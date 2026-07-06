@@ -11,9 +11,56 @@ import { LocaleProvider } from '@agentrepo/ui';
 import { getServerLocale } from '../lib/i18n/server';
 import type { Metadata } from 'next';
 
+const SITE_URL = 'https://agentrepo.dev';
+const SITE_DESCRIPTION =
+  'Clean coding, AI subagents, and development assets for professional builders. Built by Luis Ballester Zafra.';
+
 export const metadata: Metadata = {
-  title: 'AgentRepo.dev | AI Development Repository & Portfolio',
-  description: 'Clean coding, AI subagents, and development assets for professional builders. Built by Luis Ballester Zafra.',
+  metadataBase: new URL(SITE_URL),
+  title: {
+    default: 'AgentRepo.dev | AI Development Repository & Portfolio',
+    template: '%s | AgentRepo.dev',
+  },
+  description: SITE_DESCRIPTION,
+  keywords: [
+    'AI agents',
+    'AI skills',
+    'prompts',
+    'LLM',
+    'agent repository',
+    'TypeScript',
+    'Next.js',
+    'NestJS',
+  ],
+  authors: [{ name: 'Luis Ballester Zafra', url: SITE_URL }],
+  openGraph: {
+    type: 'website',
+    url: SITE_URL,
+    siteName: 'AgentRepo.dev',
+    title: 'AgentRepo.dev — AI Development Repository & Portfolio',
+    description: SITE_DESCRIPTION,
+    locale: 'en_US',
+    alternateLocale: ['es_ES'],
+    images: [
+      {
+        url: '/og-cover.svg',
+        width: 1200,
+        height: 630,
+        alt: 'AgentRepo.dev — curated AI skills and agents',
+      },
+    ],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'AgentRepo.dev — AI Development Repository & Portfolio',
+    description: SITE_DESCRIPTION,
+    images: ['/og-cover.svg'],
+  },
+  icons: {
+    icon: [{ url: '/favicon.ico', sizes: 'any' }, { url: '/icon.svg', type: 'image/svg+xml' }],
+    apple: '/icon.svg',
+  },
+  robots: { index: true, follow: true },
 };
 
 export default async function RootLayout({

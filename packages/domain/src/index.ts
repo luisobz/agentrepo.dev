@@ -8,3 +8,4 @@ export * from './catalog/agent';
 export * from './catalog/blog-post';
 export * from './catalog/search';
 export * from './catalog/premium';
+export * from './portfolio/contact-request';

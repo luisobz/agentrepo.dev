@@ -36,6 +36,7 @@ const envSchema = z.object({
   // AI
   DEEPSEEK_API_KEY: z.string().default(''),
   DEEPSEEK_MODEL: z.string().default('deepseek-v4-flash'),
+  DEEPSEEK_BASE_URL: z.string().url().default('https://api.deepseek.com/v1'),
 
   // Observabilidad
   LANGFUSE_PUBLIC_KEY: z.string().default(''),
@@ -46,6 +47,7 @@ const envSchema = z.object({
   SPACEMAIL_HOST: z.string().default('mail.spacemail.com'),
   SPACEMAIL_USER: z.string().default(''),
   SPACEMAIL_PASS: z.string().default(''),
+  CONTACT_NOTIFICATION_EMAIL: z.string().default('hola@luisbz.com'),
 
   // R2
   R2_ACCOUNT_ID: z.string().default(''),
@@ -134,6 +136,7 @@ export class BackendEnvironments {
   static get ADMIN_PASSWORD() { return BackendEnvironments.env.ADMIN_PASSWORD; }
   static get DEEPSEEK_API_KEY() { return BackendEnvironments.env.DEEPSEEK_API_KEY; }
   static get DEEPSEEK_MODEL() { return BackendEnvironments.env.DEEPSEEK_MODEL; }
+  static get DEEPSEEK_BASE_URL() { return BackendEnvironments.env.DEEPSEEK_BASE_URL; }
   static get LANGFUSE_PUBLIC_KEY() { return BackendEnvironments.env.LANGFUSE_PUBLIC_KEY; }
   static get LANGFUSE_SECRET_KEY() { return BackendEnvironments.env.LANGFUSE_SECRET_KEY; }
   static get LANGFUSE_BASE_URL() { return BackendEnvironments.env.LANGFUSE_BASE_URL; }
@@ -141,6 +144,7 @@ export class BackendEnvironments {
   static get SPACEMAIL_PORT() { return BackendEnvironments.env.SPACEMAIL_PORT; }
   static get SPACEMAIL_USER() { return BackendEnvironments.env.SPACEMAIL_USER; }
   static get SPACEMAIL_PASS() { return BackendEnvironments.env.SPACEMAIL_PASS; }
+  static get CONTACT_NOTIFICATION_EMAIL() { return BackendEnvironments.env.CONTACT_NOTIFICATION_EMAIL; }
   static get R2_ACCOUNT_ID() { return BackendEnvironments.env.R2_ACCOUNT_ID; }
   static get R2_ACCESS_KEY_ID() { return BackendEnvironments.env.R2_ACCESS_KEY_ID; }
   static get R2_SECRET_ACCESS_KEY() { return BackendEnvironments.env.R2_SECRET_ACCESS_KEY; }

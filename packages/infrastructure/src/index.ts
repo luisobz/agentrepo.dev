@@ -5,3 +5,8 @@ export * from './persistence/prisma/repositories/prisma-skill.repository';
 export * from './persistence/prisma/repositories/prisma-agent.repository';
 export * from './persistence/prisma/repositories/prisma-blog-post.repository';
 export * from './persistence/prisma/repositories/prisma-global-search.repository';
+export * from './persistence/prisma/repositories/prisma-contact-request.repository';
+export * from './ai/internal-client/internal-workflow.client';
+export * from './ai/deepseek/deepseek-llm.service';
+export * from './email/spacemail/spacemail.service';
+export * from './pdf/react-pdf/pdf-generator.service';

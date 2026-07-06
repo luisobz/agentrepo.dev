@@ -61,6 +61,10 @@ function buildContext(options?: {
     catalog: options?.catalog ?? buildCatalogStub(),
     globalSearch: (options?.globalSearch ??
       stubUseCase([])) as unknown as TRPCContext['globalSearch'],
+    portfolio: {
+      submitContact: stubUseCase({ success: true, id: 'contact-1' }),
+      listContactRequests: stubUseCase(emptyPage),
+    } as unknown as TRPCContext['portfolio'],
   };
 }
 

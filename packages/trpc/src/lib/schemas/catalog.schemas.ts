@@ -1,8 +1,18 @@
 import { FileTreeNode, SKILL_TYPES } from '@agentrepo/domain';
 import { z } from 'zod';
 
-export { SKILL_TYPES } from '@agentrepo/domain';
-export type { FileTree, FileTreeNode, SkillType } from '@agentrepo/domain';
+export {
+  CONTACT_REQUEST_STATUSES,
+  CONTACT_SUBJECTS,
+  SKILL_TYPES,
+} from '@agentrepo/domain';
+export type {
+  ContactRequestStatus,
+  ContactSubject,
+  FileTree,
+  FileTreeNode,
+  SkillType,
+} from '@agentrepo/domain';
 
 // ─── Shared ─────────────────────────────────────
 

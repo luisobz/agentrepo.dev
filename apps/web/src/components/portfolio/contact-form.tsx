@@ -1,24 +1,29 @@
 'use client';
 
-import { Bot, Sparkles } from 'lucide-react';
+import type { ContactSubject } from '@agentrepo/trpc/schemas';
+import { Bot, Loader2, Sparkles } from 'lucide-react';
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
+import { trpc } from '../utils/trpc';
 
-export const CONTACT_SUBJECTS = [
-  'Empleo',
-  'Freelance',
-  'Consulta Técnica',
-  'Otro',
-] as const;
+export const CONTACT_SUBJECT_OPTIONS: ReadonlyArray<{
+  value: ContactSubject;
+  label: string;
+}> = [
+  { value: 'employment', label: 'Empleo' },
+  { value: 'freelance', label: 'Freelance' },
+  { value: 'question', label: 'Consulta Técnica' },
+  { value: 'other', label: 'Otro' },
+];
 
 export interface ContactFormValues {
   email: string;
-  subject: (typeof CONTACT_SUBJECTS)[number];
+  subject: ContactSubject;
   message: string;
 }
 
 const inputClasses =
-  'w-full rounded-xl border border-white/15 bg-white/[0.04] px-4 py-3 text-sm text-[#fdf8ef] placeholder:text-[#8d8273] transition-colors focus:border-[#c4909a] focus:outline-none';
+  'w-full rounded-xl border border-white/15 bg-white/[0.04] px-4 py-3 text-sm text-[#fdf8ef] placeholder:text-[#8d8273] transition-colors focus:border-[#c4909a] focus:outline-none disabled:opacity-60';
 
 function FieldError({ message }: { message?: string }) {
   if (!message) {
@@ -36,15 +41,22 @@ export function ContactForm() {
   const {
     register,
     handleSubmit,
+    reset,
     formState: { errors },
   } = useForm<ContactFormValues>({
-    defaultValues: { email: '', subject: 'Empleo', message: '' },
+    defaultValues: { email: '', subject: 'employment', message: '' },
   });
 
-  // Mocked submit: Feature 15 will hand this payload to the AI contact agent.
+  const submitContact = trpc.contact.submit.useMutation({
+    onSuccess: () => {
+      reset();
+      setIsSent(true);
+    },
+  });
+  const isSubmitting = submitContact.isPending;
+
   const onSubmit = (values: ContactFormValues) => {
-    console.log('[contact-form] payload ready for the AI agent:', values);
-    setIsSent(true);
+    submitContact.mutate(values);
   };
 
   return (
@@ -73,11 +85,11 @@ export function ContactForm() {
             className="rounded-2xl border border-[#7a2230]/60 bg-[#7a2230]/15 p-6 text-center"
           >
             <p className="text-lg font-semibold text-[#fdf8ef]">
-              Mensaje en camino ✦
+              ¡Mensaje recibido! ✦
             </p>
             <p className="mt-2 text-sm text-[#cfc6b8]">
-              El agente ya está analizando tu consulta. Revisa tu bandeja de
-              entrada en unos minutos.
+              El Agente IA ha comenzado el análisis. Recibirás un email
+              interactivo pronto.
             </p>
           </div>
         ) : (
@@ -91,6 +103,7 @@ export function ContactForm() {
                 type="email"
                 placeholder="you@company.com"
                 className={inputClasses}
+                disabled={isSubmitting}
                 {...register('email', {
                   required: 'Tu email es obligatorio',
                   pattern: {
@@ -109,11 +122,12 @@ export function ContactForm() {
               <select
                 id="contact-subject"
                 className={`${inputClasses} appearance-none bg-[#1b1714]`}
+                disabled={isSubmitting}
                 {...register('subject', { required: true })}
               >
-                {CONTACT_SUBJECTS.map((subject) => (
-                  <option key={subject} value={subject}>
-                    {subject}
+                {CONTACT_SUBJECT_OPTIONS.map((option) => (
+                  <option key={option.value} value={option.value}>
+                    {option.label}
                   </option>
                 ))}
               </select>
@@ -128,6 +142,7 @@ export function ContactForm() {
                 rows={6}
                 placeholder="Tell me about your project, your stack and what you need…"
                 className={`${inputClasses} resize-y`}
+                disabled={isSubmitting}
                 {...register('message', {
                   required: 'Cuéntame al menos un poco sobre tu proyecto',
                   minLength: {
@@ -139,12 +154,29 @@ export function ContactForm() {
               <FieldError message={errors.message?.message} />
             </div>
 
+            {submitContact.isError ? (
+              <p role="alert" className="text-sm text-[#e8c2ca]">
+                No se pudo enviar el mensaje. Inténtalo de nuevo en unos
+                minutos.
+              </p>
+            ) : null}
+
             <button
               type="submit"
-              className="mt-2 flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-[#7a2230] to-[#5b1822] px-6 py-3.5 text-sm font-semibold text-[#fdf8ef] shadow-[0_4px_24px_rgba(122,34,48,0.4)] transition-all hover:-translate-y-0.5 hover:shadow-[0_8px_32px_rgba(122,34,48,0.55)]"
+              disabled={isSubmitting}
+              className="mt-2 flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-[#7a2230] to-[#5b1822] px-6 py-3.5 text-sm font-semibold text-[#fdf8ef] shadow-[0_4px_24px_rgba(122,34,48,0.4)] transition-all hover:-translate-y-0.5 hover:shadow-[0_8px_32px_rgba(122,34,48,0.55)] disabled:cursor-not-allowed disabled:opacity-70 disabled:hover:translate-y-0"
             >
-              <Sparkles className="h-4 w-4" />
-              Send to the agent
+              {isSubmitting ? (
+                <>
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                  Procesando...
+                </>
+              ) : (
+                <>
+                  <Sparkles className="h-4 w-4" />
+                  Send to the agent
+                </>
+              )}
             </button>
           </form>
         )}

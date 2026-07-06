@@ -88,8 +88,8 @@ model Permission {
 model UserRole {
   userId String
   roleId String
-  user   User @relation(fields: [userId], references: [id], onDelete: Cascade)
-  role   Role @relation(fields: [roleId], references: [id], onDelete: Cascade)
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  role   Role   @relation(fields: [roleId], references: [id], onDelete: Cascade)
 
   @@id([userId, roleId])
 }
@@ -130,4 +130,21 @@ model Purchase {
   user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([userId, assetType, assetId])
+}
+
+// ─── Portfolio contact (Feature 15) ───
+
+// A contact form submission from /portfolio. `status` tracks the async AI
+// workflow: PENDING → PROCESSING → COMPLETED | FAILED.
+model ContactRequest {
+  id        String   @id @default(uuid())
+  email     String
+  subject   String // employment | freelance | question | other
+  message   String
+  status    String   @default("PENDING") // PENDING | PROCESSING | COMPLETED | FAILED
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([status])
+  @@index([createdAt])
 }

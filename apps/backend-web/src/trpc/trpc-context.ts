@@ -1,13 +1,17 @@
+import { Logger } from '@nestjs/common';
 import {
   createAdminAuthUseCases,
   createCatalogUseCases,
+  createPortfolioUseCases,
   SearchCatalog,
 } from '@agentrepo/application';
 import { BackendEnvironments } from '@agentrepo/config';
 import {
+  InternalWorkflowClient,
   PrismaAdminSessionRepository,
   PrismaAgentRepository,
   PrismaBlogPostRepository,
+  PrismaContactRequestRepository,
   PrismaGlobalSearchRepository,
   PrismaService,
   PrismaSkillRepository,
@@ -39,6 +43,18 @@ export function buildCreateContext(prisma: PrismaService) {
     blogPostRepository: new PrismaBlogPostRepository(prisma),
   });
   const globalSearch = new SearchCatalog(new PrismaGlobalSearchRepository(prisma));
+  const portfolioLogger = new Logger('ContactWorkflow');
+  const portfolio = createPortfolioUseCases({
+    contactRequestRepository: new PrismaContactRequestRepository(prisma),
+    contactWorkflowDispatcher: new InternalWorkflowClient({
+      baseUrl: BackendEnvironments.BACKEND_AI_URL,
+      internalKey: BackendEnvironments.INTERNAL_API_SECRET,
+    }),
+    logger: {
+      warn: (message) => portfolioLogger.warn(message),
+      error: (message, stack) => portfolioLogger.error(message, stack),
+    },
+  });
   const adminAuth = createAdminAuthUseCases({
     sessions: new PrismaAdminSessionRepository(prisma),
     accessTokens: {
@@ -62,6 +78,6 @@ export function buildCreateContext(prisma: PrismaService) {
       BackendEnvironments.AUTH_SECRET
     );
 
-    return { isAdmin, adminAuth, catalog, globalSearch };
+    return { isAdmin, adminAuth, catalog, globalSearch, portfolio };
   };
 }

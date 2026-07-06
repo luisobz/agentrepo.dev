@@ -11,6 +11,7 @@ const NAV_ITEMS: { href: string; labelKey: AdminDictionaryKey; exact: boolean }[
   { href: '/admin/skills', labelKey: 'nav.skills', exact: false },
   { href: '/admin/agents', labelKey: 'nav.agents', exact: false },
   { href: '/admin/blog', labelKey: 'nav.blog', exact: false },
+  { href: '/admin/contacts', labelKey: 'nav.contacts', exact: false },
 ];
 
 export function AdminNav() {

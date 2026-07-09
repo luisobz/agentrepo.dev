@@ -13,11 +13,11 @@
         "{options.outputPath}"
       ],
       "options": {
-        "outputPath": "packages/trpc/dist",
-        "main": "packages/trpc/src/index.ts",
-        "tsConfig": "packages/trpc/tsconfig.lib.json",
+        "outputPath": "{projectRoot}/dist",
+        "main": "{projectRoot}/src/index.ts",
+        "tsConfig": "{projectRoot}/tsconfig.lib.json",
         "assets": [
-          "packages/trpc/*.md"
+          "{projectRoot}/*.md"
         ]
       }
     }

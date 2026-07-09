@@ -45,4 +45,8 @@ It records mandatory rules derived from code reviews to prevent repeating past m
 
 - **Testing:** This project uses Vitest for testing. import { ... } from "vitest";
 
+- **Package.json `main`/`types`:** Never prefix with `./dist/` or any build output directory. Always point `main` and `types` directly to the source entry: `"./src/index.js"` and `"./src/index.d.ts"`. A `./dist/` prefix causes `pnpm dev` to resolve incorrectly as `/dist/dist/src/...`.
+
+- **Package.json `exports`:** The `exports` field is different — it **must** point to `./dist/` paths (e.g. `"./dist/src/index.js"`), not `./src/`, for aliases like `@agentrepo/trpc/schemas` to resolve correctly during `pnpm dev`.
+
 

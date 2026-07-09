@@ -14,11 +14,11 @@
         "{options.outputPath}"
       ],
       "options": {
-        "outputPath": "packages/domain/dist",
-        "main": "packages/domain/src/index.ts",
-        "tsConfig": "packages/domain/tsconfig.lib.json",
+        "outputPath": "{projectRoot}/dist",
+        "main": "{projectRoot}/src/index.ts",
+        "tsConfig": "{projectRoot}/tsconfig.lib.json",
         "assets": [
-          "packages/domain/*.md"
+          "{projectRoot}/*.md"
         ]
       }
     }

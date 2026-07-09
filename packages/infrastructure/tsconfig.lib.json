@@ -1,9 +1,14 @@
 {
   "extends": "./tsconfig.json",
   "compilerOptions": {
-    "outDir": "./dist",
+    "outDir": "../../dist/out-tsc",
     "declaration": true,
-    "types": ["node"]
+    "declarationDir": "./dist",
+    "types": [
+      "node"
+    ]
   },
-  "include": ["src/**/*.ts"]
+  "include": [
+    "src/**/*.ts"
+  ]
 }

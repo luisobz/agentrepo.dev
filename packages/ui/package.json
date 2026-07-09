@@ -2,8 +2,8 @@
     "name": "@agentrepo/ui",
     "version": "0.0.1",
     "private": true,
-    "main": "./dist/index.js",
-    "types": "./dist/index.d.ts",
+    "main": "./src/index.js",
+    "types": "./src/index.d.ts",
     "dependencies": {
         "@radix-ui/react-slot": "^1.2.4",
         "@tailwindcss/typography": "^0.5.20",

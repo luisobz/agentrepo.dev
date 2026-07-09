@@ -1,8 +1,8 @@
 {
     "name": "@agentrepo/avatar",
     "private": true,
-    "main": "./dist/index.js",
-    "types": "./dist/index.d.ts",
+    "main": "./src/index.js",
+    "types": "./src/index.d.ts",
     "dependencies": {
         "framer-motion": "^12.40.0"
     },

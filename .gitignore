@@ -25,6 +25,7 @@ AGENTS_LOCAL.md
 .tmp
 *.tsbuildinfo
 /specs
+/tmp
 
 # Next.js
 .next

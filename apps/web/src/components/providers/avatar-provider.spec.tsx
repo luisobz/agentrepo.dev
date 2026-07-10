@@ -1,5 +1,7 @@
 import { useAvatar } from '@agentrepo/avatar';
+import { LocaleProvider } from '@agentrepo/ui';
 import { fireEvent, render, screen } from '@testing-library/react';
+import type { ReactElement } from 'react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { AvatarEasterEggProvider } from './avatar-provider';
 
@@ -14,6 +16,9 @@ function ClickProbe() {
   return <button onClick={registerAvatarClick}>click-avatar</button>;
 }
 
+const renderWithLocale = (ui: ReactElement) =>
+  render(<LocaleProvider>{ui}</LocaleProvider>);
+
 describe('AvatarEasterEggProvider', () => {
   afterEach(() => {
     window.localStorage.clear();
@@ -21,7 +26,7 @@ describe('AvatarEasterEggProvider', () => {
   });
 
   it('al quinto click desbloquea el portfolio y navega a él', () => {
-    render(
+    renderWithLocale(
       <AvatarEasterEggProvider>
         <ClickProbe />
       </AvatarEasterEggProvider>,

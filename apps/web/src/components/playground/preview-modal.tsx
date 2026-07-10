@@ -1,6 +1,7 @@
 'use client';
 
 import { X } from 'lucide-react';
+import { useT } from '../../lib/i18n/use-t';
 import type { PlaygroundCardData } from './playground-types';
 
 function DarkHeroPreview() {
@@ -83,6 +84,7 @@ function RedisCachePreview() {
 }
 
 function RealCodePreview({ card }: { card: PlaygroundCardData }) {
+  const t = useT();
   return (
     <div className="flex flex-col gap-3">
       {card.summary ? (
@@ -100,7 +102,7 @@ function RealCodePreview({ card }: { card: PlaygroundCardData }) {
         }}
         className="self-end rounded-lg border border-white/15 px-3 py-1.5 text-xs text-[#cfc6b8] transition-colors hover:bg-white/[0.08]"
       >
-        Copiar código
+        {t('playground.copyCode')}
       </button>
     </div>
   );
@@ -112,11 +114,12 @@ export interface PreviewModalProps {
 }
 
 export function PreviewModal({ card, onClose }: PreviewModalProps) {
+  const t = useT();
   return (
     <div
       role="dialog"
       aria-modal="true"
-      aria-label={`Previsualización de ${card.title}`}
+      aria-label={`${t('playground.previewOf')} ${card.title}`}
       className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4 backdrop-blur-sm"
       onClick={onClose}
     >
@@ -128,7 +131,7 @@ export function PreviewModal({ card, onClose }: PreviewModalProps) {
           <h3 className="text-sm font-semibold text-[#fdf8ef]">{card.title}</h3>
           <button
             type="button"
-            aria-label="Cerrar previsualización"
+            aria-label={t('playground.closePreview')}
             onClick={onClose}
             className="rounded-lg p-1.5 text-[#8d8273] transition-colors hover:bg-white/[0.08] hover:text-[#fdf8ef]"
           >

@@ -1,11 +1,12 @@
 'use client';
 
-import { useAvatar } from '@agentrepo/avatar';
+import { AvatarSlot, useAvatar, type AvatarSlotId } from '@agentrepo/avatar';
 import { skillTypeSchema } from '@agentrepo/trpc/schemas';
 import { TypeChip } from '@agentrepo/ui';
 import { FileText, Loader2, Search } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useEffect, useMemo, useRef, useState } from 'react';
+import { useT } from '../../lib/i18n/use-t';
 import { trpc } from '../utils/trpc';
 import { useCommandPalette } from './command-palette-provider';
 import {
@@ -35,12 +36,21 @@ function HitBadge({ hit }: { hit: SearchHit }) {
 
 export function CommandPalette() {
   const { isOpen, close } = useCommandPalette();
-  const { setEmotion } = useAvatar();
+  const { setEmotion, setAvatarPosition, currentSlot, say, clearMessages } =
+    useAvatar();
+  const t = useT();
   const router = useRouter();
   const inputRef = useRef<HTMLInputElement>(null);
+  // Remember where the avatar was perched so we can send it back on close.
+  const currentSlotRef = useRef<AvatarSlotId | null>(currentSlot);
+  currentSlotRef.current = currentSlot;
+  const restoreSlotRef = useRef<AvatarSlotId | null>(null);
 
   const [query, setQuery] = useState('');
   const [selectedIndex, setSelectedIndex] = useState(0);
+  // Read the hint through a ref so re-localizing doesn't re-fire the open effect.
+  const hintRef = useRef('');
+  hintRef.current = t('palette.avatarHint');
   const debouncedQuery = useDebouncedValue(query.trim(), 200);
   const isQueryReady = debouncedQuery.length >= MIN_QUERY_LENGTH;
 
@@ -69,12 +79,20 @@ export function CommandPalette() {
       setSelectedIndex(0);
       inputRef.current?.focus();
       document.documentElement.style.overflow = 'hidden';
+
+      // The avatar flies over to the search box and greets the visitor.
+      restoreSlotRef.current = currentSlotRef.current;
+      setAvatarPosition('search');
+      say(hintRef.current);
+
       return () => {
         document.documentElement.style.overflow = '';
+        setAvatarPosition(restoreSlotRef.current);
+        clearMessages();
       };
     }
     return undefined;
-  }, [isOpen]);
+  }, [isOpen, setAvatarPosition, say, clearMessages]);
 
   useEffect(() => {
     if (!isOpen || !isQueryReady) {
@@ -143,6 +161,8 @@ export function CommandPalette() {
             aria-label="Search query"
             className="w-full bg-transparent text-[15px] text-[var(--color-text-primary)] placeholder:text-[var(--color-text-placeholder)] focus:outline-none"
           />
+          {/* The avatar docks here (it flies in from wherever it was perched). */}
+          <AvatarSlot id="search" preserveSpace={false} scale={0.6} />
           <kbd className="shrink-0 rounded border border-[var(--color-border-soft)] bg-[var(--color-bg-surface)] px-1.5 py-0.5 font-mono text-[10px] text-[var(--color-text-muted)]">
             esc
           </kbd>

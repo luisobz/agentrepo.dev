@@ -19,23 +19,26 @@ function renderLayout() {
 }
 
 describe('AvatarSlot', () => {
-  it('renderiza el sprite solo en el slot activo (header por defecto)', () => {
+  it('renderiza un único sprite en el portal y marca el slot activo', () => {
     renderLayout();
     const header = screen.getByTestId('avatar-slot-header');
     const footer = screen.getByTestId('avatar-slot-footer');
-    expect(within(header).getByTestId('avatar-sprite')).toBeInTheDocument();
+    // The moving sprite lives in a viewport portal, not inside the slot boxes.
+    expect(screen.getAllByTestId('avatar-sprite')).toHaveLength(1);
+    expect(within(header).queryByTestId('avatar-sprite')).toBeNull();
     expect(within(footer).queryByTestId('avatar-sprite')).toBeNull();
     expect(header).toHaveAttribute('data-active', 'true');
     expect(footer).toHaveAttribute('data-active', 'false');
   });
 
-  it('al llamar setAvatarPosition("footer") el sprite desaparece del header y aparece en el footer', () => {
+  it('al llamar setAvatarPosition("footer") cambia el slot activo y sigue habiendo un único sprite', () => {
     renderLayout();
     act(() => screen.getByText('go-footer').click());
     const header = screen.getByTestId('avatar-slot-header');
     const footer = screen.getByTestId('avatar-slot-footer');
-    expect(within(header).queryByTestId('avatar-sprite')).toBeNull();
-    expect(within(footer).getByTestId('avatar-sprite')).toBeInTheDocument();
+    expect(header).toHaveAttribute('data-active', 'false');
+    expect(footer).toHaveAttribute('data-active', 'true');
+    expect(screen.getAllByTestId('avatar-sprite')).toHaveLength(1);
   });
 
   it('nunca hay más de un sprite montado a la vez', () => {
@@ -52,13 +55,17 @@ describe('AvatarSlot', () => {
     expect(placeholder).not.toBeNull();
   });
 
-  it('con preserveSpace=false el slot inactivo queda vacío', () => {
+  it('con preserveSpace=false el slot inactivo no reserva espacio (marcador de tamaño 0)', () => {
     render(
       <AvatarProvider>
         <AvatarSlot id="footer" preserveSpace={false} />
       </AvatarProvider>,
     );
     const footer = screen.getByTestId('avatar-slot-footer');
-    expect(footer).toBeEmptyDOMElement();
+    // Sigue existiendo un marcador (para poder rastrear su reaparición) pero
+    // sin ocupar espacio en el layout.
+    const marker = footer.querySelector('[aria-hidden="true"]');
+    expect(marker).not.toBeNull();
+    expect(marker?.className).toContain('size-0');
   });
 });

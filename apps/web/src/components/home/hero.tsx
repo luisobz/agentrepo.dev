@@ -38,8 +38,8 @@ export function Hero() {
       <AvatarSlot id="hero" preserveSpace={false} />
 
       <h1 className="max-w-3xl text-4xl font-semibold leading-tight tracking-tight sm:text-6xl">
-        Less noise,{' '}
-        <span className="text-[var(--color-brand-garnet)]">more signal</span>
+        {t('hero.titleLead')}{' '}
+        <span className="text-[var(--color-brand-garnet)]">{t('hero.titleAccent')}</span>
       </h1>
       <p className="max-w-xl text-base leading-relaxed text-[var(--color-text-secondary)] sm:text-lg">
 {t('hero.subtitle')}

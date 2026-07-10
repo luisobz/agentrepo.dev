@@ -4,7 +4,7 @@ import { HomeBackground } from '../components/home/home-background';
 import { LatestSection } from '../components/home/latest-section';
 
 export const metadata: Metadata = {
-  title: 'AgentRepo.dev | Less noise, more signal',
+  title: 'AgentRepo.dev | Less noise, filter better',
   description:
     'Curated skills, agents and notes for building with AI — searchable, versioned and ready to reuse.',
 };

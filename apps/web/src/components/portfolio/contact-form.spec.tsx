@@ -1,4 +1,6 @@
+import { LocaleProvider } from '@agentrepo/ui';
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
+import type { ReactElement } from 'react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
 const mutateMock = vi.fn();
@@ -27,6 +29,10 @@ vi.mock('../utils/trpc', () => ({
 
 import { ContactForm } from './contact-form';
 
+// The form reads translations from the locale context; default locale is 'en'.
+const renderWithLocale = (ui: ReactElement) =>
+  render(<LocaleProvider>{ui}</LocaleProvider>);
+
 describe('ContactForm', () => {
   afterEach(() => {
     vi.clearAllMocks();
@@ -39,16 +45,16 @@ describe('ContactForm', () => {
   };
 
   it('shows validation errors instead of submitting an empty form', async () => {
-    render(<ContactForm />);
+    renderWithLocale(<ContactForm />);
 
     fireEvent.click(screen.getByRole('button', { name: /send to the agent/i }));
 
-    expect(await screen.findByText('Tu email es obligatorio')).toBeTruthy();
+    expect(await screen.findByText('Your email is required')).toBeTruthy();
     expect(mutateMock).not.toHaveBeenCalled();
   });
 
   it('submits the payload through tRPC with the subject enum value', async () => {
-    render(<ContactForm />);
+    renderWithLocale(<ContactForm />);
 
     fill('Email', 'dev@example.com');
     fill('Subject', 'freelance');
@@ -65,7 +71,7 @@ describe('ContactForm', () => {
   });
 
   it('shows the success state when the mutation succeeds', async () => {
-    render(<ContactForm />);
+    renderWithLocale(<ContactForm />);
 
     fill('Email', 'dev@example.com');
     fill('Subject', 'employment');
@@ -77,16 +83,16 @@ describe('ContactForm', () => {
 
     await waitFor(() => {
       expect(screen.getByRole('status').textContent).toContain(
-        'Mensaje recibido'
+        'Message received'
       );
     });
   });
 
   it('disables the form and shows a spinner while submitting', () => {
     mutationState.isPending = true;
-    render(<ContactForm />);
+    renderWithLocale(<ContactForm />);
 
-    expect(screen.getByRole('button', { name: /procesando/i })).toHaveProperty(
+    expect(screen.getByRole('button', { name: /processing/i })).toHaveProperty(
       'disabled',
       true
     );

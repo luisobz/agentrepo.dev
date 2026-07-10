@@ -1,11 +1,12 @@
 import { notFound } from 'next/navigation';
 import type { Metadata } from 'next';
-import { CapabilitiesGrid } from '../../../components/portfolio/capabilities-grid';
-import { ContactForm } from '../../../components/portfolio/contact-form';
-import { ExperienceTimeline } from '../../../components/portfolio/experience-timeline';
 import { PortfolioAccessGate } from '../../../components/portfolio/portfolio-access-gate';
-import { PortfolioHero } from '../../../components/portfolio/portfolio-hero';
-import { getPortfolioProfile } from '../../../lib/portfolio';
+import { PortfolioContent } from '../../../components/portfolio/portfolio-content';
+import {
+  getPortfolioProfile,
+  resolvePortfolioProfile,
+} from '../../../lib/portfolio';
+import { getServerLocale } from '../../../lib/i18n/server';
 
 interface PortfolioPageProps {
   params: Promise<{ slug: string }>;
@@ -15,10 +16,11 @@ export async function generateMetadata({
   params,
 }: PortfolioPageProps): Promise<Metadata> {
   const { slug } = await params;
-  const profile = getPortfolioProfile(slug);
-  if (!profile) {
+  const rawProfile = getPortfolioProfile(slug);
+  if (!rawProfile) {
     return { title: 'Portfolio not found | AgentRepo.dev' };
   }
+  const profile = resolvePortfolioProfile(rawProfile, await getServerLocale());
   return {
     title: `${profile.name} — ${profile.role}`,
     description: profile.manifesto[0],
@@ -45,14 +47,7 @@ export default async function PortfolioPage({ params }: PortfolioPageProps) {
       </div>
 
       <div className="relative">
-        <PortfolioHero profile={profile} />
-        <ExperienceTimeline entries={profile.experience} />
-        <CapabilitiesGrid capabilities={profile.capabilities} />
-        <ContactForm />
-
-        <p className="pb-10 text-center font-mono text-xs text-[#8d8273]">
-          {profile.name} · built on agentrepo.dev
-        </p>
+        <PortfolioContent profile={profile} />
       </div>
     </div>
     </PortfolioAccessGate>

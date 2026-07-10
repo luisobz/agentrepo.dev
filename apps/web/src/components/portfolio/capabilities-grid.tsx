@@ -3,6 +3,7 @@
 import { motion } from 'framer-motion';
 import { Cpu, Layers, Sparkles } from 'lucide-react';
 import type { Capability } from '../../lib/portfolio';
+import { useT } from '../../lib/i18n/use-t';
 
 const ICONS: Record<Capability['key'], typeof Cpu> = {
   ai: Cpu,
@@ -59,6 +60,7 @@ function CapabilityCard({ capability }: { capability: Capability }) {
 }
 
 export function CapabilitiesGrid({ capabilities }: { capabilities: Capability[] }) {
+  const t = useT();
   return (
     <section aria-labelledby="capabilities-heading" className="px-6 py-20 sm:px-10">
       <div className="mx-auto w-full max-w-5xl">
@@ -66,7 +68,7 @@ export function CapabilitiesGrid({ capabilities }: { capabilities: Capability[] 
           id="capabilities-heading"
           className="mb-12 text-3xl font-semibold tracking-tight text-[#fdf8ef] sm:text-4xl"
         >
-          What I bring
+          {t('portfolio.capabilities.title')}
         </h2>
         <motion.div
           variants={container}

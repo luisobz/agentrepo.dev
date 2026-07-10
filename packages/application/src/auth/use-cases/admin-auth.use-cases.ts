@@ -2,10 +2,11 @@ import { InvalidCredentialsError, InvalidRefreshTokenError } from '@agentrepo/do
 import { UseCase } from '../../shared/base.use-case';
 import { AccessTokenIssuer } from '../ports/access-token-issuer';
 import { AdminSessionRepository } from '../ports/admin-session.repository';
-import { generateOpaqueToken, hashToken, secureEquals } from '../token-crypto';
+import { AdminUserRepository } from '../ports/admin-user.repository';
+import { PasswordAuthenticator } from '../ports/password-authenticator';
+import { generateOpaqueToken, hashToken } from '../token-crypto';
 
 export interface AdminAuthConfig {
-  adminPassword: string;
   accessTtlMs: number;
   refreshTtlMs: number;
   /**
@@ -23,9 +24,16 @@ export interface AdminSessionTokens {
   refreshExpiresAt?: Date;
 }
 
+export interface AdminLoginInput {
+  email: string;
+  password: string;
+}
+
 export interface AdminAuthDependencies {
   sessions: AdminSessionRepository;
   accessTokens: AccessTokenIssuer;
+  passwordAuthenticator: PasswordAuthenticator;
+  adminUsers: AdminUserRepository;
   config: AdminAuthConfig;
 }
 
@@ -59,13 +67,26 @@ async function issueSessionPair(
   };
 }
 
-export class LoginAdmin implements UseCase<string, AdminSessionTokens> {
+export class LoginAdmin implements UseCase<AdminLoginInput, AdminSessionTokens> {
   constructor(private readonly deps: AdminAuthDependencies) {}
 
-  async execute(password = ''): Promise<AdminSessionTokens> {
-    const { adminPassword } = this.deps.config;
-    if (!adminPassword || !(await secureEquals(password, adminPassword))) {
+  async execute(input?: AdminLoginInput): Promise<AdminSessionTokens> {
+    const email = input?.email ?? '';
+    const password = input?.password ?? '';
+    if (!email || !password) {
       throw new InvalidCredentialsError();
+    }
+    const identity = await this.deps.passwordAuthenticator.verify(email, password);
+    if (!identity) {
+      throw new InvalidCredentialsError();
+    }
+    const admin = await this.deps.adminUsers.findAdminByEmail(email);
+    // A provider identity that maps to a different local user is not an admin.
+    if (!admin || (admin.supabaseId && admin.supabaseId !== identity.providerUserId)) {
+      throw new InvalidCredentialsError();
+    }
+    if (!admin.supabaseId) {
+      await this.deps.adminUsers.linkSupabaseId(admin.id, identity.providerUserId);
     }
     await this.deps.sessions.deleteExpired(new Date());
     const { tokens } = await issueSessionPair(this.deps, crypto.randomUUID());
@@ -122,7 +143,7 @@ export class LogoutAdmin implements UseCase<string, void> {
 }
 
 export interface AdminAuthUseCases {
-  login: UseCase<string, AdminSessionTokens>;
+  login: UseCase<AdminLoginInput, AdminSessionTokens>;
   refresh: UseCase<string, AdminSessionTokens>;
   logout: UseCase<string, void>;
 }

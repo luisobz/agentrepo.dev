@@ -2,13 +2,11 @@
 
 import type { AvatarEmotion } from '@agentrepo/avatar';
 import { useCallback, useEffect, useRef, useState } from 'react';
+import { useT } from '../../lib/i18n/use-t';
 import type {
   MockPreviewId,
   PlaygroundCardData,
 } from './playground-types';
-
-export const MOCK_INTRO_MESSAGE =
-  '¡Hola! Arrastra una de las tareas del Backlog a "Desarrollar" para ver cómo mis subagentes se ponen a trabajar.';
 
 // Timeline of the scripted demo, in milliseconds.
 export const MOCK_TIMINGS = {
@@ -50,6 +48,8 @@ export const INITIAL_MOCK_CARDS: PlaygroundCardData[] = [
 export interface PlaygroundGuidance {
   message: string;
   emotion: AvatarEmotion;
+  /** When true, consumers should reset their message log to this message. */
+  reset?: boolean;
 }
 
 export interface UsePlaygroundMockOptions {
@@ -64,6 +64,8 @@ export interface UsePlaygroundMockResult {
   celebratingCardId: string | null;
   moveCardToDevelop: (cardId: string) => void;
   deployCard: (cardId: string) => void;
+  /** Cancels pending timers and resets the board to its initial state. */
+  restart: () => void;
 }
 
 /**
@@ -74,9 +76,10 @@ export interface UsePlaygroundMockResult {
 export function usePlaygroundMock(
   options?: UsePlaygroundMockOptions
 ): UsePlaygroundMockResult {
+  const t = useT();
   const [cards, setCards] = useState<PlaygroundCardData[]>(INITIAL_MOCK_CARDS);
   const [guidance, setGuidanceState] = useState<PlaygroundGuidance>({
-    message: MOCK_INTRO_MESSAGE,
+    message: t('playground.mock.intro'),
     emotion: 'idle',
   });
   const [isBusy, setIsBusy] = useState(false);
@@ -147,7 +150,7 @@ export function usePlaygroundMock(
       // Step 1 — CoderAgent takes the task.
       patchCard(cardId, { column: 'develop', agent: 'coder', hasError: false });
       setGuidance({
-        message: 'CoderAgent asumiendo la tarea. Escribiendo código y componentes...',
+        message: t('playground.mock.coderStart'),
         emotion: 'thinking',
       });
       completeSubtasksProgressively(cardId);
@@ -156,7 +159,7 @@ export function usePlaygroundMock(
       schedule(MOCK_TIMINGS.developToTesting, () => {
         patchCard(cardId, { column: 'testing', agent: 'tester' });
         setGuidance({
-          message: 'TesterAgent corriendo la suite de integración...',
+          message: t('playground.mock.testerRunning'),
           emotion: 'thinking',
         });
       });
@@ -169,11 +172,10 @@ export function usePlaygroundMock(
           column: 'develop',
           agent: 'coder',
           hasError: true,
-          errorDetail: 'La aserción de seguridad ha fallado',
+          errorDetail: t('playground.mock.testFailedDetail'),
         });
         setGuidance({
-          message:
-            '¡Ups! La aserción de seguridad ha fallado. Reenviando al Coder para refinar el bug...',
+          message: t('playground.mock.testFailed'),
           emotion: 'surprised',
         });
       });
@@ -183,7 +185,7 @@ export function usePlaygroundMock(
       schedule(retestAt, () => {
         patchCard(cardId, { column: 'testing', agent: 'tester', hasError: false });
         setGuidance({
-          message: 'Bug refinado. TesterAgent reintentando la suite...',
+          message: t('playground.mock.retesting'),
           emotion: 'thinking',
         });
       });
@@ -199,14 +201,13 @@ export function usePlaygroundMock(
           })),
         });
         setGuidance({
-          message:
-            '✓ Tests passed. La feature espera tu visto bueno en Review: previsualízala y despliégala.',
+          message: t('playground.mock.readyForReview'),
           emotion: 'happy',
         });
         setIsBusy(false);
       });
     },
-    [cards, completeSubtasksProgressively, isBusy, patchCard, schedule, setGuidance]
+    [cards, completeSubtasksProgressively, isBusy, patchCard, schedule, setGuidance, t]
   );
 
   const deployCard = useCallback(
@@ -217,7 +218,7 @@ export function usePlaygroundMock(
       }
       patchCard(cardId, { isDeploying: true, agent: 'deployer' });
       setGuidance({
-        message: 'Desplegando en Spaceship...',
+        message: t('playground.deploying'),
         emotion: 'thinking',
       });
 
@@ -229,15 +230,28 @@ export function usePlaygroundMock(
           agent: undefined,
         });
         setGuidance({
-          message: '¡Deploy exitoso! La feature ya está en producción. 🎉',
+          message: t('playground.mock.deploySuccess'),
           emotion: 'happy',
         });
         setCelebratingCardId(cardId);
         schedule(3_000, () => setCelebratingCardId(null));
       });
     },
-    [cards, patchCard, schedule, setGuidance]
+    [cards, patchCard, schedule, setGuidance, t]
   );
+
+  const restart = useCallback(() => {
+    timersRef.current.forEach(clearTimeout);
+    timersRef.current = [];
+    setCards(INITIAL_MOCK_CARDS);
+    setIsBusy(false);
+    setCelebratingCardId(null);
+    setGuidance({
+      message: t('playground.mock.intro'),
+      emotion: 'idle',
+      reset: true,
+    });
+  }, [setGuidance, t]);
 
   return {
     cards,
@@ -246,5 +260,6 @@ export function usePlaygroundMock(
     celebratingCardId,
     moveCardToDevelop,
     deployCard,
+    restart,
   };
 }

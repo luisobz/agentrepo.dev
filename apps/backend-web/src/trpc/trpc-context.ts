@@ -11,6 +11,7 @@ import {
   DeepSeekCoderService,
   InternalWorkflowClient,
   PrismaAdminSessionRepository,
+  PrismaAdminUserRepository,
   PrismaAgentRepository,
   PrismaBlogPostRepository,
   PrismaContactRequestRepository,
@@ -20,6 +21,7 @@ import {
   PrismaService,
   PrismaSkillRepository,
   StaticCodeValidator,
+  SupabasePasswordAuthenticator,
 } from '@agentrepo/infrastructure';
 import { createSessionToken, TRPCContext, verifySessionToken } from '@agentrepo/trpc';
 import type { CreateExpressContextOptions } from '@trpc/server/adapters/express';
@@ -76,8 +78,12 @@ export function buildCreateContext(prisma: PrismaService) {
       issue: (ttlMs) =>
         createSessionToken(BackendEnvironments.AUTH_SECRET, ttlMs, 'access'),
     },
+    passwordAuthenticator: new SupabasePasswordAuthenticator({
+      url: BackendEnvironments.NEXT_PUBLIC_SUPABASE_URL,
+      publishableKey: BackendEnvironments.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY,
+    }),
+    adminUsers: new PrismaAdminUserRepository(prisma),
     config: {
-      adminPassword: BackendEnvironments.ADMIN_PASSWORD,
       accessTtlMs: ACCESS_TTL_MS,
       refreshTtlMs: REFRESH_TTL_MS,
       rotationGraceMs: ROTATION_GRACE_MS,

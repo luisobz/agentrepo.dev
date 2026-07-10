@@ -24,14 +24,15 @@ const envSchema = z.object({
   NODE_ENV: z.enum(['development', 'production', 'test']).default('development'),
 
 
-  // Supabase (production database + auth)
+  // Supabase (production database + auth) — new-style API keys:
+  // publishable (sb_publishable_...) replaces anon, secret (sb_secret_...)
+  // replaces service_role.
   NEXT_PUBLIC_SUPABASE_URL: z.string().default(''),
-  NEXT_PUBLIC_SUPABASE_ANON_KEY: z.string().default(''),
-  SUPABASE_SERVICE_ROLE_KEY: z.string().default(''),
+  NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: z.string().default(''),
+  SUPABASE_SECRET_KEY: z.string().default(''),
 
   // Autenticación
   AUTH_SECRET: z.string().default('dev-auth-secret-change-me'),
-  ADMIN_PASSWORD: z.string().default(''),
 
   // AI
   DEEPSEEK_API_KEY: z.string().default(''),
@@ -49,15 +50,6 @@ const envSchema = z.object({
   SPACEMAIL_PASS: z.string().default(''),
   CONTACT_NOTIFICATION_EMAIL: z.string().default('hola@luisbz.com'),
 
-  // R2
-  R2_ACCOUNT_ID: z.string().default(''),
-  R2_ACCESS_KEY_ID: z.string().default(''),
-  R2_SECRET_ACCESS_KEY: z.string().default(''),
-  R2_BUCKET_NAME: z.string().default('agentrepo-assets'),
-  R2_PUBLIC_URL: z.string().url().default('https://assets.agentrepo.dev'),
-
-  // GitHub
-  GITHUB_TOKEN: z.string().default(''),
 
   // Pesos de generación (coerción a número)
   TEMPLATE_DISTANCE_THRESHOLD: z.coerce.number().min(0).max(1).default(0.60),
@@ -133,7 +125,9 @@ export class BackendEnvironments {
   static get HOST() { return BackendEnvironments.env.HOST; }
   static get NODE_ENV() { return BackendEnvironments.env.NODE_ENV; }
   static get AUTH_SECRET() { return BackendEnvironments.env.AUTH_SECRET; }
-  static get ADMIN_PASSWORD() { return BackendEnvironments.env.ADMIN_PASSWORD; }
+  static get NEXT_PUBLIC_SUPABASE_URL() { return BackendEnvironments.env.NEXT_PUBLIC_SUPABASE_URL; }
+  static get NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY() { return BackendEnvironments.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY; }
+  static get SUPABASE_SECRET_KEY() { return BackendEnvironments.env.SUPABASE_SECRET_KEY; }
   static get DEEPSEEK_API_KEY() { return BackendEnvironments.env.DEEPSEEK_API_KEY; }
   static get DEEPSEEK_MODEL() { return BackendEnvironments.env.DEEPSEEK_MODEL; }
   static get DEEPSEEK_BASE_URL() { return BackendEnvironments.env.DEEPSEEK_BASE_URL; }
@@ -145,12 +139,7 @@ export class BackendEnvironments {
   static get SPACEMAIL_USER() { return BackendEnvironments.env.SPACEMAIL_USER; }
   static get SPACEMAIL_PASS() { return BackendEnvironments.env.SPACEMAIL_PASS; }
   static get CONTACT_NOTIFICATION_EMAIL() { return BackendEnvironments.env.CONTACT_NOTIFICATION_EMAIL; }
-  static get R2_ACCOUNT_ID() { return BackendEnvironments.env.R2_ACCOUNT_ID; }
-  static get R2_ACCESS_KEY_ID() { return BackendEnvironments.env.R2_ACCESS_KEY_ID; }
-  static get R2_SECRET_ACCESS_KEY() { return BackendEnvironments.env.R2_SECRET_ACCESS_KEY; }
-  static get R2_BUCKET_NAME() { return BackendEnvironments.env.R2_BUCKET_NAME; }
-  static get R2_PUBLIC_URL() { return BackendEnvironments.env.R2_PUBLIC_URL; }
-  static get GITHUB_TOKEN() { return BackendEnvironments.env.GITHUB_TOKEN; }
+
   static get TEMPLATE_DISTANCE_THRESHOLD() { return BackendEnvironments.env.TEMPLATE_DISTANCE_THRESHOLD; }
   static get KEYWORD_MIN_SIMILARITY() { return BackendEnvironments.env.KEYWORD_MIN_SIMILARITY; }
   static get KEYWORD_POSITIVE_THRESHOLD() { return BackendEnvironments.env.KEYWORD_POSITIVE_THRESHOLD; }

@@ -11,6 +11,8 @@ export * from './catalog/use-cases/search-catalog.use-case';
 export * from './catalog/catalog.use-cases';
 export * from './auth/ports/admin-session.repository';
 export * from './auth/ports/access-token-issuer';
+export * from './auth/ports/admin-user.repository';
+export * from './auth/ports/password-authenticator';
 export * from './auth/use-cases/admin-auth.use-cases';
 export * from './portfolio/ports/app-logger.port';
 export * from './portfolio/ports/contact-request.repository';

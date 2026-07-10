@@ -60,7 +60,7 @@ Notas importantes:
 | `NODE_VERSION` | `26` | Node en CI |
 | `NEXT_PUBLIC_API_URL` | `https://agentrepo.dev/web/api/v1` | Base pública de backend-web (build de web y admin) |
 | `NEXT_PUBLIC_SUPABASE_URL` | — | Supabase (build de web) |
-| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | — | Supabase (build de web) |
+| `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` | — | Supabase (build de web) |
 | `NEXT_PUBLIC_SENTRY_DSN` | — | Sentry del navegador (build de web y admin) |
 | `WEB_PATH` | `backend/agentrepo.dev/web` | Destino rsync (relativo al home SSH) |
 | `ADMIN_PATH` | `backend/agentrepo.dev/admin` | Destino rsync |
@@ -73,16 +73,31 @@ Configúralas en cPanel → Setup Node.js App → Environment variables.
 `NODE_ENV=production` en todas. `SENTRY_DSN` (opcional) activa Sentry en
 cualquiera de las cuatro apps; sin él, la telemetría queda desactivada.
 
-- **web**: `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`,
-  `SUPABASE_SERVICE_ROLE_KEY` (las `NEXT_PUBLIC_*` de runtime sólo afectan al
+- **web**: `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`,
+  `SUPABASE_SECRET_KEY` (las `NEXT_PUBLIC_*` de runtime sólo afectan al
   servidor; las del cliente quedan fijadas en build).
 - **admin**: `AUTH_SECRET` (≥ 32 chars aleatorios), `NEXT_PUBLIC_API_URL`.
 - **backend-web**: `DATABASE_URL`, `AUTH_SECRET` (el mismo que admin),
-  `ADMIN_PASSWORD`, `BACKEND_AI_URL`, `INTERNAL_API_SECRET`.
+  `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`,
+  `BACKEND_AI_URL`, `INTERNAL_API_SECRET`. El login del panel admin valida
+  email+contraseña contra Supabase Auth (ya no hay `ADMIN_PASSWORD`); el
+  usuario admin se aprovisiona con la seed de producción cifrada
+  (`SEED_ENCRYPTION_KEY`, ver `SPACESHIP_DEPLOY.md`).
 - **backend-ai**: `DATABASE_URL`, `INTERNAL_API_SECRET`, `DEEPSEEK_API_KEY`,
   `DEEPSEEK_MODEL`, `LANGFUSE_PUBLIC_KEY`, `LANGFUSE_SECRET_KEY`,
   `LANGFUSE_BASE_URL`, `SPACEMAIL_HOST`, `SPACEMAIL_PORT`, `SPACEMAIL_USER`,
   `SPACEMAIL_PASS`, `R2_*` (si se usa almacenamiento de PDFs).
+
+Las claves de Supabase son las nuevas API keys (`sb_publishable_...` /
+`sb_secret_...`); las legacy JWT (`anon` / `service_role`) deben desactivarse
+en el dashboard una vez migrado.
+
+El `DATABASE_URL` de producción verifica TLS contra el certificado del
+proyecto Supabase (`sslmode=verify-full&sslrootcert=<path>`); el path del
+`sslrootcert` debe existir en la máquina que ejecuta el comando (en el
+hosting: `/home/lyqyxfejgb/cert/agentrepo.dev/supabase-agentrepo.crt`; el
+secret `DATABASE_URL` de CI para `migrate` debe usar un path válido en el
+runner o `sslmode=require`).
 
 Los backends cargan un `.env` local si existe en su *Application root*; el
 pipeline nunca sobreescribe ese fichero (`--exclude '.env'`), así que también

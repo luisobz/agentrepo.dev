@@ -1,7 +1,13 @@
+import { LocaleProvider } from '@agentrepo/ui';
 import { fireEvent, render, screen } from '@testing-library/react';
+import type { ReactElement } from 'react';
 import { describe, expect, it, vi } from 'vitest';
 import { PlaygroundCard } from './playground-card';
 import type { PlaygroundCardData } from './playground-types';
+
+// The card reads translations from the locale context; default locale is 'en'.
+const renderWithLocale = (ui: ReactElement) =>
+  render(<LocaleProvider>{ui}</LocaleProvider>);
 
 function buildCard(overrides: Partial<PlaygroundCardData> = {}): PlaygroundCardData {
   return {
@@ -19,7 +25,7 @@ function buildCard(overrides: Partial<PlaygroundCardData> = {}): PlaygroundCardD
 
 describe('PlaygroundCard', () => {
   it('renders the title and the sub-task checklist', () => {
-    render(<PlaygroundCard card={buildCard()} />);
+    renderWithLocale(<PlaygroundCard card={buildCard()} />);
 
     expect(
       screen.getByText('Feature 1: Premium Dark Hero Page')
@@ -29,13 +35,13 @@ describe('PlaygroundCard', () => {
   });
 
   it('shows the active agent badge when assigned', () => {
-    render(<PlaygroundCard card={buildCard({ agent: 'coder' })} />);
+    renderWithLocale(<PlaygroundCard card={buildCard({ agent: 'coder' })} />);
 
     expect(screen.getByText('[CoderAgent]')).toBeTruthy();
   });
 
   it('highlights the error state', () => {
-    render(
+    renderWithLocale(
       <PlaygroundCard
         card={buildCard({ hasError: true, errorDetail: 'Security assertion failed' })}
       />
@@ -48,18 +54,20 @@ describe('PlaygroundCard', () => {
 
   it('only offers the preview action in the review column and fires callbacks', () => {
     const onPreview = vi.fn();
-    const { rerender } = render(
+    const { rerender } = renderWithLocale(
       <PlaygroundCard card={buildCard()} onPreview={onPreview} />
     );
-    expect(screen.queryByText('Ver Previsualización')).toBeNull();
+    expect(screen.queryByText('View preview')).toBeNull();
 
     rerender(
-      <PlaygroundCard
-        card={buildCard({ column: 'review' })}
-        onPreview={onPreview}
-      />
+      <LocaleProvider>
+        <PlaygroundCard
+          card={buildCard({ column: 'review' })}
+          onPreview={onPreview}
+        />
+      </LocaleProvider>
     );
-    fireEvent.click(screen.getByText('Ver Previsualización'));
+    fireEvent.click(screen.getByText('View preview'));
 
     expect(onPreview).toHaveBeenCalledWith('card-1');
   });

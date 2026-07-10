@@ -37,3 +37,12 @@ out
 .env.*
 !.env.example
 !.env.*.example
+
+# Secrets: plaintext prod seed data and certificates (see .husky/pre-commit)
+packages/database/src/seeds/prod.seed.data.json
+*.crt
+*.cer
+*.pem
+*.key
+*.p12
+*.pfx

@@ -39,6 +39,14 @@ export class InvalidRefreshTokenError extends DomainError {
   }
 }
 
+export class IdentityProviderUnavailableError extends DomainError {
+  readonly code = 'IDENTITY_PROVIDER_UNAVAILABLE';
+
+  constructor() {
+    super('Identity provider is unavailable');
+  }
+}
+
 export class DataIntegrityError extends DomainError {
   readonly code = 'DATA_INTEGRITY';
 

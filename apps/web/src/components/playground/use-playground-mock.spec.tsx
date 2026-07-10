@@ -1,4 +1,6 @@
+import { LocaleProvider } from '@agentrepo/ui';
 import { act, renderHook } from '@testing-library/react';
+import type { ReactNode } from 'react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import {
   INITIAL_MOCK_CARDS,
@@ -17,6 +19,11 @@ function cardById(
   return card;
 }
 
+// The hook reads translations from the locale context; default locale is 'en'.
+const wrapper = ({ children }: { children: ReactNode }) => (
+  <LocaleProvider>{children}</LocaleProvider>
+);
+
 describe('usePlaygroundMock', () => {
   beforeEach(() => {
     vi.useFakeTimers();
@@ -27,7 +34,7 @@ describe('usePlaygroundMock', () => {
   });
 
   it('starts with the three immutable demo features in the backlog', () => {
-    const { result } = renderHook(() => usePlaygroundMock());
+    const { result } = renderHook(() => usePlaygroundMock(), { wrapper });
 
     expect(result.current.cards).toHaveLength(3);
     expect(result.current.cards.map((card) => card.column)).toEqual([
@@ -43,7 +50,7 @@ describe('usePlaygroundMock', () => {
   });
 
   it('starts the CoderAgent simulation when a card moves to develop', () => {
-    const { result } = renderHook(() => usePlaygroundMock());
+    const { result } = renderHook(() => usePlaygroundMock(), { wrapper });
 
     act(() => result.current.moveCardToDevelop('mock-1'));
 
@@ -55,7 +62,7 @@ describe('usePlaygroundMock', () => {
   });
 
   it('walks develop → testing → failure → develop → testing → review on timers', () => {
-    const { result } = renderHook(() => usePlaygroundMock());
+    const { result } = renderHook(() => usePlaygroundMock(), { wrapper });
     act(() => result.current.moveCardToDevelop('mock-1'));
 
     act(() => vi.advanceTimersByTime(MOCK_TIMINGS.developToTesting));
@@ -66,7 +73,7 @@ describe('usePlaygroundMock', () => {
     const failed = cardById(result, 'mock-1');
     expect(failed.column).toBe('develop');
     expect(failed.hasError).toBe(true);
-    expect(result.current.guidance.message).toContain('aserción');
+    expect(result.current.guidance.message).toContain('assertion');
 
     act(() => vi.advanceTimersByTime(MOCK_TIMINGS.refactorPause));
     expect(cardById(result, 'mock-1').column).toBe('testing');
@@ -82,7 +89,7 @@ describe('usePlaygroundMock', () => {
   });
 
   it('deploys from review with a loading window and celebrates', () => {
-    const { result } = renderHook(() => usePlaygroundMock());
+    const { result } = renderHook(() => usePlaygroundMock(), { wrapper });
     act(() => result.current.moveCardToDevelop('mock-1'));
     act(() =>
       vi.advanceTimersByTime(
@@ -104,8 +111,32 @@ describe('usePlaygroundMock', () => {
     expect(result.current.guidance.emotion).toBe('happy');
   });
 
+  it('resets the board and cancels pending timers on restart', () => {
+    const { result } = renderHook(() => usePlaygroundMock(), { wrapper });
+    act(() => result.current.moveCardToDevelop('mock-1'));
+    expect(cardById(result, 'mock-1').column).toBe('develop');
+    expect(result.current.isBusy).toBe(true);
+
+    act(() => result.current.restart());
+
+    expect(result.current.cards.map((card) => card.column)).toEqual([
+      'backlog',
+      'backlog',
+      'backlog',
+    ]);
+    expect(result.current.isBusy).toBe(false);
+    expect(result.current.celebratingCardId).toBeNull();
+    expect(
+      cardById(result, 'mock-1').subtasks.every((subtask) => !subtask.done)
+    ).toBe(true);
+
+    // Timers scheduled before the restart must not resurrect the old run.
+    act(() => vi.advanceTimersByTime(60_000));
+    expect(cardById(result, 'mock-1').column).toBe('backlog');
+  });
+
   it('ignores moves from columns other than the backlog', () => {
-    const { result } = renderHook(() => usePlaygroundMock());
+    const { result } = renderHook(() => usePlaygroundMock(), { wrapper });
     act(() => result.current.moveCardToDevelop('mock-1'));
     act(() => result.current.moveCardToDevelop('mock-1'));
 

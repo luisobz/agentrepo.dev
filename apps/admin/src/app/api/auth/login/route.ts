@@ -23,24 +23,26 @@ export async function POST(request: Request) {
   }
 
   const body: unknown = await request.json().catch(() => null);
-  const password =
+  const fields =
     typeof body === 'object' && body !== null
-      ? (body as Record<string, unknown>)['password']
-      : undefined;
+      ? (body as Record<string, unknown>)
+      : {};
+  const email = fields['email'];
+  const password = fields['password'];
 
-  if (typeof password !== 'string' || !password) {
-    return NextResponse.json({ error: 'Invalid password' }, { status: 401 });
+  if (typeof email !== 'string' || !email || typeof password !== 'string' || !password) {
+    return NextResponse.json({ error: 'Invalid credentials' }, { status: 401 });
   }
 
   try {
-    const tokens = await backendTrpc.adminAuth.login.mutate({ password });
+    const tokens = await backendTrpc.adminAuth.login.mutate({ email, password });
     loginRateLimiter.reset(clientKey);
     const response = NextResponse.json({ ok: true });
     applySessionCookies(response, tokens);
     return response;
   } catch (error) {
     if (error instanceof TRPCClientError && error.data?.code === 'UNAUTHORIZED') {
-      return NextResponse.json({ error: 'Invalid password' }, { status: 401 });
+      return NextResponse.json({ error: 'Invalid credentials' }, { status: 401 });
     }
     return NextResponse.json(
       { error: 'Authentication service unavailable' },

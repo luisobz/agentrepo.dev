@@ -8,6 +8,8 @@ export * from './persistence/prisma/repositories/prisma-global-search.repository
 export * from './persistence/prisma/repositories/prisma-contact-request.repository';
 export * from './persistence/prisma/repositories/prisma-playground-token.repository';
 export * from './persistence/prisma/repositories/prisma-playground-deployment.repository';
+export * from './persistence/prisma/repositories/prisma-admin-user.repository';
+export * from './auth/supabase/supabase-password-authenticator';
 export * from './ai/internal-client/internal-workflow.client';
 export * from './ai/deepseek/deepseek-llm.service';
 export * from './ai/deepseek/deepseek-coder.service';

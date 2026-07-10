@@ -3,6 +3,7 @@
 import { AvatarProvider } from '@agentrepo/avatar';
 import { useRouter } from 'next/navigation';
 import { useCallback, type ReactNode } from 'react';
+import { useT } from '../../lib/i18n/use-t';
 import { PORTFOLIO_OWNER_PATH, unlockPortfolio } from '../../lib/portfolio-unlock';
 
 /**
@@ -11,6 +12,7 @@ import { PORTFOLIO_OWNER_PATH, unlockPortfolio } from '../../lib/portfolio-unloc
  */
 export function AvatarEasterEggProvider({ children }: { children: ReactNode }) {
   const router = useRouter();
+  const t = useT();
 
   const handleSequenceComplete = useCallback(() => {
     unlockPortfolio();
@@ -18,7 +20,10 @@ export function AvatarEasterEggProvider({ children }: { children: ReactNode }) {
   }, [router]);
 
   return (
-    <AvatarProvider onSequenceComplete={handleSequenceComplete}>
+    <AvatarProvider
+      surpriseMessage={t('avatar.easterEgg.surprise')}
+      onSequenceComplete={handleSequenceComplete}
+    >
       {children}
     </AvatarProvider>
   );

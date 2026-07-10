@@ -5,15 +5,17 @@ import { Bot, Loader2, Sparkles } from 'lucide-react';
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { trpc } from '../utils/trpc';
+import { useT } from '../../lib/i18n/use-t';
+import type { WebDictionaryKey } from '../../lib/i18n/dictionary';
 
 export const CONTACT_SUBJECT_OPTIONS: ReadonlyArray<{
   value: ContactSubject;
-  label: string;
+  labelKey: WebDictionaryKey;
 }> = [
-  { value: 'employment', label: 'Empleo' },
-  { value: 'freelance', label: 'Freelance' },
-  { value: 'question', label: 'Consulta Técnica' },
-  { value: 'other', label: 'Otro' },
+  { value: 'employment', labelKey: 'portfolio.contact.subject.employment' },
+  { value: 'freelance', labelKey: 'portfolio.contact.subject.freelance' },
+  { value: 'question', labelKey: 'portfolio.contact.subject.question' },
+  { value: 'other', labelKey: 'portfolio.contact.subject.other' },
 ];
 
 export interface ContactFormValues {
@@ -37,6 +39,7 @@ function FieldError({ message }: { message?: string }) {
 }
 
 export function ContactForm() {
+  const t = useT();
   const [isSent, setIsSent] = useState(false);
   const {
     register,
@@ -66,17 +69,16 @@ export function ContactForm() {
           id="contact-heading"
           className="mb-6 text-3xl font-semibold tracking-tight text-[#fdf8ef] sm:text-4xl"
         >
-          Let&apos;s talk
+          {t('portfolio.contact.title')}
         </h2>
 
         <div className="mb-8 flex gap-3 rounded-2xl border border-[#2f5d8a]/50 bg-[#2f5d8a]/10 p-4">
           <Bot className="mt-0.5 h-5 w-5 shrink-0 text-[#8aaac8]" />
-          <p className="text-sm leading-relaxed text-[#cfc6b8]">
-            Este formulario es analizado autónomamente por un{' '}
-            <strong className="text-[#fdf8ef]">Agente IA</strong>. Al enviarlo,
-            el agente procesará tu mensaje, creará un reporte técnico
-            interactivo en PDF y te responderá por email al instante.
-          </p>
+          <p
+            className="text-sm leading-relaxed text-[#cfc6b8] [&_strong]:text-[#fdf8ef]"
+            // Static, trusted copy with a single <strong> emphasis per locale.
+            dangerouslySetInnerHTML={{ __html: t('portfolio.contact.agentNotice') }}
+          />
         </div>
 
         {isSent ? (
@@ -85,18 +87,17 @@ export function ContactForm() {
             className="rounded-2xl border border-[#7a2230]/60 bg-[#7a2230]/15 p-6 text-center"
           >
             <p className="text-lg font-semibold text-[#fdf8ef]">
-              ¡Mensaje recibido! ✦
+              {t('portfolio.contact.sentTitle')}
             </p>
             <p className="mt-2 text-sm text-[#cfc6b8]">
-              El Agente IA ha comenzado el análisis. Recibirás un email
-              interactivo pronto.
+              {t('portfolio.contact.sentBody')}
             </p>
           </div>
         ) : (
           <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-5" noValidate>
             <div>
               <label htmlFor="contact-email" className="mb-1.5 block text-sm font-medium text-[#fdf8ef]">
-                Email
+                {t('portfolio.contact.email')}
               </label>
               <input
                 id="contact-email"
@@ -105,10 +106,10 @@ export function ContactForm() {
                 className={inputClasses}
                 disabled={isSubmitting}
                 {...register('email', {
-                  required: 'Tu email es obligatorio',
+                  required: t('portfolio.contact.error.emailRequired'),
                   pattern: {
                     value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
-                    message: 'Introduce un email válido',
+                    message: t('portfolio.contact.error.emailInvalid'),
                   },
                 })}
               />
@@ -117,7 +118,7 @@ export function ContactForm() {
 
             <div>
               <label htmlFor="contact-subject" className="mb-1.5 block text-sm font-medium text-[#fdf8ef]">
-                Subject
+                {t('portfolio.contact.subject')}
               </label>
               <select
                 id="contact-subject"
@@ -127,7 +128,7 @@ export function ContactForm() {
               >
                 {CONTACT_SUBJECT_OPTIONS.map((option) => (
                   <option key={option.value} value={option.value}>
-                    {option.label}
+                    {t(option.labelKey)}
                   </option>
                 ))}
               </select>
@@ -135,19 +136,19 @@ export function ContactForm() {
 
             <div>
               <label htmlFor="contact-message" className="mb-1.5 block text-sm font-medium text-[#fdf8ef]">
-                Message
+                {t('portfolio.contact.message')}
               </label>
               <textarea
                 id="contact-message"
                 rows={6}
-                placeholder="Tell me about your project, your stack and what you need…"
+                placeholder={t('portfolio.contact.messagePlaceholder')}
                 className={`${inputClasses} resize-y`}
                 disabled={isSubmitting}
                 {...register('message', {
-                  required: 'Cuéntame al menos un poco sobre tu proyecto',
+                  required: t('portfolio.contact.error.messageRequired'),
                   minLength: {
                     value: 20,
-                    message: 'El mensaje debe tener al menos 20 caracteres',
+                    message: t('portfolio.contact.error.messageMin'),
                   },
                 })}
               />
@@ -156,8 +157,7 @@ export function ContactForm() {
 
             {submitContact.isError ? (
               <p role="alert" className="text-sm text-[#e8c2ca]">
-                No se pudo enviar el mensaje. Inténtalo de nuevo en unos
-                minutos.
+                {t('portfolio.contact.error.submit')}
               </p>
             ) : null}
 
@@ -169,12 +169,12 @@ export function ContactForm() {
               {isSubmitting ? (
                 <>
                   <Loader2 className="h-4 w-4 animate-spin" />
-                  Procesando...
+                  {t('portfolio.contact.submitting')}
                 </>
               ) : (
                 <>
                   <Sparkles className="h-4 w-4" />
-                  Send to the agent
+                  {t('portfolio.contact.submit')}
                 </>
               )}
             </button>

@@ -1,3 +1,5 @@
+import type { WebDictionaryKey } from '../../lib/i18n/dictionary';
+
 export const PLAYGROUND_COLUMNS = [
   'backlog',
   'develop',
@@ -8,12 +10,13 @@ export const PLAYGROUND_COLUMNS = [
 
 export type PlaygroundColumnId = (typeof PLAYGROUND_COLUMNS)[number];
 
-export const COLUMN_LABELS: Record<PlaygroundColumnId, string> = {
-  backlog: 'Backlog',
-  develop: 'Desarrollar',
-  testing: 'Testing',
-  review: 'Review',
-  deploy: 'Deploy',
+/** Dictionary keys for each column's label, resolved via useT()/getServerT(). */
+export const COLUMN_LABEL_KEYS: Record<PlaygroundColumnId, WebDictionaryKey> = {
+  backlog: 'playground.column.backlog',
+  develop: 'playground.column.develop',
+  testing: 'playground.column.testing',
+  review: 'playground.column.review',
+  deploy: 'playground.column.deploy',
 };
 
 export type PlaygroundAgent = 'coder' | 'tester' | 'deployer';

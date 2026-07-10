@@ -8,6 +8,7 @@ import { FormError } from '../../components/admin/form/form-error';
 function LoginForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -20,7 +21,7 @@ function LoginForm() {
     const response = await fetch('/api/auth/login', {
       method: 'POST',
       headers: { 'content-type': 'application/json' },
-      body: JSON.stringify({ password }),
+      body: JSON.stringify({ email, password }),
     });
 
     if (response.ok) {
@@ -46,15 +47,24 @@ function LoginForm() {
       <CardContent>
         <form onSubmit={handleSubmit} className="flex flex-col gap-4">
           <Input
-            type="password"
-            placeholder="Admin password"
-            value={password}
-            onChange={(event) => setPassword(event.target.value)}
+            type="email"
+            placeholder="Email"
+            value={email}
+            onChange={(event) => setEmail(event.target.value)}
+            autoComplete="username"
             autoFocus
             required
           />
+          <Input
+            type="password"
+            placeholder="Password"
+            value={password}
+            onChange={(event) => setPassword(event.target.value)}
+            autoComplete="current-password"
+            required
+          />
           <FormError message={error} />
-          <Button type="submit" disabled={isSubmitting || !password}>
+          <Button type="submit" disabled={isSubmitting || !email || !password}>
             {isSubmitting ? 'Signing in…' : 'Sign in'}
           </Button>
         </form>

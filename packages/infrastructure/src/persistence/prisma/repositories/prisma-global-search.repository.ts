@@ -3,8 +3,29 @@ import {
   GlobalSearchRepository,
 } from '@agentrepo/application';
 import { SearchHit } from '@agentrepo/domain';
-import { PrismaClient } from '@prisma/client';
+import { Prisma, PrismaClient } from '@prisma/client';
 import { toTsQuery } from '../full-text';
+
+interface SkillHitRow {
+  id: string;
+  slug: string;
+  title: string;
+  description: string | null;
+  type: string;
+}
+interface AgentHitRow {
+  id: string;
+  slug: string;
+  title: string;
+  shortDescription: string;
+  version: string;
+}
+interface PostHitRow {
+  id: string;
+  slug: string;
+  title: string;
+  excerpt: string | null;
+}
 
 export class PrismaGlobalSearchRepository implements GlobalSearchRepository {
   constructor(private readonly prisma: PrismaClient) {}
@@ -18,43 +39,28 @@ export class PrismaGlobalSearchRepository implements GlobalSearchRepository {
       return [];
     }
 
+    // Query the trigger-maintained `searchVector` GIN indexes directly; Prisma's
+    // `{ field: { search } }` filter is not index-backed (see the skill repo).
+    const match = (table: string) => Prisma.sql`
+      ${Prisma.raw(`"${table}"."searchVector"`)} @@ to_tsquery('english', ${tsQuery})
+    `;
+
     const [skills, agents, posts] = await Promise.all([
-      this.prisma.skill.findMany({
-        where: {
-          isPublished: true,
-          OR: [
-            { title: { search: tsQuery } },
-            { description: { search: tsQuery } },
-            { content: { search: tsQuery } },
-          ],
-        },
-        orderBy: { updatedAt: 'desc' },
-        take: limitPerType,
-      }),
-      this.prisma.agent.findMany({
-        where: {
-          isPublished: true,
-          OR: [
-            { title: { search: tsQuery } },
-            { shortDescription: { search: tsQuery } },
-            { readmeContent: { search: tsQuery } },
-          ],
-        },
-        orderBy: { updatedAt: 'desc' },
-        take: limitPerType,
-      }),
-      this.prisma.blogPost.findMany({
-        where: {
-          isPublished: true,
-          OR: [
-            { title: { search: tsQuery } },
-            { excerpt: { search: tsQuery } },
-            { content: { search: tsQuery } },
-          ],
-        },
-        orderBy: { updatedAt: 'desc' },
-        take: limitPerType,
-      }),
+      this.prisma.$queryRaw<SkillHitRow[]>(Prisma.sql`
+        SELECT "id", "slug", "title", "description", "type" FROM "Skill"
+        WHERE "isPublished" = true AND ${match('Skill')}
+        ORDER BY "updatedAt" DESC LIMIT ${limitPerType}
+      `),
+      this.prisma.$queryRaw<AgentHitRow[]>(Prisma.sql`
+        SELECT "id", "slug", "title", "shortDescription", "version" FROM "Agent"
+        WHERE "isPublished" = true AND ${match('Agent')}
+        ORDER BY "updatedAt" DESC LIMIT ${limitPerType}
+      `),
+      this.prisma.$queryRaw<PostHitRow[]>(Prisma.sql`
+        SELECT "id", "slug", "title", "excerpt" FROM "BlogPost"
+        WHERE "isPublished" = true AND ${match('BlogPost')}
+        ORDER BY "updatedAt" DESC LIMIT ${limitPerType}
+      `),
     ]);
 
     return [

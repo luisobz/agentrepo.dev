@@ -15,6 +15,7 @@ const tokens: AdminSessionTokens = {
 function buildContext(adminAuth: Partial<TRPCContext['adminAuth']>): TRPCContext {
   return {
     isAdmin: false,
+    clientIp: crypto.randomUUID(),
     adminAuth: adminAuth as TRPCContext['adminAuth'],
     catalog: {} as CatalogUseCases,
     globalSearch: { execute: async () => [] },

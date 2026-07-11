@@ -1,5 +1,13 @@
 import { z } from 'zod';
-import { publicProcedure, router } from '../trpc';
+import { FixedWindowRateLimiter } from '../auth/login-rate-limit';
+import { publicProcedure, rateLimit, router } from '../trpc';
+
+// Backend-side safety net so brute force cannot bypass the BFF rate limiter by
+// calling this procedure directly. Keyed by client IP at the trusted boundary.
+const loginRateLimiter = new FixedWindowRateLimiter({
+  maxAttempts: 10,
+  windowMs: 15 * 60 * 1000,
+});
 
 /**
  * Stateful admin session endpoints. The refresh token is opaque and stored
@@ -8,6 +16,7 @@ import { publicProcedure, router } from '../trpc';
  */
 export const adminAuthRouter = router({
   login: publicProcedure
+    .use(rateLimit(loginRateLimiter, 'adminAuth.login'))
     .input(z.object({ email: z.string().email(), password: z.string().min(1) }))
     .mutation(({ ctx, input }) => ctx.adminAuth.login.execute(input)),
 

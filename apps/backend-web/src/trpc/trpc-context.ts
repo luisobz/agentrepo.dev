@@ -103,6 +103,14 @@ export function buildCreateContext(prisma: PrismaService) {
       BackendEnvironments.AUTH_SECRET
     );
 
-    return { isAdmin, adminAuth, catalog, globalSearch, portfolio, playground };
+    return {
+      isAdmin,
+      clientIp: req.ip ?? null,
+      adminAuth,
+      catalog,
+      globalSearch,
+      portfolio,
+      playground,
+    };
   };
 }

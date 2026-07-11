@@ -30,7 +30,7 @@ describe('envSchema — defaults & required fields', () => {
     expect(result.data.DATABASE_URL).toBe(DB_URL);
     expect(result.data.PORT).toBe(3001);
     expect(result.data.NODE_ENV).toBe('development');
-    expect(result.data.INTERNAL_API_SECRET).toBe('dev-internal-secret');
+    expect(result.data.INTERNAL_COMMUNICATION_API_SECRET).toBe('dev-internal-secret');
     expect(result.data.AUTH_SECRET).toBe('dev-auth-secret-change-me');
   });
 
@@ -48,7 +48,7 @@ describe('envSchema — production secret guards', () => {
       DATABASE_URL: DB_URL,
       NODE_ENV: 'production',
       AUTH_SECRET: 'dev-auth-secret-change-me',
-      INTERNAL_API_SECRET: STRONG_B,
+      INTERNAL_COMMUNICATION_API_SECRET: STRONG_B,
     });
 
     expect(result.success).toBe(false);
@@ -60,38 +60,38 @@ describe('envSchema — production secret guards', () => {
       DATABASE_URL: DB_URL,
       NODE_ENV: 'production',
       AUTH_SECRET: 'short-secret',
-      INTERNAL_API_SECRET: STRONG_B,
+      INTERNAL_COMMUNICATION_API_SECRET: STRONG_B,
     });
 
     expect(result.success).toBe(false);
     expect(issuePaths(result)).toContainEqual(['AUTH_SECRET']);
   });
 
-  it('fails in production when INTERNAL_API_SECRET is the dev default', () => {
+  it('fails in production when INTERNAL_COMMUNICATION_API_SECRET is the dev default', () => {
     const result = parse({
       DATABASE_URL: DB_URL,
       NODE_ENV: 'production',
       AUTH_SECRET: STRONG_A,
-      INTERNAL_API_SECRET: 'dev-internal-secret',
+      INTERNAL_COMMUNICATION_API_SECRET: 'dev-internal-secret',
     });
 
     expect(result.success).toBe(false);
     const paths = issuePaths(result);
-    expect(paths).toContainEqual(['INTERNAL_API_SECRET']);
+    expect(paths).toContainEqual(['INTERNAL_COMMUNICATION_API_SECRET']);
     // AUTH_SECRET is strong, so it must be the ONLY failing field.
     expect(paths).not.toContainEqual(['AUTH_SECRET']);
   });
 
-  it('fails in production when INTERNAL_API_SECRET is shorter than 32 chars', () => {
+  it('fails in production when INTERNAL_COMMUNICATION_API_SECRET is shorter than 32 chars', () => {
     const result = parse({
       DATABASE_URL: DB_URL,
       NODE_ENV: 'production',
       AUTH_SECRET: STRONG_A,
-      INTERNAL_API_SECRET: 'short',
+      INTERNAL_COMMUNICATION_API_SECRET: 'short',
     });
 
     expect(result.success).toBe(false);
-    expect(issuePaths(result)).toContainEqual(['INTERNAL_API_SECRET']);
+    expect(issuePaths(result)).toContainEqual(['INTERNAL_COMMUNICATION_API_SECRET']);
   });
 
   it('succeeds in production when both secrets are strong 32+ char values', () => {
@@ -99,7 +99,7 @@ describe('envSchema — production secret guards', () => {
       DATABASE_URL: DB_URL,
       NODE_ENV: 'production',
       AUTH_SECRET: STRONG_A,
-      INTERNAL_API_SECRET: STRONG_B,
+      INTERNAL_COMMUNICATION_API_SECRET: STRONG_B,
     });
 
     expect(result.success).toBe(true);
@@ -111,7 +111,7 @@ describe('envSchema — production secret guards', () => {
       DATABASE_URL: DB_URL,
       NODE_ENV: 'development',
       AUTH_SECRET: 'dev-auth-secret-change-me',
-      INTERNAL_API_SECRET: 'dev-internal-secret',
+      INTERNAL_COMMUNICATION_API_SECRET: 'dev-internal-secret',
     });
 
     expect(result.success).toBe(true);

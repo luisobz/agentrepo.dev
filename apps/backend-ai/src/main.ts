@@ -14,7 +14,7 @@ async function bootstrap() {
   app.setGlobalPrefix(globalPrefix);
   app.use(helmet());
   // backend-ai only accepts server-to-server internal calls (guarded by
-  // INTERNAL_API_SECRET); no browser origin should ever reach it.
+  // INTERNAL_COMMUNICATION_API_SECRET); no browser origin should ever reach it.
   app.enableCors({ origin: false });
   const port = BackendEnvironments.BACKEND_AI_PORT;
   await app.listen(port);

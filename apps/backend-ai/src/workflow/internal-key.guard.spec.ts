@@ -3,7 +3,7 @@ import { describe, expect, it } from 'vitest';
 import { InternalKeyGuard } from './internal-key.guard';
 
 // In the test process DATABASE_URL is set and NODE_ENV is unset (→ development),
-// so BackendEnvironments.INTERNAL_API_SECRET is the default 'dev-internal-secret'.
+// so BackendEnvironments.INTERNAL_COMMUNICATION_API_SECRET is the default 'dev-internal-secret'.
 const VALID_KEY = 'dev-internal-secret';
 
 function contextWithKey(value: string | undefined): ExecutionContext {

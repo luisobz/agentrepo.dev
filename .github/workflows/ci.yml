@@ -37,4 +37,4 @@ jobs:
         run: pnpm verify
 
       - name: Build (todas las apps y paquetes)
-        run: pnpm build:all
+        run: pnpm build

@@ -8,5 +8,6 @@ export * from './catalog/agent';
 export * from './catalog/blog-post';
 export * from './catalog/search';
 export * from './catalog/premium';
+export * from './catalog/asset-version';
 export * from './portfolio/contact-request';
 export * from './playground/playground-token';

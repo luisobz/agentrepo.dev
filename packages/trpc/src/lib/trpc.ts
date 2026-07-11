@@ -14,6 +14,7 @@ import {
   InvalidCredentialsError,
   InvalidRefreshTokenError,
   SlugAlreadyInUseError,
+  VersionAlreadyExistsError,
 } from '@agentrepo/domain';
 import type { SearchHit } from '@agentrepo/domain';
 
@@ -40,7 +41,10 @@ function toTRPCError(error: DomainError): TRPCError {
   ) {
     return new TRPCError({ code: 'UNAUTHORIZED', message: error.message, cause: error });
   }
-  if (error instanceof SlugAlreadyInUseError) {
+  if (
+    error instanceof SlugAlreadyInUseError ||
+    error instanceof VersionAlreadyExistsError
+  ) {
     return new TRPCError({ code: 'CONFLICT', message: error.message, cause: error });
   }
   return new TRPCError({

@@ -13,6 +13,7 @@ import {
   PrismaAdminSessionRepository,
   PrismaAdminUserRepository,
   PrismaAgentRepository,
+  PrismaAgentVersionRepository,
   PrismaBlogPostRepository,
   PrismaContactRequestRepository,
   PrismaGlobalSearchRepository,
@@ -20,6 +21,7 @@ import {
   PrismaPlaygroundTokenRepository,
   PrismaService,
   PrismaSkillRepository,
+  PrismaSkillVersionRepository,
   StaticCodeValidator,
   SupabasePasswordAuthenticator,
 } from '@agentrepo/infrastructure';
@@ -48,6 +50,8 @@ export function buildCreateContext(prisma: PrismaService) {
     skillRepository: new PrismaSkillRepository(prisma),
     agentRepository: new PrismaAgentRepository(prisma),
     blogPostRepository: new PrismaBlogPostRepository(prisma),
+    skillVersionRepository: new PrismaSkillVersionRepository(prisma),
+    agentVersionRepository: new PrismaAgentVersionRepository(prisma),
   });
   const globalSearch = new SearchCatalog(new PrismaGlobalSearchRepository(prisma));
   const portfolioLogger = new Logger('ContactWorkflow');

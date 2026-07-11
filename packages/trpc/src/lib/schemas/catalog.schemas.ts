@@ -34,6 +34,33 @@ export const adminListSchema = paginationSchema.extend({
 export const idInputSchema = z.object({ id: z.uuid() });
 export const slugInputSchema = z.object({ slug: slugSchema });
 
+// ─── Versioning (npm-style registry) ────────────
+
+export const semverSchema = z
+  .string()
+  .regex(/^\d+\.\d+\.\d+$/, 'Use semantic versioning (e.g. 1.0.0)');
+
+export const versionParamsSchema = z.object({
+  slug: slugSchema,
+  version: semverSchema,
+});
+
+export const recordDownloadSchema = z.object({
+  slug: slugSchema,
+  version: semverSchema.optional(),
+});
+
+export const publishVersionSchema = z.object({
+  id: z.uuid(),
+  version: semverSchema,
+  changelog: z.string().trim().min(1).max(2_000).nullable().default(null),
+});
+
+export const setLatestVersionSchema = z.object({
+  id: z.uuid(),
+  versionId: z.uuid(),
+});
+
 export const currencySchema = z.enum(['EUR', 'USD']);
 
 const premiumFieldsSchema = {

@@ -3,6 +3,7 @@
 import { useParams } from 'next/navigation';
 import { AgentForm } from '../../../../components/admin/agents/agent-form';
 import { FormError } from '../../../../components/admin/form/form-error';
+import { VersionManager } from '../../../../components/admin/versions/version-manager';
 import { trpc } from '../../../../components/utils/trpc';
 
 export default function EditAgentPage() {
@@ -16,7 +17,16 @@ export default function EditAgentPage() {
         <p className="text-sm text-[var(--color-text-muted)]">Loading…</p>
       )}
       {agent.error && <FormError message={agent.error.message} />}
-      {agent.data && <AgentForm agent={agent.data} />}
+      {agent.data && (
+        <>
+          <AgentForm agent={agent.data} />
+          <VersionManager
+            kind="agent"
+            assetId={agent.data.id}
+            currentVersion={agent.data.version}
+          />
+        </>
+      )}
     </div>
   );
 }

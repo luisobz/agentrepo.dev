@@ -5,6 +5,8 @@ export * from './persistence/prisma/repositories/prisma-skill.repository';
 export * from './persistence/prisma/repositories/prisma-agent.repository';
 export * from './persistence/prisma/repositories/prisma-blog-post.repository';
 export * from './persistence/prisma/repositories/prisma-global-search.repository';
+export * from './persistence/prisma/repositories/prisma-skill-version.repository';
+export * from './persistence/prisma/repositories/prisma-agent-version.repository';
 export * from './persistence/prisma/repositories/prisma-contact-request.repository';
 export * from './persistence/prisma/repositories/prisma-playground-token.repository';
 export * from './persistence/prisma/repositories/prisma-playground-deployment.repository';

@@ -13,8 +13,9 @@ model Skill {
   slug           String   @unique
   title          String
   description    String?
-  content        String // Markdown content
+  content        String // Markdown content (working copy of the latest-tagged version)
   type           String // prompt, system, config, template
+  version        String   @default("1.0.0") // semver of the version tagged latest
   isPublished    Boolean  @default(false)
   headerImageUrl String? // Optional cover; the web falls back to a generated template
   isPremium      Boolean  @default(false)
@@ -23,6 +24,39 @@ model Skill {
   previewContent String? // Public teaser shown instead of content for premium assets
   createdAt      DateTime @default(now())
   updatedAt      DateTime @updatedAt
+
+  // npm-style dist-tag: which published version is served as "latest".
+  latestVersionId String?        @unique
+  latestVersion   SkillVersion?  @relation("SkillLatestVersion", fields: [latestVersionId], references: [id], onDelete: SetNull)
+  versions        SkillVersion[] @relation("SkillVersions")
+}
+
+// Immutable snapshot of a published skill version (npm-style registry entry).
+model SkillVersion {
+  id             String   @id @default(uuid())
+  skillId        String
+  version        String // semver, unique per skill
+  content        String
+  changelog      String? // release notes shown in the versions list
+  downloadsTotal Int      @default(0)
+  createdAt      DateTime @default(now())
+
+  skill        Skill                     @relation("SkillVersions", fields: [skillId], references: [id], onDelete: Cascade)
+  latestOf     Skill?                    @relation("SkillLatestVersion")
+  downloadDays SkillVersionDownloadDay[]
+
+  @@unique([skillId, version])
+}
+
+// Daily download buckets so weekly windows stay cheap to compute.
+model SkillVersionDownloadDay {
+  versionId String
+  day       DateTime @db.Date
+  count     Int      @default(0)
+
+  version SkillVersion @relation(fields: [versionId], references: [id], onDelete: Cascade)
+
+  @@id([versionId, day])
 }
 
 model Agent {
@@ -30,7 +64,7 @@ model Agent {
   slug             String   @unique
   title            String
   shortDescription String
-  version          String   @default("1.0.0")
+  version          String   @default("1.0.0") // semver of the version tagged latest
   readmeContent    String? // Main markdown content
   fileTree         Json // JSON representing the directory structure
   isPublished      Boolean  @default(false)
@@ -41,6 +75,38 @@ model Agent {
   previewContent   String?
   createdAt        DateTime @default(now())
   updatedAt        DateTime @updatedAt
+
+  latestVersionId String?        @unique
+  latestVersion   AgentVersion?  @relation("AgentLatestVersion", fields: [latestVersionId], references: [id], onDelete: SetNull)
+  versions        AgentVersion[] @relation("AgentVersions")
+}
+
+// Immutable snapshot of a published agent version (README + file tree).
+model AgentVersion {
+  id             String   @id @default(uuid())
+  agentId        String
+  version        String // semver, unique per agent
+  readmeContent  String?
+  fileTree       Json
+  changelog      String?
+  downloadsTotal Int      @default(0)
+  createdAt      DateTime @default(now())
+
+  agent        Agent                     @relation("AgentVersions", fields: [agentId], references: [id], onDelete: Cascade)
+  latestOf     Agent?                    @relation("AgentLatestVersion")
+  downloadDays AgentVersionDownloadDay[]
+
+  @@unique([agentId, version])
+}
+
+model AgentVersionDownloadDay {
+  versionId String
+  day       DateTime @db.Date
+  count     Int      @default(0)
+
+  version AgentVersion @relation(fields: [versionId], references: [id], onDelete: Cascade)
+
+  @@id([versionId, day])
 }
 
 model BlogPost {

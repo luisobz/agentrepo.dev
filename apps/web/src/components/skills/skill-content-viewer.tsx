@@ -4,12 +4,15 @@ import { Button } from '@agentrepo/ui';
 import { Check, Copy, Download } from 'lucide-react';
 import { useState } from 'react';
 import { MarkdownContent } from '@agentrepo/ui';
+import { trpc } from '../utils/trpc';
 
 type ViewerTab = 'rendered' | 'raw';
 
 interface SkillContentViewerProps {
   content: string;
   downloadFileName: string;
+  /** When set, copy/download actions count as a download of slug@version. */
+  trackDownload?: { slug: string; version: string };
 }
 
 function downloadAsMarkdown(content: string, fileName: string) {
@@ -51,14 +54,24 @@ function TabButton({
 export function SkillContentViewer({
   content,
   downloadFileName,
+  trackDownload,
 }: SkillContentViewerProps) {
   const [tab, setTab] = useState<ViewerTab>('rendered');
   const [isCopied, setIsCopied] = useState(false);
+  const recordDownload = trpc.skills.recordDownload.useMutation();
+
+  // Fire-and-forget: stats must never get in the way of the copy UX.
+  const countDownload = () => {
+    if (trackDownload) {
+      recordDownload.mutate(trackDownload);
+    }
+  };
 
   const handleCopy = async () => {
     try {
       await navigator.clipboard.writeText(content);
       setIsCopied(true);
+      countDownload();
       setTimeout(() => setIsCopied(false), 2000);
     } catch {
       setIsCopied(false);
@@ -91,7 +104,10 @@ export function SkillContentViewer({
           <Button
             variant="secondary"
             size="sm"
-            onClick={() => downloadAsMarkdown(content, downloadFileName)}
+            onClick={() => {
+              downloadAsMarkdown(content, downloadFileName);
+              countDownload();
+            }}
           >
             <Download className="mr-1.5 h-3.5 w-3.5" /> Download .md
           </Button>

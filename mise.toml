@@ -1,5 +1,5 @@
 [tools]
-node = "26"
+node = "24"
 pnpm = "10.33.4"
 starship = "latest"
 "npm:nx" = "22.7.5"

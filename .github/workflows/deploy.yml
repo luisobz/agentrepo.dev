@@ -15,7 +15,7 @@ name: Deploy (tag)
 #
 # Configuración (Settings → Secrets and variables → Actions):
 #   Secrets:  SSH_HOST, SSH_USER, SSH_KEY, DATABASE_URL (para migrate)
-#   Variables: SSH_PORT (def. 22), NODE_VERSION (def. 26),
+#   Variables: SSH_PORT (def. 22), NODE_VERSION (def. 24),
 #              NEXT_PUBLIC_API_URL, NEXT_PUBLIC_SUPABASE_URL,
 #              NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY,
 #              WEB_PATH, ADMIN_PATH, BACKEND_WEB_PATH, BACKEND_AI_PATH
@@ -42,7 +42,7 @@ permissions:
   contents: read
 
 env:
-  NODE_VERSION: ${{ vars.NODE_VERSION || '26' }}
+  NODE_VERSION: ${{ vars.NODE_VERSION || '24' }}
   SSH_PORT: ${{ vars.SSH_PORT || '22' }}
   # Dummy para el postinstall (prisma generate); nunca se conecta.
   DATABASE_URL: postgresql://ci:ci@localhost:5432/ci?schema=public

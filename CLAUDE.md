@@ -33,7 +33,7 @@ ALWAYS read its "Greeting Window" (`README.md`) first. This avoids scraping unne
 
 ## Tooling & Standards
 
-- Node 26.1.0, pnpm 10.33.4, nx tasks.
+- Node 24.x, pnpm 10.33.4, nx tasks.
 - Test runner: vitest — `test` for unit, `test:int` for integration.
 - Formatting: Prettier. Never manually reorder imports.
 - Lint: ESLint.

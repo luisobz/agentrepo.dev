@@ -25,6 +25,9 @@ COPY --from=builder /app/apps/admin/.next/standalone ./
 COPY --from=builder /app/apps/admin/.next/static ./apps/admin/.next/static
 COPY --from=builder /app/apps/admin/public ./apps/admin/public
 
+# Drop root privileges (the `node` user ships with the base image)
+USER node
+
 EXPOSE 3001
 
 CMD ["node", "apps/admin/server.js"]

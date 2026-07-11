@@ -40,6 +40,9 @@
     "postinstall": "nx run database:generate",
     "prepare": "husky"
   },
+  "lint-staged": {
+    "*.{ts,tsx,js,jsx,mjs,cjs}": "eslint --fix"
+  },
   "devDependencies": {
     "@commitlint/cli": "^21.0.1",
     "@commitlint/config-conventional": "^21.0.1",

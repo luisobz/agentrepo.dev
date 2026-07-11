@@ -27,6 +27,9 @@ COPY --from=builder /app/apps/backend-web/dist ./
 RUN corepack enable && corepack prepare pnpm@latest --activate \
     && pnpm install --frozen-lockfile --prod
 
+# Drop root privileges (the `node` user ships with the base image)
+USER node
+
 EXPOSE 4000
 
 CMD ["node", "main.js"]

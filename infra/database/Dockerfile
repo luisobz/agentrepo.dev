@@ -1,5 +1,5 @@
 # Etapa 1: construir dependencias
-FROM node:20-alpine AS builder
+FROM node:26-alpine AS builder
 WORKDIR /app
 
 # Copiar manifiestos necesarios
@@ -13,7 +13,7 @@ RUN corepack enable && corepack prepare pnpm@latest --activate
 RUN pnpm install --filter @agentrepo/database --frozen-lockfile --prod
 
 # Etapa final: imagen ligera con prisma y migraciones
-FROM node:20-alpine
+FROM node:26-alpine
 WORKDIR /app
 
 # Copiar node_modules desde el builder

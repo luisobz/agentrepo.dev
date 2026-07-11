@@ -13,6 +13,9 @@ concurrency:
   group: ci-${{ github.ref }}
   cancel-in-progress: true
 
+permissions:
+  contents: read
+
 env:
   NODE_VERSION: ${{ vars.NODE_VERSION || '26' }}
   # Dummy: sólo se usa para generar el cliente Prisma, nunca se conecta.

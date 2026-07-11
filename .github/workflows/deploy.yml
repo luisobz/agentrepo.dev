@@ -38,6 +38,9 @@ concurrency:
   group: deploy-${{ github.ref }}
   cancel-in-progress: false
 
+permissions:
+  contents: read
+
 env:
   NODE_VERSION: ${{ vars.NODE_VERSION || '26' }}
   SSH_PORT: ${{ vars.SSH_PORT || '22' }}
@@ -50,8 +53,31 @@ env:
   NEXT_PUBLIC_SENTRY_DSN: ${{ vars.NEXT_PUBLIC_SENTRY_DSN }}
 
 jobs:
+  # ---------------------------------------------------------------- VERIFY
+  # Puerta de calidad: lint + tests + build ANTES de tocar producción.
+  # Un build que compile pero rompa tests no debe llegar a desplegarse.
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: pnpm
+
+      - run: pnpm install --frozen-lockfile
+
+      - name: Lint + tests
+        run: pnpm verify
+
+      - name: Build (todas las apps y paquetes)
+        run: pnpm build
+
   # ---------------------------------------------------------------- MIGRATE
   migrate:
+    needs: verify
     if: ${{ github.event_name != 'workflow_dispatch' || contains(fromJSON('["all","migrate","backend-web","backend-ai"]'), inputs.only) }}
     runs-on: ubuntu-latest
     steps:
@@ -78,8 +104,8 @@ jobs:
   # ---------------------------------------------------------------- WEB
   web:
     # !cancelled(): el job corre aunque migrate se haya saltado (dispatch selectivo)
-    if: ${{ !cancelled() && (needs.migrate.result == 'success' || needs.migrate.result == 'skipped') && (github.event_name != 'workflow_dispatch' || inputs.only == 'all' || inputs.only == 'web') }}
-    needs: migrate
+    if: ${{ !cancelled() && needs.verify.result == 'success' && (needs.migrate.result == 'success' || needs.migrate.result == 'skipped') && (github.event_name != 'workflow_dispatch' || inputs.only == 'all' || inputs.only == 'web') }}
+    needs: [verify, migrate]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -128,8 +154,8 @@ jobs:
 
   # ---------------------------------------------------------------- ADMIN
   admin:
-    if: ${{ !cancelled() && (needs.migrate.result == 'success' || needs.migrate.result == 'skipped') && (github.event_name != 'workflow_dispatch' || inputs.only == 'all' || inputs.only == 'admin') }}
-    needs: migrate
+    if: ${{ !cancelled() && needs.verify.result == 'success' && (needs.migrate.result == 'success' || needs.migrate.result == 'skipped') && (github.event_name != 'workflow_dispatch' || inputs.only == 'all' || inputs.only == 'admin') }}
+    needs: [verify, migrate]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -177,8 +203,8 @@ jobs:
 
   # ---------------------------------------------------------------- BACKEND WEB
   backend-web:
-    if: ${{ !cancelled() && (needs.migrate.result == 'success' || needs.migrate.result == 'skipped') && (github.event_name != 'workflow_dispatch' || inputs.only == 'all' || inputs.only == 'backend-web') }}
-    needs: migrate
+    if: ${{ !cancelled() && needs.verify.result == 'success' && (needs.migrate.result == 'success' || needs.migrate.result == 'skipped') && (github.event_name != 'workflow_dispatch' || inputs.only == 'all' || inputs.only == 'backend-web') }}
+    needs: [verify, migrate]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -228,8 +254,8 @@ jobs:
 
   # ---------------------------------------------------------------- BACKEND AI
   backend-ai:
-    if: ${{ !cancelled() && (needs.migrate.result == 'success' || needs.migrate.result == 'skipped') && (github.event_name != 'workflow_dispatch' || inputs.only == 'all' || inputs.only == 'backend-ai') }}
-    needs: migrate
+    if: ${{ !cancelled() && needs.verify.result == 'success' && (needs.migrate.result == 'success' || needs.migrate.result == 'skipped') && (github.event_name != 'workflow_dispatch' || inputs.only == 'all' || inputs.only == 'backend-ai') }}
+    needs: [verify, migrate]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4

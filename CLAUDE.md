@@ -23,7 +23,9 @@ ALWAYS read its "Greeting Window" (`README.md`) first. This avoids scraping unne
   - `web`: Next.js Public Web App. [Read more](apps/web/README.md)
 - **packages/**
   - `application`: Use cases and ports for Hexagonal Architecture. [Read more](packages/application/README.md)
+  - `avatar`: Shared animated avatar system used across the web app. [Read more](packages/avatar/README.md)
   - `config`: Shared configuration and tokens. [Read more](packages/config/README.md)
+  - `database`: Prisma schema, migrations, and seeds. [Read more](packages/database/README.md)
   - `domain`: Pure business logic entities and types. [Read more](packages/domain/README.md)
   - `infrastructure`: Prisma DB, external adapters, and implementations. [Read more](packages/infrastructure/README.md)
   - `trpc`: Shared tRPC routers and schemas. [Read more](packages/trpc/README.md)

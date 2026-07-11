@@ -1,0 +1,40 @@
+name: CI
+
+# Verifica lint + tests + builds en cada push a main y en cada pull request.
+# No necesita secrets: usa una DATABASE_URL dummy sólo para que
+# `prisma generate` (postinstall) pueda resolver la variable.
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  NODE_VERSION: ${{ vars.NODE_VERSION || '26' }}
+  # Dummy: sólo se usa para generar el cliente Prisma, nunca se conecta.
+  DATABASE_URL: postgresql://ci:ci@localhost:5432/ci?schema=public
+  NEXT_PUBLIC_API_URL: http://localhost:4000
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4 # versión leída de packageManager en package.json
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: pnpm
+
+      - run: pnpm install --frozen-lockfile
+
+      - name: Lint + tests
+        run: pnpm verify
+
+      - name: Build (todas las apps y paquetes)
+        run: pnpm build

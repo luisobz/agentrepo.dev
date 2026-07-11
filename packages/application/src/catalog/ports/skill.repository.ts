@@ -5,7 +5,11 @@ import {
   Paginated,
 } from './content.repository';
 
-export type CreateSkillInput = Omit<Skill, 'id' | 'createdAt' | 'updatedAt'>;
+// `version` is registry-managed (publish/set-latest), never set directly.
+export type CreateSkillInput = Omit<
+  Skill,
+  'id' | 'version' | 'createdAt' | 'updatedAt'
+>;
 export type UpdateSkillInput = Partial<CreateSkillInput>;
 
 export interface SearchSkillsParams {

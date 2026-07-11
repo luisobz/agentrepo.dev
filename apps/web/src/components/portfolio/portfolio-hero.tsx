@@ -4,6 +4,7 @@ import { motion } from 'framer-motion';
 import { ArrowLeft } from 'lucide-react';
 import Link from 'next/link';
 import type { PortfolioProfile } from '../../lib/portfolio';
+import { useT } from '../../lib/i18n/use-t';
 
 const container = {
   hidden: {},
@@ -20,6 +21,7 @@ const fadeUp = {
 };
 
 export function PortfolioHero({ profile }: { profile: PortfolioProfile }) {
+  const t = useT();
   return (
     <section className="relative flex min-h-[90vh] flex-col justify-center px-6 py-24 sm:px-10">
       <Link
@@ -27,7 +29,7 @@ export function PortfolioHero({ profile }: { profile: PortfolioProfile }) {
         className="group fixed left-5 top-5 z-50 flex items-center gap-2 rounded-full border border-white/15 bg-white/5 px-4 py-2 font-mono text-xs text-[#cfc6b8] backdrop-blur-md transition-colors hover:border-[#c4909a] hover:text-white"
       >
         <ArrowLeft className="h-3.5 w-3.5 transition-transform group-hover:-translate-x-0.5" />
-        Volver al Repositorio
+        {t('portfolio.back')}
       </Link>
 
       <motion.div
@@ -77,7 +79,7 @@ export function PortfolioHero({ profile }: { profile: PortfolioProfile }) {
             LinkedIn
           </a>
           <span>·</span>
-          agentic workflows · LLM orchestration · RAG
+          {t('portfolio.hero.tags')}
         </motion.div>
       </motion.div>
     </section>

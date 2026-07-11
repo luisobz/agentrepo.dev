@@ -4,6 +4,8 @@ import type {
   AdminAuthUseCases,
   CatalogUseCases,
   GlobalSearchParams,
+  PlaygroundUseCases,
+  PortfolioUseCases,
 } from '@agentrepo/application';
 import type { UseCase } from '@agentrepo/application';
 import {
@@ -12,6 +14,7 @@ import {
   InvalidCredentialsError,
   InvalidRefreshTokenError,
   SlugAlreadyInUseError,
+  VersionAlreadyExistsError,
 } from '@agentrepo/domain';
 import type { SearchHit } from '@agentrepo/domain';
 
@@ -20,6 +23,8 @@ export interface TRPCContext {
   adminAuth: AdminAuthUseCases;
   catalog: CatalogUseCases;
   globalSearch: UseCase<GlobalSearchParams, SearchHit[]>;
+  portfolio: PortfolioUseCases;
+  playground: PlaygroundUseCases;
 }
 
 export const t = initTRPC.context<TRPCContext>().create({
@@ -36,7 +41,10 @@ function toTRPCError(error: DomainError): TRPCError {
   ) {
     return new TRPCError({ code: 'UNAUTHORIZED', message: error.message, cause: error });
   }
-  if (error instanceof SlugAlreadyInUseError) {
+  if (
+    error instanceof SlugAlreadyInUseError ||
+    error instanceof VersionAlreadyExistsError
+  ) {
     return new TRPCError({ code: 'CONFLICT', message: error.message, cause: error });
   }
   return new TRPCError({

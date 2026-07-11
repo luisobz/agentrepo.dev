@@ -1,0 +1,10 @@
+{
+  "users": [
+    {
+      "email": "admin@example.com",
+      "name": "Production Admin",
+      "role": "admin",
+      "password": "change-me-strong-password"
+    }
+  ]
+}

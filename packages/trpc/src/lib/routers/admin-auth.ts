@@ -8,8 +8,8 @@ import { publicProcedure, router } from '../trpc';
  */
 export const adminAuthRouter = router({
   login: publicProcedure
-    .input(z.object({ password: z.string().min(1) }))
-    .mutation(({ ctx, input }) => ctx.adminAuth.login.execute(input.password)),
+    .input(z.object({ email: z.string().email(), password: z.string().min(1) }))
+    .mutation(({ ctx, input }) => ctx.adminAuth.login.execute(input)),
 
   refresh: publicProcedure
     .input(z.object({ refreshToken: z.string().min(1) }))

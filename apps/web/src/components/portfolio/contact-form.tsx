@@ -1,24 +1,31 @@
 'use client';
 
-import { Bot, Sparkles } from 'lucide-react';
+import type { ContactSubject } from '@agentrepo/trpc/schemas';
+import { Bot, Loader2, Sparkles } from 'lucide-react';
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
+import { trpc } from '../utils/trpc';
+import { useT } from '../../lib/i18n/use-t';
+import type { WebDictionaryKey } from '../../lib/i18n/dictionary';
 
-export const CONTACT_SUBJECTS = [
-  'Empleo',
-  'Freelance',
-  'Consulta Técnica',
-  'Otro',
-] as const;
+export const CONTACT_SUBJECT_OPTIONS: ReadonlyArray<{
+  value: ContactSubject;
+  labelKey: WebDictionaryKey;
+}> = [
+  { value: 'employment', labelKey: 'portfolio.contact.subject.employment' },
+  { value: 'freelance', labelKey: 'portfolio.contact.subject.freelance' },
+  { value: 'question', labelKey: 'portfolio.contact.subject.question' },
+  { value: 'other', labelKey: 'portfolio.contact.subject.other' },
+];
 
 export interface ContactFormValues {
   email: string;
-  subject: (typeof CONTACT_SUBJECTS)[number];
+  subject: ContactSubject;
   message: string;
 }
 
 const inputClasses =
-  'w-full rounded-xl border border-white/15 bg-white/[0.04] px-4 py-3 text-sm text-[#fdf8ef] placeholder:text-[#8d8273] transition-colors focus:border-[#c4909a] focus:outline-none';
+  'w-full rounded-xl border border-white/15 bg-white/[0.04] px-4 py-3 text-sm text-[#fdf8ef] placeholder:text-[#8d8273] transition-colors focus:border-[#c4909a] focus:outline-none disabled:opacity-60';
 
 function FieldError({ message }: { message?: string }) {
   if (!message) {
@@ -32,19 +39,27 @@ function FieldError({ message }: { message?: string }) {
 }
 
 export function ContactForm() {
+  const t = useT();
   const [isSent, setIsSent] = useState(false);
   const {
     register,
     handleSubmit,
+    reset,
     formState: { errors },
   } = useForm<ContactFormValues>({
-    defaultValues: { email: '', subject: 'Empleo', message: '' },
+    defaultValues: { email: '', subject: 'employment', message: '' },
   });
 
-  // Mocked submit: Feature 15 will hand this payload to the AI contact agent.
+  const submitContact = trpc.contact.submit.useMutation({
+    onSuccess: () => {
+      reset();
+      setIsSent(true);
+    },
+  });
+  const isSubmitting = submitContact.isPending;
+
   const onSubmit = (values: ContactFormValues) => {
-    console.log('[contact-form] payload ready for the AI agent:', values);
-    setIsSent(true);
+    submitContact.mutate(values);
   };
 
   return (
@@ -54,17 +69,16 @@ export function ContactForm() {
           id="contact-heading"
           className="mb-6 text-3xl font-semibold tracking-tight text-[#fdf8ef] sm:text-4xl"
         >
-          Let&apos;s talk
+          {t('portfolio.contact.title')}
         </h2>
 
         <div className="mb-8 flex gap-3 rounded-2xl border border-[#2f5d8a]/50 bg-[#2f5d8a]/10 p-4">
           <Bot className="mt-0.5 h-5 w-5 shrink-0 text-[#8aaac8]" />
-          <p className="text-sm leading-relaxed text-[#cfc6b8]">
-            Este formulario es analizado autónomamente por un{' '}
-            <strong className="text-[#fdf8ef]">Agente IA</strong>. Al enviarlo,
-            el agente procesará tu mensaje, creará un reporte técnico
-            interactivo en PDF y te responderá por email al instante.
-          </p>
+          <p
+            className="text-sm leading-relaxed text-[#cfc6b8] [&_strong]:text-[#fdf8ef]"
+            // Static, trusted copy with a single <strong> emphasis per locale.
+            dangerouslySetInnerHTML={{ __html: t('portfolio.contact.agentNotice') }}
+          />
         </div>
 
         {isSent ? (
@@ -73,29 +87,29 @@ export function ContactForm() {
             className="rounded-2xl border border-[#7a2230]/60 bg-[#7a2230]/15 p-6 text-center"
           >
             <p className="text-lg font-semibold text-[#fdf8ef]">
-              Mensaje en camino ✦
+              {t('portfolio.contact.sentTitle')}
             </p>
             <p className="mt-2 text-sm text-[#cfc6b8]">
-              El agente ya está analizando tu consulta. Revisa tu bandeja de
-              entrada en unos minutos.
+              {t('portfolio.contact.sentBody')}
             </p>
           </div>
         ) : (
           <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-5" noValidate>
             <div>
               <label htmlFor="contact-email" className="mb-1.5 block text-sm font-medium text-[#fdf8ef]">
-                Email
+                {t('portfolio.contact.email')}
               </label>
               <input
                 id="contact-email"
                 type="email"
                 placeholder="you@company.com"
                 className={inputClasses}
+                disabled={isSubmitting}
                 {...register('email', {
-                  required: 'Tu email es obligatorio',
+                  required: t('portfolio.contact.error.emailRequired'),
                   pattern: {
                     value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
-                    message: 'Introduce un email válido',
+                    message: t('portfolio.contact.error.emailInvalid'),
                   },
                 })}
               />
@@ -104,16 +118,17 @@ export function ContactForm() {
 
             <div>
               <label htmlFor="contact-subject" className="mb-1.5 block text-sm font-medium text-[#fdf8ef]">
-                Subject
+                {t('portfolio.contact.subject')}
               </label>
               <select
                 id="contact-subject"
                 className={`${inputClasses} appearance-none bg-[#1b1714]`}
+                disabled={isSubmitting}
                 {...register('subject', { required: true })}
               >
-                {CONTACT_SUBJECTS.map((subject) => (
-                  <option key={subject} value={subject}>
-                    {subject}
+                {CONTACT_SUBJECT_OPTIONS.map((option) => (
+                  <option key={option.value} value={option.value}>
+                    {t(option.labelKey)}
                   </option>
                 ))}
               </select>
@@ -121,30 +136,47 @@ export function ContactForm() {
 
             <div>
               <label htmlFor="contact-message" className="mb-1.5 block text-sm font-medium text-[#fdf8ef]">
-                Message
+                {t('portfolio.contact.message')}
               </label>
               <textarea
                 id="contact-message"
                 rows={6}
-                placeholder="Tell me about your project, your stack and what you need…"
+                placeholder={t('portfolio.contact.messagePlaceholder')}
                 className={`${inputClasses} resize-y`}
+                disabled={isSubmitting}
                 {...register('message', {
-                  required: 'Cuéntame al menos un poco sobre tu proyecto',
+                  required: t('portfolio.contact.error.messageRequired'),
                   minLength: {
                     value: 20,
-                    message: 'El mensaje debe tener al menos 20 caracteres',
+                    message: t('portfolio.contact.error.messageMin'),
                   },
                 })}
               />
               <FieldError message={errors.message?.message} />
             </div>
 
+            {submitContact.isError ? (
+              <p role="alert" className="text-sm text-[#e8c2ca]">
+                {t('portfolio.contact.error.submit')}
+              </p>
+            ) : null}
+
             <button
               type="submit"
-              className="mt-2 flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-[#7a2230] to-[#5b1822] px-6 py-3.5 text-sm font-semibold text-[#fdf8ef] shadow-[0_4px_24px_rgba(122,34,48,0.4)] transition-all hover:-translate-y-0.5 hover:shadow-[0_8px_32px_rgba(122,34,48,0.55)]"
+              disabled={isSubmitting}
+              className="mt-2 flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-[#7a2230] to-[#5b1822] px-6 py-3.5 text-sm font-semibold text-[#fdf8ef] shadow-[0_4px_24px_rgba(122,34,48,0.4)] transition-all hover:-translate-y-0.5 hover:shadow-[0_8px_32px_rgba(122,34,48,0.55)] disabled:cursor-not-allowed disabled:opacity-70 disabled:hover:translate-y-0"
             >
-              <Sparkles className="h-4 w-4" />
-              Send to the agent
+              {isSubmitting ? (
+                <>
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                  {t('portfolio.contact.submitting')}
+                </>
+              ) : (
+                <>
+                  <Sparkles className="h-4 w-4" />
+                  {t('portfolio.contact.submit')}
+                </>
+              )}
             </button>
           </form>
         )}

@@ -4,10 +4,14 @@ import type { Metadata } from 'next';
 import { ContentCover } from '@agentrepo/ui';
 import { Play } from 'lucide-react';
 import { PremiumGate } from '../../../components/premium/premium-gate';
+import { AgentDownloadButton } from '../../../components/agents/agent-download-button';
 import { AgentWorkbench } from '../../../components/agents/workbench/agent-workbench';
 import { MarkdownContent } from '@agentrepo/ui';
+import { VersionHistory } from '../../../components/versions/version-history';
 import {
   countFiles,
+  getAgentVersion,
+  getAgentVersions,
   getPublishedAgentBySlug,
   hasPlayground,
 } from '../../../lib/agents';
@@ -17,6 +21,7 @@ export const dynamic = 'force-dynamic';
 
 interface AgentPageProps {
   params: Promise<{ slug: string }>;
+  searchParams: Promise<{ version?: string }>;
 }
 
 export async function generateMetadata({
@@ -40,14 +45,41 @@ export async function generateMetadata({
   };
 }
 
-export default async function AgentPage({ params }: AgentPageProps) {
-  const { slug } = await params;
-  const agent = await getPublishedAgentBySlug(slug);
+export default async function AgentPage({ params, searchParams }: AgentPageProps) {
+  const [{ slug }, { version: requestedVersion }] = await Promise.all([
+    params,
+    searchParams,
+  ]);
+  const [agent, versions] = await Promise.all([
+    getPublishedAgentBySlug(slug),
+    getAgentVersions(slug),
+  ]);
   if (!agent) {
     notFound();
   }
 
-  const playgroundIncluded = hasPlayground(agent.fileTree);
+  // A pinned version (?version=x.y.z) swaps the served snapshot npm-style.
+  const pinned =
+    requestedVersion && requestedVersion !== agent.version
+      ? await getAgentVersion(slug, requestedVersion)
+      : null;
+  if (requestedVersion && requestedVersion !== agent.version && !pinned) {
+    notFound();
+  }
+
+  const shownVersion = pinned?.version ?? agent.version;
+  const shownFileTree = pinned?.fileTree ?? agent.fileTree;
+  const shownReadme = pinned?.readmeContent ?? agent.readmeContent;
+  const downloadsTotal = versions.reduce(
+    (sum, entry) => sum + entry.downloadsTotal,
+    0
+  );
+  const downloadsWeekly = versions.reduce(
+    (sum, entry) => sum + entry.downloadsWeekly,
+    0
+  );
+
+  const playgroundIncluded = hasPlayground(shownFileTree);
 
   return (
     <div className="mx-auto w-full max-w-6xl px-4 pb-24 sm:px-6">
@@ -61,7 +93,23 @@ export default async function AgentPage({ params }: AgentPageProps) {
       <header className="mb-8 mt-8">
         <div className="flex flex-wrap items-center gap-3">
           <span className="rounded-full border border-[var(--color-border-medium)] px-2.5 py-0.5 font-mono text-xs text-[var(--color-text-secondary)]">
-            v{agent.version}
+            v{shownVersion}
+          </span>
+          {pinned ? (
+            <Link
+              href={`/agents/${agent.slug}`}
+              className="font-mono text-xs text-[var(--color-text-muted)] underline-offset-2 hover:underline"
+            >
+              ver latest (v{agent.version})
+            </Link>
+          ) : (
+            <span className="rounded-full bg-emerald-500/15 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-emerald-700">
+              latest
+            </span>
+          )}
+          <span className="font-mono text-xs text-[var(--color-text-muted)]">
+            {downloadsWeekly.toLocaleString()} weekly ·{' '}
+            {downloadsTotal.toLocaleString()} total downloads
           </span>
           {playgroundIncluded && (
             <span className="inline-flex items-center gap-1 rounded-full bg-[var(--color-brand-garnet-ghost)] px-2.5 py-0.5 text-xs font-medium text-[var(--color-brand-garnet)]">
@@ -98,25 +146,39 @@ export default async function AgentPage({ params }: AgentPageProps) {
         />
       ) : (
         <>
+          <div className="mb-4 flex justify-end">
+            <AgentDownloadButton
+              slug={agent.slug}
+              version={shownVersion}
+              fileTree={shownFileTree}
+              readmeContent={shownReadme}
+            />
+          </div>
           <AgentWorkbench
-            fileTree={agent.fileTree}
+            fileTree={shownFileTree}
             meta={{
               slug: agent.slug,
-              version: agent.version,
+              version: shownVersion,
               updatedAt: formatDate(agent.updatedAt),
-              fileCount: countFiles(agent.fileTree),
+              fileCount: countFiles(shownFileTree),
               hasPlayground: playgroundIncluded,
             }}
           />
 
-          {agent.readmeContent && (
+          {shownReadme && (
             <section className="mt-12">
               <h2 className="mb-4 text-xl font-semibold tracking-tight">About</h2>
-              <MarkdownContent content={agent.readmeContent} />
+              <MarkdownContent content={shownReadme} />
             </section>
           )}
         </>
       )}
+
+      <VersionHistory
+        versions={versions}
+        basePath={`/agents/${agent.slug}`}
+        currentVersion={shownVersion}
+      />
     </div>
   );
 }

@@ -41,6 +41,20 @@
         "command": "pnpm prisma db seed --config=prisma.config.ts",
         "cwd": "packages/database"
       }
+    },
+    "seed-encrypt": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "pnpm tsx src/seeds/tools/crypt-seed-data.ts encrypt",
+        "cwd": "packages/database"
+      }
+    },
+    "seed-decrypt": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "pnpm tsx src/seeds/tools/crypt-seed-data.ts decrypt",
+        "cwd": "packages/database"
+      }
     }
   }
 }

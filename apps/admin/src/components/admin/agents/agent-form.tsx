@@ -185,13 +185,22 @@ export function AgentForm({ agent }: { agent?: Agent }) {
         />
       </FormField>
       <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
-        <FormField label="Version" htmlFor="version" hint="Semantic versioning, e.g. 1.0.0">
+        <FormField
+          label="Version"
+          htmlFor="version"
+          hint={
+            agent
+              ? 'Managed from the Versions panel below (publish/set latest)'
+              : 'Semantic versioning, e.g. 1.0.0'
+          }
+        >
           <Input
             id="version"
             value={values.version}
             onChange={(event) =>
               setValues((prev) => ({ ...prev, version: event.target.value }))
             }
+            disabled={Boolean(agent)}
             required
           />
         </FormField>

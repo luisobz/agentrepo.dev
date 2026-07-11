@@ -5,6 +5,8 @@ import { fetchAllPages, isClientNotFound } from './public-content';
 import { serverTrpc } from './trpc-server';
 
 export type Agent = RouterOutputs['agents']['bySlug'];
+export type AgentVersionDetail = RouterOutputs['agents']['byVersion'];
+export type AgentVersionSummary = RouterOutputs['agents']['versions'][number];
 
 export function getPublishedAgents(): Promise<Agent[]> {
   return fetchAllPages((input) => serverTrpc.agents.list.query(input));
@@ -15,6 +17,32 @@ export const getPublishedAgentBySlug = cache(
   async (slug: string): Promise<Agent | null> => {
     try {
       return await serverTrpc.agents.bySlug.query({ slug });
+    } catch (error) {
+      if (isClientNotFound(error)) {
+        return null;
+      }
+      throw error;
+    }
+  }
+);
+
+export const getAgentVersions = cache(
+  async (slug: string): Promise<AgentVersionSummary[]> => {
+    try {
+      return await serverTrpc.agents.versions.query({ slug });
+    } catch (error) {
+      if (isClientNotFound(error)) {
+        return [];
+      }
+      throw error;
+    }
+  }
+);
+
+export const getAgentVersion = cache(
+  async (slug: string, version: string): Promise<AgentVersionDetail | null> => {
+    try {
+      return await serverTrpc.agents.byVersion.query({ slug, version });
     } catch (error) {
       if (isClientNotFound(error)) {
         return null;

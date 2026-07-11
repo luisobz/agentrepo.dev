@@ -18,6 +18,8 @@ function buildContext(adminAuth: Partial<TRPCContext['adminAuth']>): TRPCContext
     adminAuth: adminAuth as TRPCContext['adminAuth'],
     catalog: {} as CatalogUseCases,
     globalSearch: { execute: async () => [] },
+    portfolio: {} as TRPCContext['portfolio'],
+    playground: {} as TRPCContext['playground'],
   };
 }
 
@@ -34,7 +36,7 @@ describe('adminAuth router', () => {
     );
 
     await expect(
-      caller.adminAuth.login({ password: 'secret' })
+      caller.adminAuth.login({ email: 'admin@agentrepo.dev', password: 'secret' })
     ).resolves.toEqual(tokens);
   });
 
@@ -49,7 +51,10 @@ describe('adminAuth router', () => {
       })
     );
 
-    await expectTRPCCode(caller.adminAuth.login({ password: 'wrong' }), 'UNAUTHORIZED');
+    await expectTRPCCode(
+      caller.adminAuth.login({ email: 'admin@agentrepo.dev', password: 'wrong' }),
+      'UNAUTHORIZED'
+    );
   });
 
   it('maps InvalidRefreshTokenError to UNAUTHORIZED', async () => {

@@ -11,6 +11,8 @@ export interface Skill {
   description: string | null;
   content: string;
   type: SkillType;
+  /** Semver of the release currently tagged latest. */
+  version: string;
   isPublished: boolean;
   headerImageUrl: string | null;
   isPremium: boolean;

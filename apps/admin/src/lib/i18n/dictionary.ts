@@ -5,6 +5,8 @@ export const adminDictionary = {
   'nav.skills': { en: 'Skills', es: 'Skills' },
   'nav.agents': { en: 'Agents', es: 'Agentes' },
   'nav.blog': { en: 'Blog', es: 'Blog' },
+  'nav.contacts': { en: 'Contacts', es: 'Contactos' },
+  'nav.playgroundTokens': { en: 'Playground tokens', es: 'Tokens playground' },
   'nav.signOut': { en: 'Sign out', es: 'Cerrar sesión' },
   'nav.adminPanel': { en: 'Admin panel', es: 'Panel de administración' },
 

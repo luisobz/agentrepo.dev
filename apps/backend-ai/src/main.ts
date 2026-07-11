@@ -1,14 +1,13 @@
-/**
- * This is not a production server yet!
- * This is only a minimal backend to get started.
- */
+import './instrument';
 
 import { Logger } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app/app.module';
 import { BackendEnvironments } from '@agentrepo/config';
+import { initLangfuseTracing } from './workflow/langfuse';
 
 async function bootstrap() {
+  initLangfuseTracing();
   const app = await NestFactory.create(AppModule);
   const globalPrefix = 'api';
   app.setGlobalPrefix(globalPrefix);

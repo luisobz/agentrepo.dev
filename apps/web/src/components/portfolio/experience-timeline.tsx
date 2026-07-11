@@ -2,6 +2,7 @@
 
 import { motion } from 'framer-motion';
 import type { ExperienceEntry } from '../../lib/portfolio';
+import { useT } from '../../lib/i18n/use-t';
 
 function TimelineItem({ entry, index }: { entry: ExperienceEntry; index: number }) {
   return (
@@ -35,6 +36,7 @@ function TimelineItem({ entry, index }: { entry: ExperienceEntry; index: number 
 }
 
 export function ExperienceTimeline({ entries }: { entries: ExperienceEntry[] }) {
+  const t = useT();
   return (
     <section aria-labelledby="experience-heading" className="px-6 py-20 sm:px-10">
       <div className="mx-auto w-full max-w-4xl">
@@ -42,7 +44,7 @@ export function ExperienceTimeline({ entries }: { entries: ExperienceEntry[] }) 
           id="experience-heading"
           className="mb-12 text-3xl font-semibold tracking-tight text-[#fdf8ef] sm:text-4xl"
         >
-          Professional journey
+          {t('portfolio.experience.title')}
         </h2>
 
         <ul className="relative">

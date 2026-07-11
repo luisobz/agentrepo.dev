@@ -14,12 +14,14 @@
         "{options.outputPath}"
       ],
       "options": {
-        "outputPath": "packages/infrastructure/dist",
-        "main": "packages/infrastructure/src/index.ts",
-        "tsConfig": "packages/infrastructure/tsconfig.lib.json",
+        "outputPath": "{projectRoot}/dist",
+        "main": "{projectRoot}/src/index.ts",
+        "tsConfig": "{projectRoot}/tsconfig.lib.json",
         "assets": [
-          "packages/infrastructure/*.md"
-        ]
+          "{projectRoot}/*.md"
+        ],
+        "skipTypeCheck": false,
+        "generateExportsField": false
       }
     }
   }

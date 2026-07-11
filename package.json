@@ -2,6 +2,7 @@
   "name": "agentrepo.dev",
   "version": "0.0.0",
   "private": true,
+  "packageManager": "pnpm@10.33.4",
   "workspaces": [
     "packages/*",
     "apps/*"
@@ -34,7 +35,10 @@
     "db:migrate:deploy": "nx run database:migrate-deploy",
     "db:studio": "nx run database:studio",
     "db:seed": "nx run database:seed",
-    "postinstall": "nx run database:generate"
+    "db:seed:encrypt": "nx run database:seed-encrypt",
+    "db:seed:decrypt": "nx run database:seed-decrypt",
+    "postinstall": "nx run database:generate",
+    "prepare": "husky"
   },
   "devDependencies": {
     "@commitlint/cli": "^21.0.1",

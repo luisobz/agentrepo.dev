@@ -5,6 +5,8 @@ import { adminAuthRouter } from "./admin-auth";
 import { agentsRouter } from "./agents";
 import { blogRouter } from "./blog";
 import { blogPostsRouter } from "./blog-posts";
+import { contactRouter } from "./contact";
+import { playgroundRouter } from "./playground";
 import { searchRouter } from "./search";
 import { skillsRouter } from "./skills";
 
@@ -26,6 +28,8 @@ export const appRouter = router({
   agents: agentsRouter,
   blogPosts: blogPostsRouter,
   blog: blogRouter,
+  contact: contactRouter,
+  playground: playgroundRouter,
 });
 
 export type AppRouter = typeof appRouter;

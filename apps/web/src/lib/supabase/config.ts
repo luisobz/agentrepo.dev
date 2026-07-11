@@ -5,13 +5,14 @@
 
 export interface SupabasePublicEnv {
   url: string;
-  anonKey: string;
+  /** New-style publishable API key (sb_publishable_...), replaces the legacy anon JWT key. */
+  publishableKey: string;
 }
 
 export function getSupabasePublicEnv(): SupabasePublicEnv | null {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
-  const anonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
-  return url && anonKey ? { url, anonKey } : null;
+  const publishableKey = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY;
+  return url && publishableKey ? { url, publishableKey } : null;
 }
 
 export function isSupabaseConfigured(): boolean {

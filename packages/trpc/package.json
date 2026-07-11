@@ -2,8 +2,8 @@
   "name": "@agentrepo/trpc",
   "version": "0.0.0",
   "private": true,
-  "main": "./dist/src/index.js",
-  "types": "./dist/src/index.d.ts",
+  "main": "./src/index.js",
+  "types": "./src/index.d.ts",
   "dependencies": {
     "@trpc/server": "^11.17.0",
     "superjson": "^2.2.6",

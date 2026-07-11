@@ -3,6 +3,7 @@
 import { useParams } from 'next/navigation';
 import { FormError } from '../../../../components/admin/form/form-error';
 import { SkillForm } from '../../../../components/admin/skills/skill-form';
+import { VersionManager } from '../../../../components/admin/versions/version-manager';
 import { trpc } from '../../../../components/utils/trpc';
 
 export default function EditSkillPage() {
@@ -16,7 +17,16 @@ export default function EditSkillPage() {
         <p className="text-sm text-[var(--color-text-muted)]">Loading…</p>
       )}
       {skill.error && <FormError message={skill.error.message} />}
-      {skill.data && <SkillForm skill={skill.data} />}
+      {skill.data && (
+        <>
+          <SkillForm skill={skill.data} />
+          <VersionManager
+            kind="skill"
+            assetId={skill.data.id}
+            currentVersion={skill.data.version}
+          />
+        </>
+      )}
     </div>
   );
 }

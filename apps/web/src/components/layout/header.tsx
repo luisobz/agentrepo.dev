@@ -33,6 +33,16 @@ export function Header() {
     return null;
   }
 
+  // On the dark playground page the transparent (not-scrolled) header sits on a
+  // near-black backdrop, so its default dark text is unreadable. Once scrolled
+  // the pill picks up its warm-white background and the default colors work.
+  const onDark = !!pathname?.startsWith("/playground") && !isScrolled;
+
+  const navLinkClass = cn(
+    "font-sans text-xs uppercase tracking-wider font-semibold whitespace-nowrap transition-colors hover:text-[var(--color-brand-garnet)]",
+    onDark ? "text-[#cfc6b8]" : "text-[var(--color-text-secondary)]"
+  );
+
   return (
     <>
       <header
@@ -45,7 +55,7 @@ export function Header() {
           className={cn(
             "w-full transition-all duration-500 ease-out border",
             isScrolled
-              ? "max-w-xl md:max-w-2xl bg-[var(--color-bg-warm-white)]/80 backdrop-blur-md rounded-full shadow-md px-6 py-2 border-[var(--color-border-soft)]"
+              ? "max-w-2xl md:max-w-4xl bg-[var(--color-bg-warm-white)]/80 backdrop-blur-md rounded-full shadow-md px-5 py-2 border-[var(--color-border-soft)]"
               : "max-w-7xl bg-transparent border-transparent px-6 py-5"
           )}
         >
@@ -61,7 +71,8 @@ export function Header() {
               <span
                 className={cn(
                   "font-mono font-bold tracking-tight text-sm transition-opacity duration-300",
-                  isScrolled ? "hidden sm:inline" : "inline"
+                  isScrolled ? "hidden sm:inline" : "inline",
+                  onDark && "text-[#fdf8ef]"
                 )}
               >
                 agentrepo<span className="text-[var(--color-brand-garnet)]">.dev</span>
@@ -72,32 +83,27 @@ export function Header() {
             <AvatarSlot
               id="header"
               preserveSpace={false}
-              className="hidden items-center sm:flex [&>*]:scale-75"
+              scale={0.75}
+              className="hidden items-center sm:flex"
             />
 
             {/* Navigation links */}
-            <nav className="hidden md:flex items-center gap-6">
-              <Link
-                href="/skills"
-                className="font-sans text-xs uppercase tracking-wider font-semibold text-[var(--color-text-secondary)] hover:text-[var(--color-brand-garnet)] transition-colors"
-              >
+            <nav className="hidden md:flex items-center gap-5 lg:gap-6">
+              <Link href="/skills" className={navLinkClass}>
                 {t('nav.skills')}
               </Link>
-              <Link
-                href="/agents"
-                className="font-sans text-xs uppercase tracking-wider font-semibold text-[var(--color-text-secondary)] hover:text-[var(--color-brand-garnet)] transition-colors"
-              >
+              <Link href="/agents" className={navLinkClass}>
                 {t('nav.agents')}
               </Link>
-              <Link
-                href="/blog"
-                className="font-sans text-xs uppercase tracking-wider font-semibold text-[var(--color-text-secondary)] hover:text-[var(--color-brand-garnet)] transition-colors"
-              >
+              <Link href="/blog" className={navLinkClass}>
                 {t('nav.blog')}
+              </Link>
+              <Link href="/playground" className={navLinkClass}>
+                {t('nav.playground')}
               </Link>
               <Link
                 href="/portfolio/luisbz"
-                className="font-sans text-xs uppercase tracking-wider font-semibold text-[var(--color-text-secondary)] hover:text-[var(--color-brand-garnet)] transition-colors inline-flex items-center gap-0.5"
+                className={cn(navLinkClass, "inline-flex items-center gap-0.5")}
               >
                 {t('nav.portfolio')}
                 <ArrowUpRight className="w-3.5 h-3.5 opacity-60" />
@@ -106,7 +112,7 @@ export function Header() {
 
             {/* CTA/Actions */}
             <div className="flex items-center gap-3">
-              <LocaleSwitcher className="hidden sm:flex" />
+              <LocaleSwitcher className="hidden sm:flex" onDark={onDark} />
               {/* Cmd+K trigger hint inside the header when full-sized */}
               {!isScrolled && (
                 <button
@@ -118,11 +124,23 @@ export function Header() {
                     });
                     document.dispatchEvent(event);
                   }}
-                  className="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-lg bg-[var(--color-bg-surface)] text-[var(--color-text-muted)] border border-[var(--color-border-soft)] hover:border-[var(--color-border-medium)] transition-colors text-xs font-mono focus:outline-none"
+                  className={cn(
+                    "hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-lg transition-colors text-xs font-mono focus:outline-none",
+                    onDark
+                      ? "bg-white/[0.06] text-[#cfc6b8] border border-white/15 hover:border-white/30"
+                      : "bg-[var(--color-bg-surface)] text-[var(--color-text-muted)] border border-[var(--color-border-soft)] hover:border-[var(--color-border-medium)]"
+                  )}
                 >
                   <Search className="w-3.5 h-3.5" />
                   <span>{t('nav.search')}</span>
-                  <kbd className="bg-[var(--color-bg-base)] px-1.5 py-0.5 rounded text-[10px] border border-[var(--color-border-soft)]">
+                  <kbd
+                    className={cn(
+                      "px-1.5 py-0.5 rounded text-[10px] border",
+                      onDark
+                        ? "bg-white/[0.06] border-white/15"
+                        : "bg-[var(--color-bg-base)] border-[var(--color-border-soft)]"
+                    )}
+                  >
                     ⌘K
                   </kbd>
                 </button>
@@ -131,10 +149,12 @@ export function Header() {
               <Link
                 href="/portfolio/luisbz#contact"
                 className={cn(
-                  "hidden sm:flex items-center justify-center font-sans font-medium text-xs rounded-full border border-[var(--color-brand-garnet)] transition-all",
+                  "hidden sm:flex items-center justify-center font-sans font-medium text-xs whitespace-nowrap rounded-full border transition-all",
                   isScrolled
-                    ? "px-4 py-1.5 bg-[var(--color-brand-garnet)] text-[var(--color-bg-warm-white)] hover:bg-[var(--color-brand-garnet-deep)] hover:shadow-xs"
-                    : "px-5 py-2 text-[var(--color-brand-garnet)] bg-transparent hover:bg-[var(--color-brand-garnet)] hover:text-[var(--color-bg-warm-white)]"
+                    ? "px-4 py-1.5 border-[var(--color-brand-garnet)] bg-[var(--color-brand-garnet)] text-[var(--color-bg-warm-white)] hover:bg-[var(--color-brand-garnet-deep)] hover:shadow-xs"
+                    : onDark
+                      ? "px-5 py-2 border-[#c4909a] text-[#e8c2ca] bg-transparent hover:bg-[#c4909a] hover:text-[#14110f]"
+                      : "px-5 py-2 border-[var(--color-brand-garnet)] text-[var(--color-brand-garnet)] bg-transparent hover:bg-[var(--color-brand-garnet)] hover:text-[var(--color-bg-warm-white)]"
                 )}
               >
                 {t('nav.hire')}
@@ -143,7 +163,12 @@ export function Header() {
               {/* Mobile menu trigger */}
               <button
                 onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-                className="flex md:hidden p-1.5 rounded-lg text-[var(--color-text-secondary)] hover:bg-[var(--color-bg-surface)] transition-colors focus:outline-none"
+                className={cn(
+                  "flex md:hidden p-1.5 rounded-lg transition-colors focus:outline-none",
+                  onDark
+                    ? "text-[#cfc6b8] hover:bg-white/[0.06]"
+                    : "text-[var(--color-text-secondary)] hover:bg-[var(--color-bg-surface)]"
+                )}
               >
                 {mobileMenuOpen ? (
                   <X className="w-5 h-5" />
@@ -179,28 +204,35 @@ export function Header() {
             onClick={() => setMobileMenuOpen(false)}
             className="font-sans text-sm font-semibold text-[var(--color-text-primary)] hover:text-[var(--color-brand-garnet)] py-2 border-b border-[var(--color-border-soft)]/40"
           >
-            Skills
+            {t('nav.skills')}
           </Link>
           <Link
             href="/agents"
             onClick={() => setMobileMenuOpen(false)}
             className="font-sans text-sm font-semibold text-[var(--color-text-primary)] hover:text-[var(--color-brand-garnet)] py-2 border-b border-[var(--color-border-soft)]/40"
           >
-            Agents
+            {t('nav.agents')}
           </Link>
           <Link
             href="/blog"
             onClick={() => setMobileMenuOpen(false)}
             className="font-sans text-sm font-semibold text-[var(--color-text-primary)] hover:text-[var(--color-brand-garnet)] py-2 border-b border-[var(--color-border-soft)]/40"
           >
-            Blog
+            {t('nav.blog')}
+          </Link>
+          <Link
+            href="/playground"
+            onClick={() => setMobileMenuOpen(false)}
+            className="font-sans text-sm font-semibold text-[var(--color-text-primary)] hover:text-[var(--color-brand-garnet)] py-2 border-b border-[var(--color-border-soft)]/40"
+          >
+            {t('nav.playground')}
           </Link>
           <Link
             href="/portfolio/luisbz"
             onClick={() => setMobileMenuOpen(false)}
             className="font-sans text-sm font-semibold text-[var(--color-text-primary)] hover:text-[var(--color-brand-garnet)] py-2 flex items-center justify-between"
           >
-            <span>Portfolio</span>
+            <span>{t('nav.portfolio')}</span>
             <ArrowUpRight className="w-4 h-4 opacity-60" />
           </Link>
 
@@ -209,7 +241,7 @@ export function Header() {
             onClick={() => setMobileMenuOpen(false)}
             className="mt-2 w-full flex items-center justify-center font-sans font-medium text-sm py-3 bg-[var(--color-brand-garnet)] text-[var(--color-bg-warm-white)] rounded-xl hover:bg-[var(--color-brand-garnet-deep)] shadow-sm"
           >
-            Hire Luis Ballester
+            {t('nav.hire')}
           </Link>
         </nav>
       </div>

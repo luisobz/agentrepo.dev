@@ -8,7 +8,6 @@
         "start": "next start"
     },
     "dependencies": {
-        "@agentrepo/config": "workspace:*",
         "@agentrepo/trpc": "workspace:*",
         "@agentrepo/ui": "workspace:*",
         "@agentrepo/avatar": "workspace:*",

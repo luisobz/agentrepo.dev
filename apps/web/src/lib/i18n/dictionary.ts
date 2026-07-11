@@ -9,6 +9,8 @@ export const webDictionary = {
   'nav.search': { en: 'Search', es: 'Buscar' },
   'nav.hire': { en: 'Creator', es: 'Creador' },
   'nav.signIn': { en: 'Sign in', es: 'Entrar' },
+  'nav.openMenu': { en: 'Open menu', es: 'Abrir menú' },
+  'nav.closeMenu': { en: 'Close menu', es: 'Cerrar menú' },
 
   'hero.titleLead': { en: 'Less noise,', es: 'Menos ruido,' },
   'hero.titleAccent': { en: 'filter better', es: 'filtra mejor' },

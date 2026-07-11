@@ -54,3 +54,11 @@ export class DataIntegrityError extends DomainError {
     super(`Stored data violates a domain invariant: ${detail}`);
   }
 }
+
+export class WorkflowDispatchFailedError extends DomainError {
+  readonly code = 'WORKFLOW_DISPATCH_FAILED';
+
+  constructor(detail: string) {
+    super(`Failed to dispatch workflow: ${detail}`);
+  }
+}

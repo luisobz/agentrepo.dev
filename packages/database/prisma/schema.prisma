@@ -182,6 +182,7 @@ model AdminSession {
   createdAt    DateTime  @default(now())
 
   @@index([familyId])
+  @@index([expiresAt])
 }
 
 // A completed purchase unlocks a premium Skill or Agent for a user.

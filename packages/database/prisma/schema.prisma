@@ -29,6 +29,15 @@ model Skill {
   latestVersionId String?        @unique
   latestVersion   SkillVersion?  @relation("SkillLatestVersion", fields: [latestVersionId], references: [id], onDelete: SetNull)
   versions        SkillVersion[] @relation("SkillVersions")
+
+  // Generated full-text vector (title + description + content), maintained by
+  // Postgres. Populated/queried via raw SQL — see prisma-*.repository.ts.
+  searchVector Unsupported("tsvector")?
+
+  @@index([searchVector], type: Gin)
+  @@index([title(ops: raw("gin_trgm_ops"))], type: Gin)
+  @@index([slug(ops: raw("gin_trgm_ops"))], type: Gin)
+  @@index([description(ops: raw("gin_trgm_ops"))], type: Gin)
 }
 
 // Immutable snapshot of a published skill version (npm-style registry entry).
@@ -79,6 +88,14 @@ model Agent {
   latestVersionId String?        @unique
   latestVersion   AgentVersion?  @relation("AgentLatestVersion", fields: [latestVersionId], references: [id], onDelete: SetNull)
   versions        AgentVersion[] @relation("AgentVersions")
+
+  // Generated full-text vector (title + shortDescription + readmeContent).
+  searchVector Unsupported("tsvector")?
+
+  @@index([searchVector], type: Gin)
+  @@index([title(ops: raw("gin_trgm_ops"))], type: Gin)
+  @@index([slug(ops: raw("gin_trgm_ops"))], type: Gin)
+  @@index([shortDescription(ops: raw("gin_trgm_ops"))], type: Gin)
 }
 
 // Immutable snapshot of a published agent version (README + file tree).
@@ -119,6 +136,14 @@ model BlogPost {
   headerImageUrl String?
   createdAt      DateTime @default(now())
   updatedAt      DateTime @updatedAt
+
+  // Generated full-text vector (title + excerpt + content).
+  searchVector Unsupported("tsvector")?
+
+  @@index([searchVector], type: Gin)
+  @@index([title(ops: raw("gin_trgm_ops"))], type: Gin)
+  @@index([slug(ops: raw("gin_trgm_ops"))], type: Gin)
+  @@index([excerpt(ops: raw("gin_trgm_ops"))], type: Gin)
 }
 
 // ─── Identity & access (Supabase Auth is the identity provider) ───
@@ -182,6 +207,7 @@ model AdminSession {
   createdAt    DateTime  @default(now())
 
   @@index([familyId])
+  @@index([expiresAt])
 }
 
 // A completed purchase unlocks a premium Skill or Agent for a user.

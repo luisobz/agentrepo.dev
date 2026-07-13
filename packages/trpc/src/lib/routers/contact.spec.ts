@@ -3,9 +3,13 @@ import { describe, expect, it, vi } from 'vitest';
 import { TRPCContext } from '../trpc';
 import { appRouter } from './_app';
 
-function buildContext(options?: { isAdmin?: boolean }): TRPCContext {
+function buildContext(options?: {
+  isAdmin?: boolean;
+  clientIp?: string;
+}): TRPCContext {
   return {
     isAdmin: options?.isAdmin ?? false,
+    clientIp: options?.clientIp ?? crypto.randomUUID(),
     adminAuth: {} as TRPCContext['adminAuth'],
     catalog: {} as TRPCContext['catalog'],
     globalSearch: { execute: async () => [] },
@@ -60,6 +64,29 @@ describe('contact router', () => {
         message: 'short',
       })
     ).rejects.toBeInstanceOf(TRPCError);
+  });
+
+  it('rate-limits repeated submissions from the same client IP', async () => {
+    const clientIp = `test-${crypto.randomUUID()}`;
+    const payload = {
+      email: 'jane@company.com',
+      subject: 'employment' as const,
+      message: 'We are hiring an AI engineer for our team.',
+    };
+
+    // The limiter allows 5 attempts per window; the 6th must be rejected.
+    for (let i = 0; i < 5; i++) {
+      const caller = appRouter.createCaller(buildContext({ clientIp }));
+      await expect(caller.contact.submit(payload)).resolves.toEqual({
+        success: true,
+        id: 'contact-1',
+      });
+    }
+
+    const caller = appRouter.createCaller(buildContext({ clientIp }));
+    await expect(caller.contact.submit(payload)).rejects.toSatisfy(
+      (error) => error instanceof TRPCError && error.code === 'TOO_MANY_REQUESTS'
+    );
   });
 
   it('requires an admin session to list contact requests', async () => {

@@ -15,6 +15,7 @@ function buildContext(options?: {
 }): TRPCContext {
   return {
     isAdmin: options?.isAdmin ?? false,
+    clientIp: crypto.randomUUID(),
     adminAuth: {} as TRPCContext['adminAuth'],
     catalog: {} as TRPCContext['catalog'],
     globalSearch: { execute: async () => [] },

@@ -53,6 +53,7 @@ function buildContext(options?: {
 }): TRPCContext {
   return {
     isAdmin: options?.isAdmin ?? false,
+    clientIp: crypto.randomUUID(),
     adminAuth: {
       login: stubUseCase(undefined),
       refresh: stubUseCase(undefined),

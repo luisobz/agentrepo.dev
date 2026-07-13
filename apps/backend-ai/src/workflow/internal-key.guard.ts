@@ -26,7 +26,7 @@ export class InternalKeyGuard implements CanActivate {
 
     if (
       typeof provided !== 'string' ||
-      !safeEquals(provided, BackendEnvironments.INTERNAL_API_SECRET)
+      !safeEquals(provided, BackendEnvironments.INTERNAL_COMMUNICATION_API_SECRET)
     ) {
       throw new UnauthorizedException('Invalid internal key');
     }

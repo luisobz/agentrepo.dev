@@ -3,6 +3,7 @@ import { CallbackHandler } from '@langfuse/langchain';
 import { LangfuseSpanProcessor } from '@langfuse/otel';
 import { Logger } from '@nestjs/common';
 import { NodeTracerProvider } from '@opentelemetry/sdk-trace-node';
+import { maskSensitiveData } from './mask';
 
 let tracingInitialised = false;
 
@@ -28,6 +29,8 @@ export function initLangfuseTracing(): void {
         publicKey: BackendEnvironments.LANGFUSE_PUBLIC_KEY,
         secretKey: BackendEnvironments.LANGFUSE_SECRET_KEY,
         baseUrl: BackendEnvironments.LANGFUSE_BASE_URL,
+        // Redact PII (contact email/message) before spans leave the process.
+        mask: maskSensitiveData,
       }),
     ],
   });

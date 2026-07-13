@@ -163,6 +163,8 @@ export function Header() {
               {/* Mobile menu trigger */}
               <button
                 onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+                aria-label={mobileMenuOpen ? t('nav.closeMenu') : t('nav.openMenu')}
+                aria-expanded={mobileMenuOpen}
                 className={cn(
                   "flex md:hidden p-1.5 rounded-lg transition-colors focus:outline-none",
                   onDark

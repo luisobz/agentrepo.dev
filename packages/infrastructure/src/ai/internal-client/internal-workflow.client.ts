@@ -2,6 +2,7 @@ import {
   ContactWorkflowDispatcher,
   ContactWorkflowPayload,
 } from '@agentrepo/application';
+import { WorkflowDispatchFailedError } from '@agentrepo/domain';
 
 export interface InternalWorkflowClientConfig {
   /** Base URL of backend-ai, e.g. http://localhost:4001 */
@@ -34,7 +35,7 @@ export class InternalWorkflowClient implements ContactWorkflowDispatcher {
     });
 
     if (!response.ok) {
-      throw new Error(
+      throw new WorkflowDispatchFailedError(
         `backend-ai rejected the contact workflow: HTTP ${response.status}`
       );
     }

@@ -2,25 +2,15 @@ import {
   adminListSchema,
   createBlogPostSchema,
   idInputSchema,
-  paginationSchema,
-  slugInputSchema,
   updateBlogPostSchema,
 } from '../schemas/catalog.schemas';
-import { adminProcedure, publicProcedure, router } from '../trpc';
+import { adminProcedure, router } from '../trpc';
 
+/**
+ * Admin-only blog CRUD. Public reads live in `blogRouter` (`blog.getPosts` /
+ * `blog.getPostBySlug`); this router intentionally exposes no public surface.
+ */
 export const blogPostsRouter = router({
-  list: publicProcedure
-    .input(paginationSchema)
-    .query(({ input, ctx }) =>
-      ctx.catalog.blogPosts.list.execute({ ...input, publishedOnly: true })
-    ),
-
-  bySlug: publicProcedure
-    .input(slugInputSchema)
-    .query(({ input, ctx }) =>
-      ctx.catalog.blogPosts.getPublishedBySlug.execute(input.slug)
-    ),
-
   admin: router({
     list: adminProcedure
       .input(adminListSchema)

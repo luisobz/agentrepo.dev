@@ -17,9 +17,12 @@ import {
   VersionAlreadyExistsError,
 } from '@agentrepo/domain';
 import type { SearchHit } from '@agentrepo/domain';
+import { FixedWindowRateLimiter } from './auth/login-rate-limit';
 
 export interface TRPCContext {
   isAdmin: boolean;
+  /** Best-effort client IP, used as the key for abuse rate limiting. */
+  clientIp: string | null;
   adminAuth: AdminAuthUseCases;
   catalog: CatalogUseCases;
   globalSearch: UseCase<GlobalSearchParams, SearchHit[]>;
@@ -64,6 +67,24 @@ const mapDomainErrors = t.middleware(async ({ next }) => {
 
 export const router = t.router;
 export const publicProcedure = t.procedure.use(mapDomainErrors);
+
+/**
+ * Builds a middleware that rate-limits a procedure by client IP. Enforced at
+ * the trusted boundary (the backend itself), so it cannot be bypassed by
+ * calling the tRPC endpoint directly instead of going through the BFF.
+ */
+export function rateLimit(limiter: FixedWindowRateLimiter, bucket: string) {
+  return t.middleware(({ ctx, next }) => {
+    const key = `${bucket}:${ctx.clientIp ?? 'unknown'}`;
+    if (!limiter.consume(key)) {
+      throw new TRPCError({
+        code: 'TOO_MANY_REQUESTS',
+        message: 'Too many requests, please try again later',
+      });
+    }
+    return next();
+  });
+}
 
 export const adminProcedure = publicProcedure.use(({ ctx, next }) => {
   if (!ctx.isAdmin) {

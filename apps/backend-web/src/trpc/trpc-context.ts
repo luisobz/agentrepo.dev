@@ -58,8 +58,8 @@ export function buildCreateContext(prisma: PrismaService) {
   const portfolio = createPortfolioUseCases({
     contactRequestRepository: new PrismaContactRequestRepository(prisma),
     contactWorkflowDispatcher: new InternalWorkflowClient({
-      baseUrl: BackendEnvironments.BACKEND_AI_URL,
-      internalKey: BackendEnvironments.INTERNAL_API_SECRET,
+      baseUrl: BackendEnvironments.BACKEND_AI_SERVICE_URL,
+      internalKey: BackendEnvironments.INTERNAL_COMMUNICATION_API_SECRET,
     }),
     logger: {
       warn: (message) => portfolioLogger.warn(message),
@@ -103,6 +103,14 @@ export function buildCreateContext(prisma: PrismaService) {
       BackendEnvironments.AUTH_SECRET
     );
 
-    return { isAdmin, adminAuth, catalog, globalSearch, portfolio, playground };
+    return {
+      isAdmin,
+      clientIp: req.ip ?? null,
+      adminAuth,
+      catalog,
+      globalSearch,
+      portfolio,
+      playground,
+    };
   };
 }

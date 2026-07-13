@@ -3,6 +3,7 @@ import './instrument';
 import { Logger } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
 import { PrismaService } from '@agentrepo/infrastructure';
+import helmet from 'helmet';
 import { AppModule } from './app/app.module';
 import * as trpcExpress from '@trpc/server/adapters/express';
 import { appRouter } from '@agentrepo/trpc';
@@ -14,7 +15,13 @@ async function bootstrap() {
   const globalPrefix = 'api';
   app.setGlobalPrefix(globalPrefix);
 
-  app.enableCors();
+  app.use(helmet());
+  // Trust the reverse proxy (Passenger/cPanel) so `req.ip` reflects the real
+  // client address used for rate limiting instead of the proxy's.
+  app.getHttpAdapter().getInstance().set('trust proxy', 1);
+  app.enableCors({
+    origin: [BackendEnvironments.WEB_APP_URL, BackendEnvironments.ADMIN_APP_URL],
+  });
 
   const prisma = app.get(PrismaService);
 

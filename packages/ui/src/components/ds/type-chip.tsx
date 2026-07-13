@@ -30,13 +30,18 @@ export interface TypeChipProps
   extends React.HTMLAttributes<HTMLDivElement>,
   VariantProps<typeof typeChipVariants> { }
 
-function TypeChip({ className, type, ...props }: TypeChipProps) {
-  return (
-    <div className={cn(typeChipVariants({ type }), className)} {...props}>
+const TypeChip = React.forwardRef<HTMLDivElement, TypeChipProps>(
+  ({ className, type, ...props }, ref) => (
+    <div
+      ref={ref}
+      className={cn(typeChipVariants({ type }), className)}
+      {...props}
+    >
       [{type}]
     </div>
   )
-}
+)
+TypeChip.displayName = "TypeChip"
 
 const tagVariants = cva(
   "inline-flex items-center rounded-full border border-[var(--color-border-soft)] bg-[var(--color-bg-surface)] px-[10px] py-[4px] text-[12px] font-[var(--font-geist-sans)] text-[var(--color-text-secondary)] transition-colors hover:border-[var(--color-brand-garnet-muted)] hover:text-[var(--color-brand-garnet)] focus:outline-none focus:ring-2 focus:ring-[var(--color-brand-garnet)] focus:ring-offset-2",
@@ -50,10 +55,11 @@ export interface TagProps
   extends React.HTMLAttributes<HTMLDivElement>,
   VariantProps<typeof tagVariants> { }
 
-function Tag({ className, ...props }: TagProps) {
-  return (
-    <div className={cn(tagVariants(), className)} {...props} />
+const Tag = React.forwardRef<HTMLDivElement, TagProps>(
+  ({ className, ...props }, ref) => (
+    <div ref={ref} className={cn(tagVariants(), className)} {...props} />
   )
-}
+)
+Tag.displayName = "Tag"
 
 export { TypeChip, typeChipVariants, Tag, tagVariants }

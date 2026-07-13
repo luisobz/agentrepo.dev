@@ -45,7 +45,7 @@ import { CONTACT_WORKFLOW_USE_CASE } from './workflow.tokens';
             warn: (message) => logger.warn(message),
             error: (message, stack) => logger.error(message, stack),
           },
-          { notificationEmail: BackendEnvironments.CONTACT_NOTIFICATION_EMAIL }
+          { notificationEmail: BackendEnvironments.CONTACT_FORM_NOTIFICATION_EMAIL }
         );
       },
     },

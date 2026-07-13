@@ -60,28 +60,30 @@ export class PrismaSkillRepository implements SkillRepository {
       return { items: [], total: 0, page: params.page, pageSize: params.pageSize };
     }
 
-    const where: Prisma.SkillWhereInput = {
-      isPublished: true,
-      OR: [
-        { title: { search: tsQuery } },
-        { description: { search: tsQuery } },
-        { content: { search: tsQuery } },
-      ],
-    };
+    // Query the trigger-maintained `searchVector` GIN index directly. Prisma's
+    // own `{ field: { search } }` compiles to an un-indexable to_tsvector()
+    // computed per row (full-table scan); this uses the index instead.
+    const skip = (params.page - 1) * params.pageSize;
+    const filter = Prisma.sql`"isPublished" = true AND "searchVector" @@ to_tsquery('english', ${tsQuery})`;
 
-    const [rows, total] = await this.prisma.$transaction([
-      this.prisma.skill.findMany({
-        where,
-        orderBy: { updatedAt: 'desc' },
-        skip: (params.page - 1) * params.pageSize,
-        take: params.pageSize,
-      }),
-      this.prisma.skill.count({ where }),
+    const [rows, totals] = await this.prisma.$transaction([
+      this.prisma.$queryRaw<SkillRow[]>(Prisma.sql`
+        SELECT "id", "slug", "title", "description", "content", "type", "version",
+               "isPublished", "headerImageUrl", "isPremium", "priceCents", "currency",
+               "previewContent", "createdAt", "updatedAt", "latestVersionId"
+        FROM "Skill"
+        WHERE ${filter}
+        ORDER BY "updatedAt" DESC
+        LIMIT ${params.pageSize} OFFSET ${skip}
+      `),
+      this.prisma.$queryRaw<{ count: number }[]>(
+        Prisma.sql`SELECT count(*)::int AS count FROM "Skill" WHERE ${filter}`
+      ),
     ]);
 
     return {
       items: rows.map(toDomain),
-      total,
+      total: totals[0]?.count ?? 0,
       page: params.page,
       pageSize: params.pageSize,
     };

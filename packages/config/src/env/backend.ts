@@ -4,7 +4,7 @@ import { z } from 'zod';
 
 // ─── Esquema Zod ────────────────────────────────
 
-const envSchema = z.object({
+export const envSchema = z.object({
   // Obligatorias
   DATABASE_URL: z.string().min(1, 'DATABASE_URL es obligatoria'),
 
@@ -18,8 +18,11 @@ const envSchema = z.object({
 
   // URLs y cadenas con defaults
   NEXT_PUBLIC_API_URL: z.string().url().default('http://localhost:4000'),
-  BACKEND_AI_URL: z.string().url().default('http://localhost:4001'),
-  INTERNAL_API_SECRET: z.string().default('dev-internal-secret'),
+  BACKEND_AI_SERVICE_URL: z.string().url().default('http://localhost:4001'),
+  INTERNAL_COMMUNICATION_API_SECRET: z.string().default('dev-internal-secret'),
+  // Origins allowed by the backends' CORS policy (the public web + admin apps).
+  WEB_APP_URL: z.string().url().default('http://localhost:3000'),
+  ADMIN_APP_URL: z.string().url().default('http://localhost:3001'),
   HOST: z.string().default('0.0.0.0'),
   NODE_ENV: z.enum(['development', 'production', 'test']).default('development'),
 
@@ -48,7 +51,7 @@ const envSchema = z.object({
   SPACEMAIL_HOST: z.string().default('mail.spacemail.com'),
   SPACEMAIL_USER: z.string().default(''),
   SPACEMAIL_PASS: z.string().default(''),
-  CONTACT_NOTIFICATION_EMAIL: z.string().default('hola@luisbz.com'),
+  CONTACT_FORM_NOTIFICATION_EMAIL: z.string().default('hola@luisbz.com'),
 
 
   // Pesos de generación (coerción a número)
@@ -57,14 +60,28 @@ const envSchema = z.object({
   KEYWORD_POSITIVE_THRESHOLD: z.coerce.number().min(0).max(1).default(0.25),
   KEYWORD_NEGATIVE_WEIGHT: z.coerce.number().min(0).default(1.2),
 }).superRefine((env, ctx) => {
+  if (env.NODE_ENV !== 'production') return;
+
   const isWeakAuthSecret =
     env.AUTH_SECRET === 'dev-auth-secret-change-me' || env.AUTH_SECRET.length < 32;
-  if (env.NODE_ENV === 'production' && isWeakAuthSecret) {
+  if (isWeakAuthSecret) {
     ctx.addIssue({
       code: 'custom',
       path: ['AUTH_SECRET'],
       message:
         'AUTH_SECRET debe ser un valor aleatorio de al menos 32 caracteres en producción',
+    });
+  }
+
+  const isWeakInternalSecret =
+    env.INTERNAL_COMMUNICATION_API_SECRET === 'dev-internal-secret' ||
+    env.INTERNAL_COMMUNICATION_API_SECRET.length < 32;
+  if (isWeakInternalSecret) {
+    ctx.addIssue({
+      code: 'custom',
+      path: ['INTERNAL_COMMUNICATION_API_SECRET'],
+      message:
+        'INTERNAL_COMMUNICATION_API_SECRET debe ser un valor aleatorio de al menos 32 caracteres en producción',
     });
   }
 });
@@ -120,8 +137,10 @@ export class BackendEnvironments {
   static get BACKEND_WEB_PORT() { return BackendEnvironments.env.BACKEND_WEB_PORT; }
   static get BACKEND_AI_PORT() { return BackendEnvironments.env.BACKEND_AI_PORT; }
   static get NEXT_PUBLIC_API_URL() { return BackendEnvironments.env.NEXT_PUBLIC_API_URL; }
-  static get BACKEND_AI_URL() { return BackendEnvironments.env.BACKEND_AI_URL; }
-  static get INTERNAL_API_SECRET() { return BackendEnvironments.env.INTERNAL_API_SECRET; }
+  static get BACKEND_AI_SERVICE_URL() { return BackendEnvironments.env.BACKEND_AI_SERVICE_URL; }
+  static get INTERNAL_COMMUNICATION_API_SECRET() { return BackendEnvironments.env.INTERNAL_COMMUNICATION_API_SECRET; }
+  static get WEB_APP_URL() { return BackendEnvironments.env.WEB_APP_URL; }
+  static get ADMIN_APP_URL() { return BackendEnvironments.env.ADMIN_APP_URL; }
   static get HOST() { return BackendEnvironments.env.HOST; }
   static get NODE_ENV() { return BackendEnvironments.env.NODE_ENV; }
   static get AUTH_SECRET() { return BackendEnvironments.env.AUTH_SECRET; }
@@ -138,7 +157,7 @@ export class BackendEnvironments {
   static get SPACEMAIL_PORT() { return BackendEnvironments.env.SPACEMAIL_PORT; }
   static get SPACEMAIL_USER() { return BackendEnvironments.env.SPACEMAIL_USER; }
   static get SPACEMAIL_PASS() { return BackendEnvironments.env.SPACEMAIL_PASS; }
-  static get CONTACT_NOTIFICATION_EMAIL() { return BackendEnvironments.env.CONTACT_NOTIFICATION_EMAIL; }
+  static get CONTACT_FORM_NOTIFICATION_EMAIL() { return BackendEnvironments.env.CONTACT_FORM_NOTIFICATION_EMAIL; }
 
   static get TEMPLATE_DISTANCE_THRESHOLD() { return BackendEnvironments.env.TEMPLATE_DISTANCE_THRESHOLD; }
   static get KEYWORD_MIN_SIMILARITY() { return BackendEnvironments.env.KEYWORD_MIN_SIMILARITY; }

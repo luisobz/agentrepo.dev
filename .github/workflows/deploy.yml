@@ -14,7 +14,7 @@ name: Deploy (tag)
 # Prisma ya generado): en cPanel NO hay que pulsar "Run NPM Install".
 #
 # Configuración (Settings → Secrets and variables → Actions):
-#   Secrets:  SSH_HOST, SSH_USER, SSH_KEY, DATABASE_URL (para migrate)
+#   Secrets:  SSH_HOST, SSH_USER, SSH_KEY, SSH_KNOWN_HOSTS, DATABASE_URL (para migrate)
 #   Variables: SSH_PORT (def. 22), NODE_VERSION (def. 24),
 #              NEXT_PUBLIC_API_URL, NEXT_PUBLIC_SUPABASE_URL,
 #              NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY,
@@ -91,13 +91,13 @@ jobs:
 
       - run: pnpm install --frozen-lockfile
 
-      - name: Prisma migrate deploy (se salta si no hay secret DATABASE_URL)
+      - name: Prisma migrate deploy
         env:
           PROD_DATABASE_URL: ${{ secrets.DATABASE_URL }}
         run: |
           if [ -z "$PROD_DATABASE_URL" ]; then
-            echo "::notice::Secret DATABASE_URL no configurado — se omiten las migraciones."
-            exit 0
+            echo "::error::Falta el secret DATABASE_URL: no se puede desplegar sin aplicar las migraciones."
+            exit 1
           fi
           DATABASE_URL="$PROD_DATABASE_URL" pnpm db:migrate:deploy
 
@@ -113,6 +113,13 @@ jobs:
       - name: Guard — secrets configurados
         run: |
           test -n "${{ secrets.SSH_HOST }}" || { echo "::error::Falta el secret SSH_HOST"; exit 1; }
+
+      - name: Guard — variables públicas de autenticación
+        env:
+          SUPABASE_URL: ${{ vars.NEXT_PUBLIC_SUPABASE_URL }}
+          SUPABASE_KEY: ${{ vars.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY }}
+        run: |
+          test -n "$SUPABASE_URL" && test -n "$SUPABASE_KEY" || { echo "::error::Faltan NEXT_PUBLIC_SUPABASE_URL o NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY"; exit 1; }
 
       - uses: pnpm/action-setup@v4
       - uses: actions/setup-node@v4
@@ -131,11 +138,15 @@ jobs:
           rsync -a apps/web/public/ deploy-out/web/apps/web/public/
 
       - name: Configurar SSH
+        env:
+          SSH_KEY: ${{ secrets.SSH_KEY }}
+          SSH_KNOWN_HOSTS: ${{ secrets.SSH_KNOWN_HOSTS }}
         run: |
           mkdir -p ~/.ssh && chmod 700 ~/.ssh
-          printf '%s\n' "${{ secrets.SSH_KEY }}" > ~/.ssh/id_deploy
-          chmod 600 ~/.ssh/id_deploy
-          ssh-keyscan -p "${SSH_PORT}" "${{ secrets.SSH_HOST }}" >> ~/.ssh/known_hosts 2>/dev/null || true
+          test -n "$SSH_KEY" && test -n "$SSH_KNOWN_HOSTS" || { echo "::error::Faltan SSH_KEY o SSH_KNOWN_HOSTS"; exit 1; }
+          printf '%s\n' "$SSH_KEY" > ~/.ssh/id_deploy
+          printf '%s\n' "$SSH_KNOWN_HOSTS" > ~/.ssh/known_hosts
+          chmod 600 ~/.ssh/id_deploy ~/.ssh/known_hosts
 
       - name: Subir web y reiniciar (rsync + Passenger)
         env:
@@ -143,7 +154,7 @@ jobs:
           USER: ${{ secrets.SSH_USER }}
           DEST: ${{ vars.WEB_PATH || 'backend/agentrepo.dev/web' }}
         run: |
-          SSH="ssh -i ~/.ssh/id_deploy -p ${SSH_PORT} -o StrictHostKeyChecking=accept-new"
+          SSH="ssh -i ~/.ssh/id_deploy -p ${SSH_PORT} -o StrictHostKeyChecking=yes"
           rsync -az --delete -e "$SSH" \
             --exclude '.env' \
             --exclude 'tmp/' \
@@ -181,11 +192,15 @@ jobs:
           rsync -a apps/admin/public/ deploy-out/admin/apps/admin/public/
 
       - name: Configurar SSH
+        env:
+          SSH_KEY: ${{ secrets.SSH_KEY }}
+          SSH_KNOWN_HOSTS: ${{ secrets.SSH_KNOWN_HOSTS }}
         run: |
           mkdir -p ~/.ssh && chmod 700 ~/.ssh
-          printf '%s\n' "${{ secrets.SSH_KEY }}" > ~/.ssh/id_deploy
-          chmod 600 ~/.ssh/id_deploy
-          ssh-keyscan -p "${SSH_PORT}" "${{ secrets.SSH_HOST }}" >> ~/.ssh/known_hosts 2>/dev/null || true
+          test -n "$SSH_KEY" && test -n "$SSH_KNOWN_HOSTS" || { echo "::error::Faltan SSH_KEY o SSH_KNOWN_HOSTS"; exit 1; }
+          printf '%s\n' "$SSH_KEY" > ~/.ssh/id_deploy
+          printf '%s\n' "$SSH_KNOWN_HOSTS" > ~/.ssh/known_hosts
+          chmod 600 ~/.ssh/id_deploy ~/.ssh/known_hosts
 
       - name: Subir admin y reiniciar (rsync + Passenger)
         env:
@@ -193,7 +208,7 @@ jobs:
           USER: ${{ secrets.SSH_USER }}
           DEST: ${{ vars.ADMIN_PATH || 'backend/agentrepo.dev/admin' }}
         run: |
-          SSH="ssh -i ~/.ssh/id_deploy -p ${SSH_PORT} -o StrictHostKeyChecking=accept-new"
+          SSH="ssh -i ~/.ssh/id_deploy -p ${SSH_PORT} -o StrictHostKeyChecking=yes"
           rsync -az --delete -e "$SSH" \
             --exclude '.env' \
             --exclude 'tmp/' \
@@ -229,14 +244,18 @@ jobs:
           printf "packages:\n  - 'workspace_modules/@agentrepo/*'\n" > apps/backend-web/dist/pnpm-workspace.yaml
           pnpm --dir apps/backend-web/dist install --prod --frozen-lockfile
           # Genera el cliente Prisma DENTRO del bundle (compilador WASM, portable)
-          pnpm exec prisma generate --schema apps/backend-web/dist/workspace_modules/@agentrepo/database/prisma/schema.prisma
+          pnpm --dir apps/backend-web/dist/workspace_modules/@agentrepo/database exec prisma generate --schema prisma/schema.prisma
 
       - name: Configurar SSH
+        env:
+          SSH_KEY: ${{ secrets.SSH_KEY }}
+          SSH_KNOWN_HOSTS: ${{ secrets.SSH_KNOWN_HOSTS }}
         run: |
           mkdir -p ~/.ssh && chmod 700 ~/.ssh
-          printf '%s\n' "${{ secrets.SSH_KEY }}" > ~/.ssh/id_deploy
-          chmod 600 ~/.ssh/id_deploy
-          ssh-keyscan -p "${SSH_PORT}" "${{ secrets.SSH_HOST }}" >> ~/.ssh/known_hosts 2>/dev/null || true
+          test -n "$SSH_KEY" && test -n "$SSH_KNOWN_HOSTS" || { echo "::error::Faltan SSH_KEY o SSH_KNOWN_HOSTS"; exit 1; }
+          printf '%s\n' "$SSH_KEY" > ~/.ssh/id_deploy
+          printf '%s\n' "$SSH_KNOWN_HOSTS" > ~/.ssh/known_hosts
+          chmod 600 ~/.ssh/id_deploy ~/.ssh/known_hosts
 
       - name: Subir backend-web y reiniciar (rsync + Passenger)
         env:
@@ -244,7 +263,7 @@ jobs:
           USER: ${{ secrets.SSH_USER }}
           DEST: ${{ vars.BACKEND_WEB_PATH || 'backend/agentrepo.dev/backend-web' }}
         run: |
-          SSH="ssh -i ~/.ssh/id_deploy -p ${SSH_PORT} -o StrictHostKeyChecking=accept-new"
+          SSH="ssh -i ~/.ssh/id_deploy -p ${SSH_PORT} -o StrictHostKeyChecking=yes"
           rsync -az --delete -e "$SSH" \
             --exclude '.env' \
             --exclude 'tmp/' \
@@ -277,14 +296,18 @@ jobs:
           pnpm exec nx run backend-ai:prune
           printf "packages:\n  - 'workspace_modules/@agentrepo/*'\n" > apps/backend-ai/dist/pnpm-workspace.yaml
           pnpm --dir apps/backend-ai/dist install --prod --frozen-lockfile
-          pnpm exec prisma generate --schema apps/backend-ai/dist/workspace_modules/@agentrepo/database/prisma/schema.prisma
+          pnpm --dir apps/backend-ai/dist/workspace_modules/@agentrepo/database exec prisma generate --schema prisma/schema.prisma
 
       - name: Configurar SSH
+        env:
+          SSH_KEY: ${{ secrets.SSH_KEY }}
+          SSH_KNOWN_HOSTS: ${{ secrets.SSH_KNOWN_HOSTS }}
         run: |
           mkdir -p ~/.ssh && chmod 700 ~/.ssh
-          printf '%s\n' "${{ secrets.SSH_KEY }}" > ~/.ssh/id_deploy
-          chmod 600 ~/.ssh/id_deploy
-          ssh-keyscan -p "${SSH_PORT}" "${{ secrets.SSH_HOST }}" >> ~/.ssh/known_hosts 2>/dev/null || true
+          test -n "$SSH_KEY" && test -n "$SSH_KNOWN_HOSTS" || { echo "::error::Faltan SSH_KEY o SSH_KNOWN_HOSTS"; exit 1; }
+          printf '%s\n' "$SSH_KEY" > ~/.ssh/id_deploy
+          printf '%s\n' "$SSH_KNOWN_HOSTS" > ~/.ssh/known_hosts
+          chmod 600 ~/.ssh/id_deploy ~/.ssh/known_hosts
 
       - name: Subir backend-ai y reiniciar (rsync + Passenger)
         env:
@@ -292,7 +315,7 @@ jobs:
           USER: ${{ secrets.SSH_USER }}
           DEST: ${{ vars.BACKEND_AI_PATH || 'backend/agentrepo.dev/backend-ai' }}
         run: |
-          SSH="ssh -i ~/.ssh/id_deploy -p ${SSH_PORT} -o StrictHostKeyChecking=accept-new"
+          SSH="ssh -i ~/.ssh/id_deploy -p ${SSH_PORT} -o StrictHostKeyChecking=yes"
           rsync -az --delete -e "$SSH" \
             --exclude '.env' \
             --exclude 'tmp/' \

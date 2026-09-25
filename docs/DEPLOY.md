@@ -37,9 +37,9 @@ Notas importantes:
   `NEXT_PUBLIC_API_URL` debe ser la base pública donde respondas `backend-web`
   (p. ej. `https://agentrepo.dev/web/api/v1`). Esta variable se **inyecta en
   build** (variable de Actions, no del hosting).
-- `backend-web` habla con `backend-ai` por HTTP local (`BACKEND_AI_URL`,
+- `backend-web` habla con `backend-ai` por HTTP local (`BACKEND_AI_SERVICE_URL`,
   normalmente `http://127.0.0.1:<puerto interno>` o la URL oculta), protegido
-  con `INTERNAL_API_SECRET`.
+  con `INTERNAL_COMMUNICATION_API_SECRET`.
 
 ## Configuración en GitHub (Settings → Secrets and variables → Actions)
 
@@ -50,14 +50,15 @@ Notas importantes:
 | `SSH_HOST` | Host SSH del hosting |
 | `SSH_USER` | Usuario SSH |
 | `SSH_KEY` | Clave privada (formato OpenSSH) |
-| `DATABASE_URL` | Postgres de producción (Supabase). Si falta, el job `migrate` se salta. |
+| `SSH_KNOWN_HOSTS` | Clave pública del host SSH en formato `known_hosts`, verificada contra la huella del proveedor. Incluye el puerto si no es 22. |
+| `DATABASE_URL` | Postgres de producción (Supabase). Obligatorio para migrar y desplegar los backends. |
 
 ### Variables
 
 | Variable | Default | Uso |
 |---|---|---|
 | `SSH_PORT` | `22` | Puerto SSH |
-| `NODE_VERSION` | `26` | Node en CI |
+| `NODE_VERSION` | `24` | Node en CI |
 | `NEXT_PUBLIC_API_URL` | `https://agentrepo.dev/web/api/v1` | Base pública de backend-web (build de web y admin) |
 | `NEXT_PUBLIC_SUPABASE_URL` | — | Supabase (build de web) |
 | `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` | — | Supabase (build de web) |
@@ -79,11 +80,12 @@ cualquiera de las cuatro apps; sin él, la telemetría queda desactivada.
 - **admin**: `AUTH_SECRET` (≥ 32 chars aleatorios), `NEXT_PUBLIC_API_URL`.
 - **backend-web**: `DATABASE_URL`, `AUTH_SECRET` (el mismo que admin),
   `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`,
-  `BACKEND_AI_URL`, `INTERNAL_API_SECRET`. El login del panel admin valida
+  `WEB_APP_URL`, `ADMIN_APP_URL` (orígenes HTTPS exactos para CORS),
+  `BACKEND_AI_SERVICE_URL`, `INTERNAL_COMMUNICATION_API_SECRET`. El login del panel admin valida
   email+contraseña contra Supabase Auth (ya no hay `ADMIN_PASSWORD`); el
   usuario admin se aprovisiona con la seed de producción cifrada
-  (`SEED_ENCRYPTION_KEY`, ver `SPACESHIP_DEPLOY.md`).
-- **backend-ai**: `DATABASE_URL`, `INTERNAL_API_SECRET`, `DEEPSEEK_API_KEY`,
+  (`SEED_ENCRYPTION_KEY`, ver `packages/database/README.md`).
+- **backend-ai**: `DATABASE_URL`, `INTERNAL_COMMUNICATION_API_SECRET`, `DEEPSEEK_API_KEY`,
   `DEEPSEEK_MODEL`, `LANGFUSE_PUBLIC_KEY`, `LANGFUSE_SECRET_KEY`,
   `LANGFUSE_BASE_URL`, `SPACEMAIL_HOST`, `SPACEMAIL_PORT`, `SPACEMAIL_USER`,
   `SPACEMAIL_PASS`, `R2_*` (si se usa almacenamiento de PDFs).
@@ -110,7 +112,9 @@ puedes gestionar las variables ahí por SSH.
   (`all`, `web`, `admin`, `backend-web`, `backend-ai`, `migrate`).
 
 Orden: `migrate` corre primero; las apps sólo se despliegan si las migraciones
-terminaron bien (o se saltaron por no haber secret).
+terminaron bien. Si falta el secret `DATABASE_URL`, el despliegue completo
+falla antes de subir las apps. Un despliegue selectivo de `web` o `admin`
+no ejecuta migraciones.
 
 ## Qué sube exactamente el pipeline
 
@@ -130,5 +134,13 @@ terminaron bien (o se saltaron por no haber secret).
    (las carpetas se crean solas si no existen; también las crea el rsync).
 2. Configura las variables de entorno de cada app en cPanel.
 3. Añade los secrets/variables en GitHub.
+   Verifica la huella SSH con el proveedor antes de copiarla a `SSH_KNOWN_HOSTS`;
+   no confíes sólo en la salida de `ssh-keyscan`.
 4. Lanza el workflow a mano (`only: all`) o publica un tag `v0.1.0`.
-5. Comprueba `https://agentrepo.dev/web/api/v1/api/health` y la home.
+5. Aprovisiona el usuario administrador con la seed de producción
+   (`packages/database/README.md`): prepara el archivo cifrado
+   `prod.seed.data.enc`, `SEED_ENCRYPTION_KEY`, las credenciales de Supabase
+   y ejecuta `NODE_ENV=production pnpm db:seed` contra la BD de producción.
+   El pipeline sólo ejecuta migraciones; no crea usuarios.
+6. Comprueba `https://agentrepo.dev/web/api/v1/api/health`, la home,
+   el login del panel y una llamada de backend a backend.

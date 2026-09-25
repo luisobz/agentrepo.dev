@@ -6,7 +6,7 @@
   <a href="https://github.com/luisobz/agentrepo.dev/blob/main/LICENSE">
     <img src="https://img.shields.io/github/license/luisobz/agentrepo.dev?style=for-the-badge&color=8B5CF6" alt="License">
   </a>
-  <img src="https://img.shields.io/badge/node-%3E%3D26.1.0-blue?style=for-the-badge&logo=node.js&color=10B981" alt="Node Version">
+  <img src="https://img.shields.io/badge/node-%3E%3D24-blue?style=for-the-badge&logo=node.js&color=10B981" alt="Node Version">
   <img src="https://img.shields.io/badge/pnpm-%3E%3D10.33.4-orange?style=for-the-badge&logo=pnpm&color=F59E0B" alt="pnpm Version">
   <img src="https://img.shields.io/badge/nx-workspace-blueviolet?style=for-the-badge&logo=nx&color=4F46E5" alt="Nx Workspace">
 </p>
@@ -74,7 +74,7 @@ graph TD
 ### 📋 Requisitos Previos
 
 Asegúrate de tener instalados los siguientes componentes:
-*   **Node.js** v26.1.0 o superior
+*   **Node.js** v24 o superior
 *   **pnpm** v10.33.4 o superior
 *   **Docker** y **Docker Compose** (para la base de datos local)
 
@@ -104,7 +104,7 @@ Asegúrate de tener instalados los siguientes componentes:
    ```bash
    pnpm db:up
    ```
-   *(Alternativamente, puedes usar `./scripts/db-up.sh`)*
+   *(Alternativamente, puedes usar `./infra/database/db-up.sh`)*
 
 5. **Iniciar el entorno de desarrollo:**
    Ejecuta todos los servidores de desarrollo en paralelo con Nx:

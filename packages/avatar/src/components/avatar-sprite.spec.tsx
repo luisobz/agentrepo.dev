@@ -21,7 +21,9 @@ describe('AvatarSprite', () => {
     const sprite = screen.getByTestId('avatar-sprite');
     expect(sprite).toBeInTheDocument();
     expect(sprite).toHaveAttribute('data-emotion', 'idle');
-    expect(sprite).toHaveAttribute('aria-hidden', 'true');
+    expect(sprite).toHaveAttribute('type', 'button');
+    expect(sprite).toHaveAccessibleName('Interact with mascot');
+    expect(sprite.querySelector('svg')).toHaveAttribute('shape-rendering', 'crispEdges');
   });
 
   it.each(['idle', 'happy', 'thinking', 'surprised'] as const)(
@@ -34,9 +36,11 @@ describe('AvatarSprite', () => {
 
   it('la cara cambia entre idle y happy (SVG distinto)', () => {
     const { container: idle } = renderWithEmotion('idle');
-    const idleSvg = idle.querySelector('svg')!.innerHTML;
+    const idleSvg = idle.querySelector('svg')?.innerHTML;
     const { container: happy } = renderWithEmotion('happy');
-    const happySvg = happy.querySelector('svg')!.innerHTML;
+    const happySvg = happy.querySelector('svg')?.innerHTML;
+    expect(idleSvg).toBeDefined();
+    expect(happySvg).toBeDefined();
     expect(idleSvg).not.toEqual(happySvg);
   });
 

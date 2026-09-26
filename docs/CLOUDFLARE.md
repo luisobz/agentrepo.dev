@@ -31,11 +31,12 @@ caduque el DS anterior en resolvers y comprobar que ya no aparece en el
 registro padre. Tras activar Cloudflare, se puede volver a habilitar DNSSEC
 con el nuevo DS de Cloudflare.
 
-Spaceship advierte que al usar nameservers externos se terminan sus conexiones
-DNS automáticas de hosting y Spacemail. La zona Cloudflare reproduce los
-registros actuales, pero la guía de Spaceship para hosting con DNS externo
-menciona un TXT de verificación en `@`. Su valor no aparece en el panel ni en
-los registros actuales; hay que aclararlo con Spaceship antes del corte.
+Spaceship advierte que al usar nameservers externos deja de gestionar
+automáticamente los registros DNS de hosting y Spacemail. El 2026-09-26,
+Spaceship Support confirmó por chat que para `agentrepo.dev`, ya conectado a
+ambos productos, **no hace falta un TXT de verificación adicional** al cambiar
+nameservers. Hay que conservar los registros necesarios, ya reproducidos en
+Cloudflare. No se asignó un número de ticket al chat.
 
 Después del cambio, comprobar DNSSEC, web, panel, health checks, correo,
 certificados, cabeceras `noindex` y el workflow `Deploy (tag)` desde GitHub.

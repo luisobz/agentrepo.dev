@@ -12,7 +12,9 @@ import { buildCreateContext } from './trpc/trpc-context';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
-  const globalPrefix = 'api';
+  // LiteSpeed forwards Passenger's BaseURI as part of req.url.
+  const baseUri = process.env.NODE_ENV === 'production' ? 'web/api/v1/' : '';
+  const globalPrefix = `${baseUri}api`;
   app.setGlobalPrefix(globalPrefix);
 
   app.use(helmet());
@@ -26,7 +28,7 @@ async function bootstrap() {
   const prisma = app.get(PrismaService);
 
   app.use(
-    '/api/trpc',
+    `/${globalPrefix}/trpc`,
     trpcExpress.createExpressMiddleware({
       router: appRouter,
       createContext: buildCreateContext(prisma),

@@ -10,7 +10,9 @@ import { initLangfuseTracing } from './workflow/langfuse';
 async function bootstrap() {
   initLangfuseTracing();
   const app = await NestFactory.create(AppModule);
-  const globalPrefix = 'api';
+  // LiteSpeed forwards Passenger's BaseURI as part of req.url.
+  const baseUri = process.env.NODE_ENV === 'production' ? 'api/ai/' : '';
+  const globalPrefix = `${baseUri}api`;
   app.setGlobalPrefix(globalPrefix);
   app.use(helmet());
   // backend-ai only accepts server-to-server internal calls (guarded by

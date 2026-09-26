@@ -1,0 +1,76 @@
+name: Package for cPanel
+
+# Build self-contained archives on a GitHub runner. cPanel shared hosting does
+# not have enough memory to install and build the entire monorepo.
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+env:
+  DATABASE_URL: postgresql://ci:ci@localhost:5432/ci?schema=public
+  NEXT_PUBLIC_API_URL: ${{ vars.NEXT_PUBLIC_API_URL || 'https://agentrepo.dev/web/api/v1' }}
+  NEXT_PUBLIC_SUPABASE_URL: ${{ vars.NEXT_PUBLIC_SUPABASE_URL }}
+  NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: ${{ vars.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY }}
+  NEXT_PUBLIC_SENTRY_DSN: ${{ vars.NEXT_PUBLIC_SENTRY_DSN }}
+
+jobs:
+  package:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: pnpm
+
+      - name: Require public build configuration
+        run: test -n "$NEXT_PUBLIC_SUPABASE_URL" && test -n "$NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY"
+
+      - run: pnpm install --frozen-lockfile
+
+      - name: Build web and admin
+        run: |
+          pnpm exec nx build web
+          pnpm exec nx build admin
+
+      - name: Package Next.js standalone apps
+        run: |
+          mkdir -p deploy-out/web deploy-out/admin
+          rsync -a apps/web/.next/standalone/ deploy-out/web/
+          rsync -a apps/web/.next/static/ deploy-out/web/apps/web/.next/static/
+          rsync -a apps/web/public/ deploy-out/web/apps/web/public/
+          rsync -a apps/admin/.next/standalone/ deploy-out/admin/
+          rsync -a apps/admin/.next/static/ deploy-out/admin/apps/admin/.next/static/
+          rsync -a apps/admin/public/ deploy-out/admin/apps/admin/public/
+          tar -czf "$RUNNER_TEMP/web.tar.gz" -C deploy-out/web .
+          tar -czf "$RUNNER_TEMP/admin.tar.gz" -C deploy-out/admin .
+
+      - name: Build and package backend-web
+        run: |
+          pnpm exec nx run backend-web:prune
+          printf "packages:\n  - 'workspace_modules/@agentrepo/*'\n" > apps/backend-web/dist/pnpm-workspace.yaml
+          pnpm --dir apps/backend-web/dist install --prod --frozen-lockfile
+          pnpm --dir apps/backend-web/dist/workspace_modules/@agentrepo/database exec prisma generate --schema prisma/schema.prisma
+          tar -czf "$RUNNER_TEMP/backend-web.tar.gz" -C apps/backend-web/dist .
+
+      - name: Build and package backend-ai
+        run: |
+          pnpm exec nx run backend-ai:prune
+          printf "packages:\n  - 'workspace_modules/@agentrepo/*'\n" > apps/backend-ai/dist/pnpm-workspace.yaml
+          pnpm --dir apps/backend-ai/dist install --prod --frozen-lockfile
+          pnpm --dir apps/backend-ai/dist/workspace_modules/@agentrepo/database exec prisma generate --schema prisma/schema.prisma
+          tar -czf "$RUNNER_TEMP/backend-ai.tar.gz" -C apps/backend-ai/dist .
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: cpanel-bundles-${{ github.sha }}
+          path: |
+            ${{ runner.temp }}/web.tar.gz
+            ${{ runner.temp }}/admin.tar.gz
+            ${{ runner.temp }}/backend-web.tar.gz
+            ${{ runner.temp }}/backend-ai.tar.gz
+          if-no-files-found: error
+          retention-days: 7

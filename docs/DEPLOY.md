@@ -20,9 +20,9 @@ configuración necesaria en el hosting.
 | App | Application root (default) | Startup file | URL pública sugerida |
 |---|---|---|---|
 | `web` (Next.js) | `backend/agentrepo.dev/web` | `apps/web/server.js` | `agentrepo.dev/` |
-| `admin` (Next.js) | `backend/agentrepo.dev/admin` | `apps/admin/server.js` | `agentrepo.dev/admin` (o subdominio) |
+| `admin` (Next.js) | `backend/agentrepo.dev/admin` | `apps/admin/server.js` | `admin.agentrepo.dev/` |
 | `backend-web` (NestJS + tRPC) | `backend/agentrepo.dev/backend-web` | `src/main.js` | `agentrepo.dev/web/api/v1` |
-| `backend-ai` (NestJS interno) | `backend/agentrepo.dev/backend-ai` | `src/main.js` | ruta no pública / oculta |
+| `backend-ai` (NestJS interno) | `backend/agentrepo.dev/backend-ai` | `src/main.js` | `agentrepo.dev/api/ai` (endpoints protegidos salvo health) |
 
 Notas importantes:
 
@@ -34,6 +34,10 @@ Notas importantes:
 - Passenger intercepta el `listen()` de Node, así que el puerto interno que
   configuran `WEB_PORT`/`BACKEND_WEB_PORT`/… es irrelevante en producción.
 - El frontend compone la URL de tRPC como `NEXT_PUBLIC_API_URL + /api/trpc`.
+- El hosting tiene habilitada la salida TCP 5432 hacia el pooler de Supabase.
+  Si se cambia de plan, confirma esta regla en Hosting Manager → Advanced →
+  Outgoing port management antes del despliegue.
+- `agentrepo.dev/admin` redirige al login de `admin.agentrepo.dev`.
   `NEXT_PUBLIC_API_URL` debe ser la base pública donde respondas `backend-web`
   (p. ej. `https://agentrepo.dev/web/api/v1`). Esta variable se **inyecta en
   build** (variable de Actions, no del hosting).
@@ -143,4 +147,4 @@ no ejecuta migraciones.
    y ejecuta `NODE_ENV=production pnpm db:seed` contra la BD de producción.
    El pipeline sólo ejecuta migraciones; no crea usuarios.
 6. Comprueba `https://agentrepo.dev/web/api/v1/api/health`, la home,
-   el login del panel y una llamada de backend a backend.
+   `https://admin.agentrepo.dev/login` y una llamada de backend a backend.

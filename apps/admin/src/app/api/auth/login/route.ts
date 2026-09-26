@@ -1,5 +1,4 @@
 import { FixedWindowRateLimiter } from '@agentrepo/trpc/auth';
-import { TRPCClientError } from '@trpc/client';
 import { NextResponse } from 'next/server';
 import { backendTrpc } from '../../../../lib/auth/backend-client';
 import { applySessionCookies } from '../../../../lib/auth/cookies';
@@ -41,7 +40,11 @@ export async function POST(request: Request) {
     applySessionCookies(response, tokens);
     return response;
   } catch (error) {
-    if (error instanceof TRPCClientError && error.data?.code === 'UNAUTHORIZED') {
+    const code =
+      typeof error === 'object' && error !== null && 'data' in error
+        ? (error as { data?: { code?: string } }).data?.code
+        : undefined;
+    if (code === 'UNAUTHORIZED') {
       return NextResponse.json({ error: 'Invalid credentials' }, { status: 401 });
     }
     return NextResponse.json(

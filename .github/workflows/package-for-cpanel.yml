@@ -49,6 +49,7 @@ jobs:
           printf "packages:\n  - 'workspace_modules/@agentrepo/*'\n" > apps/backend-web/dist/pnpm-workspace.yaml
           pnpm --dir apps/backend-web/dist install --prod --frozen-lockfile
           pnpm --dir apps/backend-web/dist/workspace_modules/@agentrepo/database exec prisma generate --schema prisma/schema.prisma
+          node scripts/fix-pruned-workspace-entries.mjs apps/backend-web/dist
           tar -czf "$RUNNER_TEMP/backend-web.tar.gz" -C apps/backend-web/dist .
 
       - name: Build and package backend-ai
@@ -57,6 +58,7 @@ jobs:
           printf "packages:\n  - 'workspace_modules/@agentrepo/*'\n" > apps/backend-ai/dist/pnpm-workspace.yaml
           pnpm --dir apps/backend-ai/dist install --prod --frozen-lockfile
           pnpm --dir apps/backend-ai/dist/workspace_modules/@agentrepo/database exec prisma generate --schema prisma/schema.prisma
+          node scripts/fix-pruned-workspace-entries.mjs apps/backend-ai/dist
           tar -czf "$RUNNER_TEMP/backend-ai.tar.gz" -C apps/backend-ai/dist .
 
       - uses: actions/upload-artifact@v4

@@ -91,6 +91,11 @@ jobs:
 
       - run: pnpm install --frozen-lockfile
 
+      - name: Install Supabase pooler CA
+        run: curl --fail --silent --show-error --location \
+          https://supabase-downloads.s3-ap-southeast-1.amazonaws.com/prod/ssl/prod-ca-2021.crt \
+          --output /tmp/supabase-ca.crt
+
       - name: Prisma migrate deploy
         env:
           PROD_DATABASE_URL: ${{ secrets.DATABASE_URL }}
@@ -131,11 +136,7 @@ jobs:
       - run: pnpm exec nx build web
 
       - name: Preparar bundle standalone
-        run: |
-          mkdir -p deploy-out/web
-          rsync -a apps/web/.next/standalone/ deploy-out/web/
-          rsync -a apps/web/.next/static/ deploy-out/web/apps/web/.next/static/
-          rsync -a apps/web/public/ deploy-out/web/apps/web/public/
+        run: bash scripts/package-next-standalone.sh web deploy-out/web
 
       - name: Configurar SSH
         env:
@@ -185,11 +186,7 @@ jobs:
       - run: pnpm exec nx build admin
 
       - name: Preparar bundle standalone
-        run: |
-          mkdir -p deploy-out/admin
-          rsync -a apps/admin/.next/standalone/ deploy-out/admin/
-          rsync -a apps/admin/.next/static/ deploy-out/admin/apps/admin/.next/static/
-          rsync -a apps/admin/public/ deploy-out/admin/apps/admin/public/
+        run: bash scripts/package-next-standalone.sh admin deploy-out/admin
 
       - name: Configurar SSH
         env:
@@ -322,3 +319,38 @@ jobs:
             --exclude '*.log' \
             apps/backend-ai/dist/ "$USER@$HOST:$DEST/"
           $SSH "$USER@$HOST" "mkdir -p '$DEST/tmp' && touch '$DEST/tmp/restart.txt'"
+
+  # A release represents a deployment that passed live checks, not just a build.
+  smoke:
+    needs: [verify, migrate, web, admin, backend-web, backend-ai]
+    if: ${{ !cancelled() && needs.verify.result == 'success' && (needs.migrate.result == 'success' || needs.migrate.result == 'skipped') && !contains(needs.*.result, 'failure') }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check deployed routes
+        run: |
+          for route in / /admin /web/api/v1/api/health /api/ai/api/health; do
+            curl --fail --silent --show-error --location --retry 8 --retry-delay 5 \
+              --retry-all-errors --max-time 20 --output /dev/null \
+              "https://agentrepo.dev${route}"
+          done
+
+  release:
+    needs: smoke
+    if: ${{ startsWith(github.ref, 'refs/tags/v') && needs.smoke.result == 'success' }}
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Publish GitHub release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          if gh release view "$GITHUB_REF_NAME" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
+            echo "Release $GITHUB_REF_NAME already exists"
+            exit 0
+          fi
+          gh release create "$GITHUB_REF_NAME" \
+            --repo "$GITHUB_REPOSITORY" \
+            --target "$GITHUB_SHA" \
+            --verify-tag \
+            --generate-notes

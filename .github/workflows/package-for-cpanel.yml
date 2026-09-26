@@ -38,13 +38,8 @@ jobs:
 
       - name: Package Next.js standalone apps
         run: |
-          mkdir -p deploy-out/web deploy-out/admin
-          rsync -a apps/web/.next/standalone/ deploy-out/web/
-          rsync -a apps/web/.next/static/ deploy-out/web/apps/web/.next/static/
-          rsync -a apps/web/public/ deploy-out/web/apps/web/public/
-          rsync -a apps/admin/.next/standalone/ deploy-out/admin/
-          rsync -a apps/admin/.next/static/ deploy-out/admin/apps/admin/.next/static/
-          rsync -a apps/admin/public/ deploy-out/admin/apps/admin/public/
+          bash scripts/package-next-standalone.sh web deploy-out/web
+          bash scripts/package-next-standalone.sh admin deploy-out/admin
           tar -czf "$RUNNER_TEMP/web.tar.gz" -C deploy-out/web .
           tar -czf "$RUNNER_TEMP/admin.tar.gz" -C deploy-out/admin .
 

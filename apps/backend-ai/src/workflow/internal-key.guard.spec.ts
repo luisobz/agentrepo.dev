@@ -1,10 +1,9 @@
 import { ExecutionContext, UnauthorizedException } from '@nestjs/common';
+import { BackendEnvironments } from '@agentrepo/config';
 import { describe, expect, it } from 'vitest';
 import { InternalKeyGuard } from './internal-key.guard';
 
-// In the test process DATABASE_URL is set and NODE_ENV is unset (→ development),
-// so BackendEnvironments.INTERNAL_COMMUNICATION_API_SECRET is the default 'dev-internal-secret'.
-const VALID_KEY = 'dev-internal-secret';
+const VALID_KEY = BackendEnvironments.INTERNAL_COMMUNICATION_API_SECRET;
 
 function contextWithKey(value: string | undefined): ExecutionContext {
   return {

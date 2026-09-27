@@ -129,6 +129,7 @@ export default async function AgentPage({ params, searchParams }: AgentPageProps
         <p className="mt-3 max-w-2xl text-lg leading-relaxed text-[var(--color-text-secondary)]">
           {agent.shortDescription}
         </p>
+        {agent.authorName && <p className="mt-3 font-mono text-xs text-[var(--color-text-muted)]">Author: {agent.authorName}</p>}
       </header>
 
       <ContentCover

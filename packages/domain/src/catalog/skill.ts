@@ -6,6 +6,8 @@ export type SkillType = (typeof SKILL_TYPES)[number];
 
 export interface Skill {
   id: string;
+  authorId?: string | null;
+  authorName?: string | null;
   slug: string;
   title: string;
   description: string | null;

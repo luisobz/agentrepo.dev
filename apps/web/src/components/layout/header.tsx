@@ -147,7 +147,7 @@ export function Header() {
               )}
 
               <Link
-                href="/portfolio/luisbz#contact"
+                href="/creator"
                 className={cn(
                   "hidden sm:flex items-center justify-center font-sans font-medium text-xs whitespace-nowrap rounded-full border transition-all",
                   isScrolled
@@ -239,7 +239,7 @@ export function Header() {
           </Link>
 
           <Link
-            href="/portfolio/luisbz#contact"
+            href="/creator"
             onClick={() => setMobileMenuOpen(false)}
             className="mt-2 w-full flex items-center justify-center font-sans font-medium text-sm py-3 bg-[var(--color-brand-garnet)] text-[var(--color-bg-warm-white)] rounded-xl hover:bg-[var(--color-brand-garnet-deep)] shadow-sm"
           >

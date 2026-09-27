@@ -1,7 +1,9 @@
 # Cloudflare para agentrepo.dev
 
-Estado a 2026-09-26: zona creada con el plan Free, pendiente de activar. La
-delegación pública sigue en `launch1.spaceship.net` y `launch2.spaceship.net`.
+Estado a 2026-09-27: zona creada con el plan Free, pendiente de activar en el
+panel de Cloudflare. Spaceship confirmó el cambio de delegación y el registro
+`.dev` ya publica `everton.ns.cloudflare.com` y `lucy.ns.cloudflare.com`.
+Algunos resolutores todavía conservan en caché los nameservers anteriores.
 Cloudflare asignó `everton.ns.cloudflare.com` y `lucy.ns.cloudflare.com` y se
 configuró SSL/TLS en **Full (strict)**. El hosting y los despliegues siguen en
 Spaceship y GitHub Actions.
@@ -22,14 +24,13 @@ webdisk y los registros de correo quedan **DNS only**. No se debe añadir una
 regla de caché global para HTML ni para las rutas de API/admin: Cloudflare no
 cachea HTML ni JSON por defecto.
 
-## Corte de DNS pendiente
+## Corte de DNS
 
-`agentrepo.dev` tiene un registro DS de DNSSEC en el registrador. Su TTL
-publicado en `.dev` era de 1800 segundos al preparar esta zona. Antes de
-cambiar nameservers hay que desactivar DNSSEC en Spaceship, esperar a que
-caduque el DS anterior en resolvers y comprobar que ya no aparece en el
-registro padre. Tras activar Cloudflare, se puede volver a habilitar DNSSEC
-con el nuevo DS de Cloudflare.
+DNSSEC se desactivó en Spaceship y se comprobó que el DS anterior desapareció
+del registro `.dev` antes del cambio de nameservers. Spaceship confirmó los
+nameservers de Cloudflare y el registro `.dev` ya los publica. Cloudflare sigue
+comprobando la delegación; después de activar la zona queda reactivar DNSSEC
+con el nuevo DS de Cloudflare en Spaceship.
 
 Spaceship advierte que al usar nameservers externos deja de gestionar
 automáticamente los registros DNS de hosting y Spacemail. El 2026-09-26,
@@ -38,6 +39,8 @@ ambos productos, **no hace falta un TXT de verificación adicional** al cambiar
 nameservers. Hay que conservar los registros necesarios, ya reproducidos en
 Cloudflare. No se asignó un número de ticket al chat.
 
-Después del cambio, comprobar DNSSEC, web, panel, health checks, correo,
-certificados, cabeceras `noindex` y el workflow `Deploy (tag)` desde GitHub.
+La web, el panel y ambos health checks responden 200 a través de la IP del
+proxy de Cloudflare, con certificado TLS válido. Queda comprobar la activación
+de la zona, DNSSEC, correo, cabeceras `noindex` y el workflow `Deploy (tag)`
+desde GitHub tras la propagación.
 Mantener `noindex` hasta aprobar la publicación.

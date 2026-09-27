@@ -1,0 +1,36 @@
+-- Protect Prisma-managed tables from Supabase Data API roles.
+-- Backend Prisma uses agentrepo_prisma with BYPASSRLS; Supabase Auth remains available.
+ALTER TABLE public."Skill" ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public."SkillVersion" ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public."SkillVersionDownloadDay" ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public."Agent" ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public."AgentVersion" ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public."AgentVersionDownloadDay" ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public."BlogPost" ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public."User" ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public."Role" ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public."Permission" ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public."UserRole" ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public."RolePermission" ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public."AdminSession" ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public."Purchase" ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public."ContactRequest" ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public."PlaygroundToken" ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public."PlaygroundDeployment" ENABLE ROW LEVEL SECURITY;
+REVOKE ALL ON TABLE public."Skill" FROM anon, authenticated;
+REVOKE ALL ON TABLE public."SkillVersion" FROM anon, authenticated;
+REVOKE ALL ON TABLE public."SkillVersionDownloadDay" FROM anon, authenticated;
+REVOKE ALL ON TABLE public."Agent" FROM anon, authenticated;
+REVOKE ALL ON TABLE public."AgentVersion" FROM anon, authenticated;
+REVOKE ALL ON TABLE public."AgentVersionDownloadDay" FROM anon, authenticated;
+REVOKE ALL ON TABLE public."BlogPost" FROM anon, authenticated;
+REVOKE ALL ON TABLE public."User" FROM anon, authenticated;
+REVOKE ALL ON TABLE public."Role" FROM anon, authenticated;
+REVOKE ALL ON TABLE public."Permission" FROM anon, authenticated;
+REVOKE ALL ON TABLE public."UserRole" FROM anon, authenticated;
+REVOKE ALL ON TABLE public."RolePermission" FROM anon, authenticated;
+REVOKE ALL ON TABLE public."AdminSession" FROM anon, authenticated;
+REVOKE ALL ON TABLE public."Purchase" FROM anon, authenticated;
+REVOKE ALL ON TABLE public."ContactRequest" FROM anon, authenticated;
+REVOKE ALL ON TABLE public."PlaygroundToken" FROM anon, authenticated;
+REVOKE ALL ON TABLE public."PlaygroundDeployment" FROM anon, authenticated;

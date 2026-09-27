@@ -9,7 +9,9 @@ import type { PlaygroundCardData } from './playground-types';
 const renderWithLocale = (ui: ReactElement) =>
   render(<LocaleProvider>{ui}</LocaleProvider>);
 
-function buildCard(overrides: Partial<PlaygroundCardData> = {}): PlaygroundCardData {
+function buildCard(
+  overrides: Partial<PlaygroundCardData> = {},
+): PlaygroundCardData {
   return {
     id: 'card-1',
     title: 'Feature 1: Premium Dark Hero Page',
@@ -27,11 +29,18 @@ describe('PlaygroundCard', () => {
   it('renders the title and the sub-task checklist', () => {
     renderWithLocale(<PlaygroundCard card={buildCard()} />);
 
-    expect(
-      screen.getByText('Feature 1: Premium Dark Hero Page')
-    ).toBeTruthy();
+    expect(screen.getByText('Feature 1: Premium Dark Hero Page')).toBeTruthy();
     expect(screen.getByText('Write code')).toBeTruthy();
     expect(screen.getByText('Setup tests')).toBeTruthy();
+  });
+
+  it('starts a backlog task with a button as well as drag and drop', () => {
+    const onStart = vi.fn();
+    renderWithLocale(
+      <PlaygroundCard card={buildCard()} isDraggable onStart={onStart} />,
+    );
+    fireEvent.click(screen.getByText('Start task'));
+    expect(onStart).toHaveBeenCalledWith('card-1');
   });
 
   it('shows the active agent badge when assigned', () => {
@@ -43,19 +52,22 @@ describe('PlaygroundCard', () => {
   it('highlights the error state', () => {
     renderWithLocale(
       <PlaygroundCard
-        card={buildCard({ hasError: true, errorDetail: 'Security assertion failed' })}
-      />
+        card={buildCard({
+          hasError: true,
+          errorDetail: 'Security assertion failed',
+        })}
+      />,
     );
 
     expect(screen.getByRole('alert').textContent).toContain(
-      'Security assertion failed'
+      'Security assertion failed',
     );
   });
 
   it('only offers the preview action in the review column and fires callbacks', () => {
     const onPreview = vi.fn();
     const { rerender } = renderWithLocale(
-      <PlaygroundCard card={buildCard()} onPreview={onPreview} />
+      <PlaygroundCard card={buildCard()} onPreview={onPreview} />,
     );
     expect(screen.queryByText('View preview')).toBeNull();
 
@@ -65,10 +77,43 @@ describe('PlaygroundCard', () => {
           card={buildCard({ column: 'review' })}
           onPreview={onPreview}
         />
-      </LocaleProvider>
+      </LocaleProvider>,
     );
     fireEvent.click(screen.getByText('View preview'));
 
     expect(onPreview).toHaveBeenCalledWith('card-1');
+  });
+
+  it('chooses a documentation library and selects a merged card for release', () => {
+    const onDocument = vi.fn();
+    const onSelect = vi.fn();
+    const { rerender } = renderWithLocale(
+      <PlaygroundCard
+        card={buildCard({ column: 'review' })}
+        onDocument={onDocument}
+      />,
+    );
+    fireEvent.change(screen.getByLabelText('Documentation library'), {
+      target: { value: 'Obsidian' },
+    });
+    fireEvent.click(screen.getByText('Document and merge'));
+    expect(onDocument).toHaveBeenCalledWith('card-1', 'Obsidian');
+
+    rerender(
+      <LocaleProvider>
+        <PlaygroundCard
+          card={buildCard({
+            column: 'documentation',
+            documentationLibrary: 'Obsidian',
+            screenshotCount: 2,
+            isMerged: true,
+          })}
+          onSelect={onSelect}
+        />
+      </LocaleProvider>,
+    );
+    expect(screen.getByText(/Documented and merged/)).toBeTruthy();
+    fireEvent.click(screen.getByLabelText('Select for release'));
+    expect(onSelect).toHaveBeenCalledWith('card-1', true);
   });
 });

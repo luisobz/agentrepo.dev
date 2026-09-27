@@ -1,17 +1,27 @@
 'use client';
 
 import { AvatarSlot } from '@agentrepo/avatar';
-import { AlertTriangle, Check, Eye, Loader2, Rocket } from 'lucide-react';
-import type { DragEvent } from 'react';
+import {
+  AlertTriangle,
+  Check,
+  Eye,
+  BookOpen,
+  Camera,
+  ArrowRight,
+} from 'lucide-react';
+import { useState, type DragEvent } from 'react';
 import { useT } from '../../lib/i18n/use-t';
 import {
   AGENT_LABELS,
+  DOCUMENTATION_LIBRARIES,
+  type DocumentationLibrary,
   type PlaygroundCardData,
 } from './playground-types';
 
 const AGENT_STYLES: Record<string, string> = {
   coder: 'bg-[#2f5d8a]/20 text-[#8aaac8] border-[#2f5d8a]/40',
   tester: 'bg-amber-500/15 text-amber-300 border-amber-500/40',
+  documenter: 'bg-violet-500/15 text-violet-300 border-violet-500/40',
   deployer: 'bg-emerald-500/15 text-emerald-300 border-emerald-500/40',
 };
 
@@ -21,8 +31,11 @@ export interface PlaygroundCardProps {
   /** When true, the avatar docks at this card's top-right corner. */
   hostAvatar?: boolean;
   onDragStart?: (event: DragEvent<HTMLElement>, cardId: string) => void;
+  onStart?: (cardId: string) => void;
   onPreview?: (cardId: string) => void;
-  onDeploy?: (cardId: string) => void;
+  onDocument?: (cardId: string, library: DocumentationLibrary) => void;
+  isSelected?: boolean;
+  onSelect?: (cardId: string, selected: boolean) => void;
 }
 
 export function PlaygroundCard({
@@ -30,10 +43,14 @@ export function PlaygroundCard({
   isDraggable = false,
   hostAvatar = false,
   onDragStart,
+  onStart,
   onPreview,
-  onDeploy,
+  onDocument,
+  isSelected = false,
+  onSelect,
 }: PlaygroundCardProps) {
   const t = useT();
+  const [library, setLibrary] = useState<DocumentationLibrary>('Outline');
   return (
     <article
       data-testid={`playground-card-${card.id}`}
@@ -95,6 +112,17 @@ export function PlaygroundCard({
         </p>
       ) : null}
 
+      {card.column === 'backlog' && onStart ? (
+        <button
+          type="button"
+          onClick={() => onStart(card.id)}
+          disabled={!isDraggable}
+          className="mt-3 flex w-full items-center justify-center gap-1.5 rounded-lg border border-[#c4909a]/40 bg-[#7a2230]/20 px-3 py-2 text-xs font-semibold text-[#e8c2ca] hover:bg-[#7a2230]/40 disabled:opacity-50"
+        >
+          {t('playground.startTask')} <ArrowRight className="h-3.5 w-3.5" />
+        </button>
+      ) : null}
+
       {card.column === 'review' && onPreview ? (
         <button
           type="button"
@@ -106,30 +134,72 @@ export function PlaygroundCard({
         </button>
       ) : null}
 
-      {card.column === 'review' && onDeploy ? (
-        <button
-          type="button"
-          onClick={() => onDeploy(card.id)}
-          disabled={card.isDeploying}
-          className="mt-2 flex w-full items-center justify-center gap-1.5 rounded-lg bg-gradient-to-r from-emerald-700 to-emerald-800 px-3 py-2 text-xs font-semibold text-emerald-50 transition-colors hover:from-emerald-600 disabled:opacity-70"
-        >
-          {card.isDeploying ? (
-            <>
-              <Loader2 className="h-3.5 w-3.5 animate-spin" />
-              {t('playground.deploying')}
-            </>
-          ) : (
-            <>
-              <Rocket className="h-3.5 w-3.5" />
-              {t('playground.deploy')}
-            </>
-          )}
-        </button>
+      {card.column === 'review' && onDocument ? (
+        <div className="mt-3 space-y-2">
+          <label
+            className="block text-xs text-[#cfc6b8]"
+            htmlFor={`library-${card.id}`}
+          >
+            {t('playground.documentationLibrary')}
+          </label>
+          <select
+            id={`library-${card.id}`}
+            value={library}
+            onChange={(event) =>
+              setLibrary(event.target.value as DocumentationLibrary)
+            }
+            className="w-full rounded-lg border border-white/20 bg-[#211a1a] px-2 py-2 text-xs text-[#fdf8ef]"
+          >
+            {DOCUMENTATION_LIBRARIES.map((option) => (
+              <option key={option} value={option}>
+                {option}
+              </option>
+            ))}
+          </select>
+          <button
+            type="button"
+            onClick={() => onDocument(card.id, library)}
+            className="flex w-full items-center justify-center gap-1.5 rounded-lg bg-violet-800 px-3 py-2 text-xs font-semibold text-white hover:bg-violet-700"
+          >
+            <BookOpen className="h-3.5 w-3.5" /> {t('playground.document')}
+          </button>
+        </div>
+      ) : null}
+
+      {card.column === 'documentation' ? (
+        <div className="mt-3 space-y-2 text-xs text-[#cfc6b8]">
+          <p className="flex items-center gap-1.5">
+            <BookOpen className="h-3.5 w-3.5" /> {t('playground.connectedTo')}{' '}
+            {card.documentationLibrary}
+          </p>
+          <p className="flex items-center gap-1.5">
+            <Camera className="h-3.5 w-3.5" /> {card.screenshotCount ?? 0}{' '}
+            {t('playground.screenshots')}
+          </p>
+          {card.isMerged ? (
+            <p className="font-semibold text-emerald-300">
+              ✓ {t('playground.merged')}
+            </p>
+          ) : null}
+          {card.isMerged && !card.isDeployed && onSelect ? (
+            <label className="flex cursor-pointer items-center gap-2 rounded-lg border border-white/15 p-2">
+              <input
+                type="checkbox"
+                checked={isSelected}
+                onChange={(event) => onSelect(card.id, event.target.checked)}
+              />
+              {t('playground.selectForRelease')}
+            </label>
+          ) : null}
+        </div>
       ) : null}
 
       {card.isDeployed ? (
         <p className="mt-3 text-xs text-emerald-300">
           ✓ {t('playground.deploySuccess')}
+          {card.releaseTag ? (
+            <span className="ml-1 font-mono">{card.releaseTag}</span>
+          ) : null}
           {card.deployedUrl ? (
             <span className="mt-1 block truncate font-mono text-[10px] text-emerald-200/80">
               {card.deployedUrl}

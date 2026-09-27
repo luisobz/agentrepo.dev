@@ -10,7 +10,7 @@ import {
 
 function cardById(
   result: { current: ReturnType<typeof usePlaygroundMock> },
-  id: string
+  id: string,
 ) {
   const card = result.current.cards.find((item) => item.id === id);
   if (!card) {
@@ -33,11 +33,12 @@ describe('usePlaygroundMock', () => {
     vi.useRealTimers();
   });
 
-  it('starts with the three immutable demo features in the backlog', () => {
+  it('starts with four demo features in the backlog', () => {
     const { result } = renderHook(() => usePlaygroundMock(), { wrapper });
 
-    expect(result.current.cards).toHaveLength(3);
+    expect(result.current.cards).toHaveLength(4);
     expect(result.current.cards.map((card) => card.column)).toEqual([
+      'backlog',
       'backlog',
       'backlog',
       'backlog',
@@ -46,6 +47,7 @@ describe('usePlaygroundMock', () => {
       'Feature 1: Premium Dark Hero Page',
       'Feature 2: Secure GitHub OAuth Flow',
       'Feature 3: High-Performance Redis Caching',
+      'Feature 4: Accessible Search Palette',
     ]);
   });
 
@@ -83,12 +85,12 @@ describe('usePlaygroundMock', () => {
     const reviewed = cardById(result, 'mock-1');
     expect(reviewed.column).toBe('review');
     expect(
-      reviewed.subtasks.some((subtask) => subtask.label === '✓ Tests passed')
+      reviewed.subtasks.some((subtask) => subtask.label === '✓ Tests passed'),
     ).toBe(true);
     expect(result.current.isBusy).toBe(false);
   });
 
-  it('deploys from review with a loading window and celebrates', () => {
+  it('documents a reviewed card with an integration, screenshots and merge before release', () => {
     const { result } = renderHook(() => usePlaygroundMock(), { wrapper });
     act(() => result.current.moveCardToDevelop('mock-1'));
     act(() =>
@@ -96,19 +98,57 @@ describe('usePlaygroundMock', () => {
         MOCK_TIMINGS.developToTesting +
           MOCK_TIMINGS.testingFailure +
           MOCK_TIMINGS.refactorPause +
-          MOCK_TIMINGS.retestPass
-      )
+          MOCK_TIMINGS.retestPass,
+      ),
     );
 
-    act(() => result.current.deployCard('mock-1'));
+    act(() => result.current.documentCard('mock-1', 'Outline'));
+    expect(cardById(result, 'mock-1').column).toBe('documentation');
+    expect(cardById(result, 'mock-1').documentationLibrary).toBe('Outline');
+    expect(cardById(result, 'mock-1').isMerged).toBe(false);
+
+    act(() => vi.advanceTimersByTime(MOCK_TIMINGS.documentationStep * 4));
+    const documented = cardById(result, 'mock-1');
+    expect(documented.isMerged).toBe(true);
+    expect(documented.screenshotCount).toBeGreaterThan(0);
+    expect(documented.subtasks.every((task) => task.done)).toBe(true);
+
+    act(() => result.current.deployCards(['mock-1']));
     expect(cardById(result, 'mock-1').isDeploying).toBe(true);
 
     act(() => vi.advanceTimersByTime(MOCK_TIMINGS.deployDuration));
     const deployed = cardById(result, 'mock-1');
-    expect(deployed.column).toBe('deploy');
+    expect(deployed.column).toBe('documentation');
     expect(deployed.isDeployed).toBe(true);
+    expect(deployed.releaseTag).toBe('demo-v1');
     expect(result.current.celebratingCardId).toBe('mock-1');
     expect(result.current.guidance.emotion).toBe('happy');
+  });
+
+  it('refuses to release cards that have not completed documentation', () => {
+    const { result } = renderHook(() => usePlaygroundMock(), { wrapper });
+    act(() => result.current.deployCards(['mock-1']));
+    expect(cardById(result, 'mock-1').isDeploying).toBeFalsy();
+  });
+
+  it('creates one release tag for multiple documented cards', () => {
+    const { result } = renderHook(() => usePlaygroundMock(), { wrapper });
+    const developmentDuration =
+      MOCK_TIMINGS.developToTesting +
+      MOCK_TIMINGS.testingFailure +
+      MOCK_TIMINGS.refactorPause +
+      MOCK_TIMINGS.retestPass;
+    for (const cardId of ['mock-1', 'mock-2']) {
+      act(() => result.current.moveCardToDevelop(cardId));
+      act(() => vi.advanceTimersByTime(developmentDuration));
+      act(() => result.current.documentCard(cardId, 'Obsidian'));
+      act(() => vi.advanceTimersByTime(MOCK_TIMINGS.documentationStep * 4));
+    }
+    act(() => result.current.deployCards(['mock-1', 'mock-2']));
+    act(() => vi.advanceTimersByTime(MOCK_TIMINGS.deployDuration));
+    expect(cardById(result, 'mock-1').releaseTag).toBe('demo-v1');
+    expect(cardById(result, 'mock-2').releaseTag).toBe('demo-v1');
+    expect(cardById(result, 'mock-3').releaseTag).toBeUndefined();
   });
 
   it('resets the board and cancels pending timers on restart', () => {
@@ -123,11 +163,12 @@ describe('usePlaygroundMock', () => {
       'backlog',
       'backlog',
       'backlog',
+      'backlog',
     ]);
     expect(result.current.isBusy).toBe(false);
     expect(result.current.celebratingCardId).toBeNull();
     expect(
-      cardById(result, 'mock-1').subtasks.every((subtask) => !subtask.done)
+      cardById(result, 'mock-1').subtasks.every((subtask) => !subtask.done),
     ).toBe(true);
 
     // Timers scheduled before the restart must not resurrect the old run.

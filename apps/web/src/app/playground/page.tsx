@@ -5,7 +5,7 @@ import { PlaygroundBoard } from '../../components/playground/playground-board';
 export const metadata: Metadata = {
   title: 'Playground | AgentRepo.dev',
   description:
-    'Interactive Kanban playground where autonomous AI sub-agents plan, code, test and deploy features live.',
+    'Interactive Kanban simulation where AI sub-agents code, test, document and release features in batches.',
 };
 
 export default async function PlaygroundPage() {

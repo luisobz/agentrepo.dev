@@ -5,7 +5,7 @@ export const PLAYGROUND_COLUMNS = [
   'develop',
   'testing',
   'review',
-  'deploy',
+  'documentation',
 ] as const;
 
 export type PlaygroundColumnId = (typeof PLAYGROUND_COLUMNS)[number];
@@ -16,14 +16,22 @@ export const COLUMN_LABEL_KEYS: Record<PlaygroundColumnId, WebDictionaryKey> = {
   develop: 'playground.column.develop',
   testing: 'playground.column.testing',
   review: 'playground.column.review',
-  deploy: 'playground.column.deploy',
+  documentation: 'playground.column.documentation',
 };
 
-export type PlaygroundAgent = 'coder' | 'tester' | 'deployer';
+export const DOCUMENTATION_LIBRARIES = [
+  'Outline',
+  'Obsidian',
+  'Notion',
+] as const;
+export type DocumentationLibrary = (typeof DOCUMENTATION_LIBRARIES)[number];
+
+export type PlaygroundAgent = 'coder' | 'tester' | 'documenter' | 'deployer';
 
 export const AGENT_LABELS: Record<PlaygroundAgent, string> = {
   coder: 'CoderAgent',
   tester: 'TesterAgent',
+  documenter: 'DocsAgent',
   deployer: 'DeployerAgent',
 };
 
@@ -32,7 +40,11 @@ export interface PlaygroundSubtask {
   done: boolean;
 }
 
-export type MockPreviewId = 'dark-hero' | 'oauth-flow' | 'redis-cache';
+export type MockPreviewId =
+  | 'dark-hero'
+  | 'oauth-flow'
+  | 'redis-cache'
+  | 'search-palette';
 
 export interface PlaygroundCardData {
   id: string;
@@ -44,6 +56,10 @@ export interface PlaygroundCardData {
   errorDetail?: string;
   isDeploying?: boolean;
   isDeployed?: boolean;
+  documentationLibrary?: DocumentationLibrary;
+  screenshotCount?: number;
+  isMerged?: boolean;
+  releaseTag?: string;
   deployedUrl?: string;
   /** Mock cards render a canned preview; real cards carry generated code. */
   kind: 'mock' | 'real';

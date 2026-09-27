@@ -1,6 +1,5 @@
 import { notFound } from 'next/navigation';
 import type { Metadata } from 'next';
-import { PortfolioAccessGate } from '../../../components/portfolio/portfolio-access-gate';
 import { PortfolioContent } from '../../../components/portfolio/portfolio-content';
 import {
   getPortfolioProfile,
@@ -36,8 +35,6 @@ export default async function PortfolioPage({ params }: PortfolioPageProps) {
   }
 
   return (
-    <PortfolioAccessGate>
-    {/* -mt-24 reclaims the global <main> top padding: this page has no header. */}
     <div className="-mt-24 min-h-screen bg-[#14110f] text-[#fdf8ef]">
       {/* Premium dark backdrop: garnet glow, blue counter-glow and vignette */}
       <div aria-hidden="true" className="pointer-events-none fixed inset-0">
@@ -50,6 +47,5 @@ export default async function PortfolioPage({ params }: PortfolioPageProps) {
         <PortfolioContent profile={profile} />
       </div>
     </div>
-    </PortfolioAccessGate>
   );
 }

@@ -57,14 +57,15 @@ export const webDictionary = {
     es: 'Una pizarra Kanban donde los agentes trabajan en directo',
   },
   'playground.subtitle': {
-    en: 'Drag a task and watch the sub-agents code, test (and get it wrong, and fix it) until it ships. Hit "Restart" to run the simulation again whenever you like.',
-    es: 'Arrastra una tarea y observa cómo los subagentes programan, testean (y se equivocan, y se corrigen) hasta desplegarla. Pulsa «Reiniciar» para volver a empezar la simulación cuando quieras.',
+    en: 'Drag tasks through coding and tests, connect a documentation library, add screenshots and merge. Select one or more finished cards for a simulated batch release.',
+    es: 'Arrastra tareas por desarrollo y pruebas, conecta una librería de documentación, añade capturas y mergea. Selecciona una o varias tarjetas finalizadas para simular un release en lote.',
   },
   'playground.guidedSimulation': {
     en: 'Guided simulation',
     es: 'Simulación guiada',
   },
   'playground.restart': { en: 'Restart', es: 'Reiniciar' },
+  'playground.startTask': { en: 'Start task', es: 'Iniciar tarea' },
   'playground.viewPreview': { en: 'View preview', es: 'Ver previsualización' },
   'playground.deploy': { en: 'Deploy', es: 'Deploy' },
   'playground.deploying': {
@@ -108,7 +109,52 @@ export const webDictionary = {
   'playground.column.develop': { en: 'Develop', es: 'Desarrollar' },
   'playground.column.testing': { en: 'Testing', es: 'Testing' },
   'playground.column.review': { en: 'Review', es: 'Review' },
-  'playground.column.deploy': { en: 'Deploy', es: 'Deploy' },
+  'playground.column.documentation': {
+    en: 'Documentation',
+    es: 'Documentación',
+  },
+  'playground.documentationLibrary': {
+    en: 'Documentation library',
+    es: 'Librería de documentación',
+  },
+  'playground.document': {
+    en: 'Document and merge',
+    es: 'Documentar y mergear',
+  },
+  'playground.connectedTo': { en: 'Connected to', es: 'Conectada a' },
+  'playground.screenshots': { en: 'screenshots', es: 'capturas' },
+  'playground.merged': {
+    en: 'Documented and merged',
+    es: 'Documentada y mergeada',
+  },
+  'playground.selectForRelease': {
+    en: 'Select for release',
+    es: 'Seleccionar para release',
+  },
+  'playground.releaseTitle': {
+    en: 'Batch release simulation',
+    es: 'Simulación de release en lote',
+  },
+  'playground.releaseDescription': {
+    en: 'Select completed cards, then simulate one Git tag and one deployment for the batch.',
+    es: 'Selecciona tarjetas finalizadas y simula un único tag de Git y un despliegue para el lote.',
+  },
+  'playground.cardsSelected': {
+    en: 'cards selected',
+    es: 'tarjetas seleccionadas',
+  },
+  'playground.deploySelected': {
+    en: 'Tag and deploy selection',
+    es: 'Etiquetar y desplegar selección',
+  },
+  'playground.mock.documenting': {
+    en: 'DocsAgent connects the library, adds screenshots, writes the guide and merges the PR.',
+    es: 'DocsAgent conecta la librería, añade capturas, redacta la guía y mergea la PR.',
+  },
+  'playground.mock.documented': {
+    en: 'Documented and merged. Select this card for the next batch release.',
+    es: 'Documentada y mergeada. Selecciona la tarjeta para el siguiente release en lote.',
+  },
   'playground.mock.intro': {
     en: 'Hi! Drag one of the Backlog tasks into "Develop" to watch my sub-agents get to work.',
     es: '¡Hola! Arrastra una de las tareas del Backlog a "Desarrollar" para ver cómo mis subagentes se ponen a trabajar.',
@@ -134,12 +180,12 @@ export const webDictionary = {
     es: 'Bug refinado. TesterAgent reintentando la suite...',
   },
   'playground.mock.readyForReview': {
-    en: '✓ Tests passed. The feature is waiting for your approval in Review: preview it and deploy it.',
-    es: '✓ Tests passed. La feature espera tu visto bueno en Review: previsualízala y despliégala.',
+    en: '✓ Tests passed. Preview the feature in Review, then document and merge it.',
+    es: '✓ Tests superados. Previsualiza la feature en Review, después documéntala y mergea.',
   },
   'playground.mock.deploySuccess': {
-    en: 'Deploy successful! The feature is now live in production. 🎉',
-    es: '¡Deploy exitoso! La feature ya está en producción. 🎉',
+    en: 'Batch release simulated: one tag and deployment for the selected cards. 🎉',
+    es: 'Release en lote simulado: un tag y despliegue para las tarjetas seleccionadas. 🎉',
   },
 
   'common.empty': {
@@ -196,9 +242,18 @@ export const webDictionary = {
     en: 'Sign in to buy premium assets and keep your library in sync.',
     es: 'Inicia sesión para comprar contenido premium y sincronizar tu biblioteca.',
   },
-  'auth.continueGithub': { en: 'Continue with GitHub', es: 'Continuar con GitHub' },
-  'auth.continueGoogle': { en: 'Continue with Google', es: 'Continuar con Google' },
-  'auth.continueApple': { en: 'Continue with Apple', es: 'Continuar con Apple' },
+  'auth.continueGithub': {
+    en: 'Continue with GitHub',
+    es: 'Continuar con GitHub',
+  },
+  'auth.continueGoogle': {
+    en: 'Continue with Google',
+    es: 'Continuar con Google',
+  },
+  'auth.continueApple': {
+    en: 'Continue with Apple',
+    es: 'Continuar con Apple',
+  },
   'auth.emailToggle': {
     en: 'Or use email and password',
     es: 'O usa email y contraseña',
@@ -268,7 +323,10 @@ export const webDictionary = {
     en: 'The message could not be sent. Try again in a few minutes.',
     es: 'No se pudo enviar el mensaje. Inténtalo de nuevo en unos minutos.',
   },
-  'portfolio.contact.submit': { en: 'Send to the agent', es: 'Enviar al agente' },
+  'portfolio.contact.submit': {
+    en: 'Send to the agent',
+    es: 'Enviar al agente',
+  },
   'portfolio.contact.submitting': { en: 'Processing…', es: 'Procesando…' },
 } satisfies Dictionary<string>;
 

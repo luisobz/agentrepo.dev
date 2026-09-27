@@ -42,7 +42,7 @@ function titleFromPrompt(prompt: string): string {
  * moves live while DeepSeek writes the component.
  */
 export function usePlaygroundReal(
-  options?: UsePlaygroundRealOptions
+  options?: UsePlaygroundRealOptions,
 ): UsePlaygroundRealResult {
   const [cards, setCards] = useState<PlaygroundCardData[]>([]);
   const [token, setToken] = useState('');
@@ -50,7 +50,7 @@ export function usePlaygroundReal(
   const [remainingUses, setRemainingUses] = useState(0);
   const [activeRun, setActiveRun] = useState<ActiveRun | null>(null);
   const [celebratingCardId, setCelebratingCardId] = useState<string | null>(
-    null
+    null,
   );
 
   const emitGuidance = options?.onGuidance;
@@ -59,11 +59,11 @@ export function usePlaygroundReal(
     (cardId: string, patch: Partial<PlaygroundCardData>) => {
       setCards((current) =>
         current.map((card) =>
-          card.id === cardId ? { ...card, ...patch } : card
-        )
+          card.id === cardId ? { ...card, ...patch } : card,
+        ),
       );
     },
-    []
+    [],
   );
 
   const validateTokenMutation = trpc.playground.validateToken.useMutation({
@@ -186,7 +186,7 @@ export function usePlaygroundReal(
           emotion: 'surprised',
         });
       },
-    }
+    },
   );
 
   const createFeature = useCallback(
@@ -214,7 +214,7 @@ export function usePlaygroundReal(
         emotion: 'thinking',
       });
     },
-    [activeRun, emitGuidance, tokenStatus]
+    [activeRun, emitGuidance, tokenStatus],
   );
 
   const deployMutation = trpc.playground.deploy.useMutation();
@@ -240,7 +240,7 @@ export function usePlaygroundReal(
         {
           onSuccess: (deployment) => {
             patchCard(cardId, {
-              column: 'deploy',
+              column: 'review',
               isDeploying: false,
               isDeployed: true,
               deployedUrl: deployment.url,
@@ -260,10 +260,10 @@ export function usePlaygroundReal(
               errorDetail: error.message,
             });
           },
-        }
+        },
       );
     },
-    [cards, deployMutation, emitGuidance, patchCard, token]
+    [cards, deployMutation, emitGuidance, patchCard, token],
   );
 
   return {

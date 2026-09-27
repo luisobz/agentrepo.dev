@@ -4,6 +4,7 @@ import type { AvatarEmotion } from '@agentrepo/avatar';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useT } from '../../lib/i18n/use-t';
 import type {
+  DocumentationLibrary,
   MockPreviewId,
   PlaygroundCardData,
 } from './playground-types';
@@ -15,6 +16,7 @@ export const MOCK_TIMINGS = {
   testingFailure: 2_000,
   refactorPause: 2_000,
   retestPass: 1_500,
+  documentationStep: 650,
   deployDuration: 1_500,
 } as const;
 
@@ -23,7 +25,7 @@ const SUBTASKS = ['Write code', 'Setup tests', 'Polish styles'];
 function buildMockCard(
   id: string,
   title: string,
-  previewId: MockPreviewId
+  previewId: MockPreviewId,
 ): PlaygroundCardData {
   return {
     id,
@@ -41,7 +43,12 @@ export const INITIAL_MOCK_CARDS: PlaygroundCardData[] = [
   buildMockCard(
     'mock-3',
     'Feature 3: High-Performance Redis Caching',
-    'redis-cache'
+    'redis-cache',
+  ),
+  buildMockCard(
+    'mock-4',
+    'Feature 4: Accessible Search Palette',
+    'search-palette',
   ),
 ];
 
@@ -61,9 +68,11 @@ export interface UsePlaygroundMockResult {
   guidance: PlaygroundGuidance;
   /** True while a card is running the scripted pipeline. */
   isBusy: boolean;
+  isReleasing: boolean;
   celebratingCardId: string | null;
   moveCardToDevelop: (cardId: string) => void;
-  deployCard: (cardId: string) => void;
+  documentCard: (cardId: string, library: DocumentationLibrary) => void;
+  deployCards: (cardIds: string[]) => void;
   /** Cancels pending timers and resets the board to its initial state. */
   restart: () => void;
 }
@@ -74,7 +83,7 @@ export interface UsePlaygroundMockResult {
  * its own once the visitor drags a backlog card into "Desarrollar".
  */
 export function usePlaygroundMock(
-  options?: UsePlaygroundMockOptions
+  options?: UsePlaygroundMockOptions,
 ): UsePlaygroundMockResult {
   const t = useT();
   const [cards, setCards] = useState<PlaygroundCardData[]>(INITIAL_MOCK_CARDS);
@@ -83,10 +92,12 @@ export function usePlaygroundMock(
     emotion: 'idle',
   });
   const [isBusy, setIsBusy] = useState(false);
+  const [isReleasing, setIsReleasing] = useState(false);
   const [celebratingCardId, setCelebratingCardId] = useState<string | null>(
-    null
+    null,
   );
   const timersRef = useRef<ReturnType<typeof setTimeout>[]>([]);
+  const releaseCounterRef = useRef(1);
   const onGuidanceRef = useRef(options?.onGuidance);
   onGuidanceRef.current = options?.onGuidance;
 
@@ -108,11 +119,11 @@ export function usePlaygroundMock(
     (cardId: string, patch: Partial<PlaygroundCardData>) => {
       setCards((current) =>
         current.map((card) =>
-          card.id === cardId ? { ...card, ...patch } : card
-        )
+          card.id === cardId ? { ...card, ...patch } : card,
+        ),
       );
     },
-    []
+    [],
   );
 
   const completeSubtasksProgressively = useCallback(
@@ -127,16 +138,16 @@ export function usePlaygroundMock(
                     subtasks: card.subtasks.map((subtask, subtaskIndex) =>
                       subtaskIndex <= index
                         ? { ...subtask, done: true }
-                        : subtask
+                        : subtask,
                     ),
                   }
-                : card
-            )
+                : card,
+            ),
           );
         });
       });
     },
-    [schedule]
+    [schedule],
   );
 
   const moveCardToDevelop = useCallback(
@@ -183,7 +194,11 @@ export function usePlaygroundMock(
       // Step 3 — refactor done, back to testing, this time it passes.
       const retestAt = failureAt + MOCK_TIMINGS.refactorPause;
       schedule(retestAt, () => {
-        patchCard(cardId, { column: 'testing', agent: 'tester', hasError: false });
+        patchCard(cardId, {
+          column: 'testing',
+          agent: 'tester',
+          hasError: false,
+        });
         setGuidance({
           message: t('playground.mock.retesting'),
           emotion: 'thinking',
@@ -207,37 +222,127 @@ export function usePlaygroundMock(
         setIsBusy(false);
       });
     },
-    [cards, completeSubtasksProgressively, isBusy, patchCard, schedule, setGuidance, t]
+    [
+      cards,
+      completeSubtasksProgressively,
+      isBusy,
+      patchCard,
+      schedule,
+      setGuidance,
+      t,
+    ],
   );
 
-  const deployCard = useCallback(
-    (cardId: string) => {
+  const documentCard = useCallback(
+    (cardId: string, library: DocumentationLibrary) => {
       const card = cards.find((item) => item.id === cardId);
-      if (!card || card.column !== 'review' || card.isDeploying) {
-        return;
-      }
-      patchCard(cardId, { isDeploying: true, agent: 'deployer' });
+      if (!card || card.column !== 'review' || isBusy) return;
+      const steps = [
+        `Connect to ${library}`,
+        'Capture screenshots',
+        'Write documentation',
+        'Merge PR',
+      ];
+      setIsBusy(true);
+      patchCard(cardId, {
+        column: 'documentation',
+        documentationLibrary: library,
+        screenshotCount: 0,
+        isMerged: false,
+        agent: 'documenter',
+        subtasks: steps.map((label) => ({ label, done: false })),
+      });
       setGuidance({
-        message: t('playground.deploying'),
+        message: t('playground.mock.documenting'),
         emotion: 'thinking',
       });
-
-      schedule(MOCK_TIMINGS.deployDuration, () => {
-        patchCard(cardId, {
-          column: 'deploy',
-          isDeploying: false,
-          isDeployed: true,
-          agent: undefined,
+      steps.forEach((_, index) => {
+        schedule(MOCK_TIMINGS.documentationStep * (index + 1), () => {
+          setCards((current) =>
+            current.map((item) =>
+              item.id === cardId
+                ? {
+                    ...item,
+                    subtasks: item.subtasks.map((task, taskIndex) => ({
+                      ...task,
+                      done: taskIndex <= index,
+                    })),
+                    screenshotCount: index >= 1 ? 2 : 0,
+                    isMerged: index === steps.length - 1,
+                    agent:
+                      index === steps.length - 1 ? undefined : 'documenter',
+                  }
+                : item,
+            ),
+          );
+          if (index === steps.length - 1) {
+            setIsBusy(false);
+            setGuidance({
+              message: t('playground.mock.documented'),
+              emotion: 'happy',
+            });
+          }
         });
+      });
+    },
+    [cards, isBusy, patchCard, schedule, setGuidance, t],
+  );
+
+  const deployCards = useCallback(
+    (cardIds: string[]) => {
+      if (
+        isReleasing ||
+        cardIds.length === 0 ||
+        new Set(cardIds).size !== cardIds.length
+      )
+        return;
+      const selected = cardIds.map((id) =>
+        cards.find((card) => card.id === id),
+      );
+      if (
+        selected.some(
+          (card) =>
+            !card ||
+            card.column !== 'documentation' ||
+            !card.isMerged ||
+            card.isDeployed,
+        )
+      )
+        return;
+      setIsReleasing(true);
+      setCards((current) =>
+        current.map((card) =>
+          cardIds.includes(card.id)
+            ? { ...card, isDeploying: true, agent: 'deployer' }
+            : card,
+        ),
+      );
+      setGuidance({ message: t('playground.deploying'), emotion: 'thinking' });
+      const releaseTag = `demo-v${releaseCounterRef.current++}`;
+      schedule(MOCK_TIMINGS.deployDuration, () => {
+        setCards((current) =>
+          current.map((card) =>
+            cardIds.includes(card.id)
+              ? {
+                  ...card,
+                  isDeploying: false,
+                  isDeployed: true,
+                  releaseTag,
+                  agent: undefined,
+                }
+              : card,
+          ),
+        );
+        setIsReleasing(false);
         setGuidance({
           message: t('playground.mock.deploySuccess'),
           emotion: 'happy',
         });
-        setCelebratingCardId(cardId);
+        setCelebratingCardId(cardIds[0]);
         schedule(3_000, () => setCelebratingCardId(null));
       });
     },
-    [cards, patchCard, schedule, setGuidance, t]
+    [cards, isReleasing, schedule, setGuidance, t],
   );
 
   const restart = useCallback(() => {
@@ -245,6 +350,8 @@ export function usePlaygroundMock(
     timersRef.current = [];
     setCards(INITIAL_MOCK_CARDS);
     setIsBusy(false);
+    setIsReleasing(false);
+    releaseCounterRef.current = 1;
     setCelebratingCardId(null);
     setGuidance({
       message: t('playground.mock.intro'),
@@ -257,9 +364,11 @@ export function usePlaygroundMock(
     cards,
     guidance,
     isBusy,
+    isReleasing,
     celebratingCardId,
     moveCardToDevelop,
-    deployCard,
+    documentCard,
+    deployCards,
     restart,
   };
 }

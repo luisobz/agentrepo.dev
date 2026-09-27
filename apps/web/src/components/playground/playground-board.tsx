@@ -1,7 +1,7 @@
 'use client';
 
 import { useAvatar } from '@agentrepo/avatar';
-import { RotateCcw, Sparkles } from 'lucide-react';
+import { RotateCcw, Rocket, Sparkles } from 'lucide-react';
 import {
   type DragEvent,
   useCallback,
@@ -20,7 +20,10 @@ import {
   type PlaygroundColumnId,
 } from './playground-types';
 import { PreviewModal } from './preview-modal';
-import { type PlaygroundGuidance, usePlaygroundMock } from './use-playground-mock';
+import {
+  type PlaygroundGuidance,
+  usePlaygroundMock,
+} from './use-playground-mock';
 
 export function PlaygroundBoard() {
   const t = useT();
@@ -30,6 +33,7 @@ export function PlaygroundBoard() {
   ]);
   const [previewCardId, setPreviewCardId] = useState<string | null>(null);
   const [chatOpen, setChatOpen] = useState(false);
+  const [selectedCardIds, setSelectedCardIds] = useState<string[]>([]);
   const messageIdRef = useRef(0);
   const chatOpenRef = useRef(chatOpen);
   chatOpenRef.current = chatOpen;
@@ -52,7 +56,7 @@ export function PlaygroundBoard() {
         say(next.message, { durationMs: 2600, placement: 'top' });
       }
     },
-    [setEmotion, say, clearMessages]
+    [setEmotion, say, clearMessages],
   );
 
   const handleClearChat = useCallback(() => setMessages([]), []);
@@ -61,8 +65,10 @@ export function PlaygroundBoard() {
 
   const cards = mock.cards;
   const celebratingCardId = mock.celebratingCardId;
-  const previewCard =
-    cards.find((card) => card.id === previewCardId) ?? null;
+  const releasableIds = selectedCardIds.filter((id) =>
+    cards.some((card) => card.id === id && card.isMerged && !card.isDeployed),
+  );
+  const previewCard = cards.find((card) => card.id === previewCardId) ?? null;
 
   // The card an agent is actively working on (has an agent or is deploying).
   const activeCardId =
@@ -73,7 +79,7 @@ export function PlaygroundBoard() {
   // processes, otherwise back to the collapsed chat launcher.
   useEffect(() => {
     setAvatarPosition(
-      !chatOpen && activeCardId ? 'playground-card' : 'playground-guide'
+      !chatOpen && activeCardId ? 'playground-card' : 'playground-guide',
     );
   }, [chatOpen, activeCardId, setAvatarPosition]);
 
@@ -87,17 +93,14 @@ export function PlaygroundBoard() {
   // Leaving the playground sends the avatar back to the header.
   useEffect(() => () => setAvatarPosition('header'), [setAvatarPosition]);
 
-  const handleDragStart = (
-    event: DragEvent<HTMLElement>,
-    cardId: string
-  ) => {
+  const handleDragStart = (event: DragEvent<HTMLElement>, cardId: string) => {
     event.dataTransfer.setData('text/plain', cardId);
     event.dataTransfer.effectAllowed = 'move';
   };
 
   const handleDrop = (
     event: DragEvent<HTMLElement>,
-    column: PlaygroundColumnId
+    column: PlaygroundColumnId,
   ) => {
     event.preventDefault();
     const cardId = event.dataTransfer.getData('text/plain');
@@ -109,6 +112,17 @@ export function PlaygroundBoard() {
   const cardsInColumn = (column: PlaygroundColumnId): PlaygroundCardData[] =>
     cards.filter((card) => card.column === column);
 
+  const handleSelect = (cardId: string, selected: boolean) => {
+    setSelectedCardIds((current) =>
+      selected ? [...current, cardId] : current.filter((id) => id !== cardId),
+    );
+  };
+
+  const handleRelease = () => {
+    mock.deployCards(releasableIds);
+    setSelectedCardIds([]);
+  };
+
   return (
     <div className="flex flex-col gap-6">
       <div className="flex flex-wrap items-center justify-between gap-4">
@@ -119,7 +133,10 @@ export function PlaygroundBoard() {
 
         <button
           type="button"
-          onClick={mock.restart}
+          onClick={() => {
+            mock.restart();
+            setSelectedCardIds([]);
+          }}
           className="inline-flex items-center gap-2 rounded-xl border border-white/15 bg-white/[0.04] px-4 py-2 text-sm font-medium text-[#cfc6b8] transition-colors hover:border-[#c4909a]/50 hover:text-[#fdf8ef] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#c4909a]/60"
         >
           <RotateCcw className="h-4 w-4" />
@@ -127,7 +144,7 @@ export function PlaygroundBoard() {
         </button>
       </div>
 
-      <div className="grid gap-4 md:grid-cols-3 xl:grid-cols-5">
+      <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-5">
         {PLAYGROUND_COLUMNS.map((column) => (
           <section
             key={column}
@@ -159,16 +176,47 @@ export function PlaygroundBoard() {
                 isDraggable={card.column === 'backlog' && !mock.isBusy}
                 hostAvatar={!chatOpen && card.id === activeCardId}
                 onDragStart={handleDragStart}
+                onStart={mock.moveCardToDevelop}
                 onPreview={setPreviewCardId}
-                onDeploy={mock.deployCard}
+                onDocument={mock.documentCard}
+                isSelected={selectedCardIds.includes(card.id)}
+                onSelect={handleSelect}
               />
             ))}
           </section>
         ))}
       </div>
 
+      <section className="flex flex-wrap items-center justify-between gap-4 rounded-2xl border border-emerald-500/25 bg-emerald-950/20 p-5">
+        <div>
+          <h2 className="text-sm font-semibold text-emerald-100">
+            {t('playground.releaseTitle')}
+          </h2>
+          <p className="mt-1 text-xs text-[#cfc6b8]">
+            {t('playground.releaseDescription')}
+          </p>
+          <p className="mt-1 text-xs text-emerald-300">
+            {releasableIds.length} {t('playground.cardsSelected')}
+          </p>
+        </div>
+        <button
+          type="button"
+          onClick={handleRelease}
+          disabled={releasableIds.length === 0 || mock.isReleasing}
+          className="inline-flex items-center gap-2 rounded-xl bg-emerald-700 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-600 disabled:cursor-not-allowed disabled:opacity-50"
+        >
+          <Rocket className="h-4 w-4" />
+          {mock.isReleasing
+            ? t('playground.deploying')
+            : t('playground.deploySelected')}
+        </button>
+      </section>
+
       {previewCard ? (
-        <PreviewModal card={previewCard} onClose={() => setPreviewCardId(null)} />
+        <PreviewModal
+          card={previewCard}
+          onClose={() => setPreviewCardId(null)}
+        />
       ) : null}
       {celebratingCardId ? <ConfettiBurst /> : null}
 

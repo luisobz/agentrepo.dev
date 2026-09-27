@@ -83,6 +83,22 @@ function RedisCachePreview() {
   );
 }
 
+function SearchPalettePreview() {
+  return (
+    <div className="rounded-xl bg-[#12100e] p-8">
+      <div className="mx-auto max-w-sm rounded-xl border border-white/15 bg-[#211a1a] p-4 shadow-xl">
+        <p className="text-sm text-[#fdf8ef]">⌕ Search skills and agents</p>
+        <div className="mt-3 rounded-lg border border-[#c4909a]/40 bg-[#7a2230]/20 px-3 py-2 text-xs text-[#e8c2ca]">
+          ↵ Open accessible result
+        </div>
+        <p className="mt-3 text-xs text-[#8d8273]">
+          Keyboard navigation · clear focus · screen reader labels
+        </p>
+      </div>
+    </div>
+  );
+}
+
 function RealCodePreview({ card }: { card: PlaygroundCardData }) {
   const t = useT();
   return (
@@ -145,6 +161,8 @@ export function PreviewModal({ card, onClose }: PreviewModalProps) {
           <OAuthFlowPreview />
         ) : card.previewId === 'redis-cache' ? (
           <RedisCachePreview />
+        ) : card.previewId === 'search-palette' ? (
+          <SearchPalettePreview />
         ) : (
           <DarkHeroPreview />
         )}

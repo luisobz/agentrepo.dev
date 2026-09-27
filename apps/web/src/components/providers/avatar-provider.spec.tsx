@@ -25,7 +25,7 @@ describe('AvatarEasterEggProvider', () => {
     vi.clearAllMocks();
   });
 
-  it('al quinto click desbloquea el portfolio y navega a él', () => {
+  it('al quinto click navega al portfolio', () => {
     renderWithLocale(
       <AvatarEasterEggProvider>
         <ClickProbe />
@@ -39,7 +39,6 @@ describe('AvatarEasterEggProvider', () => {
     expect(window.localStorage.getItem('portfolioUnlocked')).toBeNull();
 
     fireEvent.click(button);
-    expect(window.localStorage.getItem('portfolioUnlocked')).toBe('true');
     expect(push).toHaveBeenCalledWith('/portfolio/luisbz');
   });
 });

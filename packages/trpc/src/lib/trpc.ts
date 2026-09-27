@@ -21,6 +21,7 @@ import { FixedWindowRateLimiter } from './auth/login-rate-limit';
 
 export interface TRPCContext {
   isAdmin: boolean;
+  creatorUserId?: string | null;
   /** Best-effort client IP, used as the key for abuse rate limiting. */
   clientIp: string | null;
   adminAuth: AdminAuthUseCases;
@@ -91,4 +92,11 @@ export const adminProcedure = publicProcedure.use(({ ctx, next }) => {
     throw new TRPCError({ code: 'UNAUTHORIZED', message: 'Admin session required' });
   }
   return next();
+});
+
+export const creatorProcedure = publicProcedure.use(({ ctx, next }) => {
+  if (!ctx.creatorUserId) {
+    throw new TRPCError({ code: 'UNAUTHORIZED', message: 'Creator sign-in required' });
+  }
+  return next({ ctx: { creatorUserId: ctx.creatorUserId } });
 });

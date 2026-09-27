@@ -15,8 +15,8 @@ function fileTreeFromJson(value: Prisma.JsonValue, agentId: string): FileTree {
   return value;
 }
 
-function toDomain(row: AgentRow): Agent {
-  return { ...row, fileTree: fileTreeFromJson(row.fileTree, row.id) };
+function toDomain(row: AgentRow, authorName?: string | null): Agent {
+  return { ...row, fileTree: fileTreeFromJson(row.fileTree, row.id), authorName };
 }
 
 export class PrismaAgentRepository implements AgentRepository {
@@ -44,6 +44,7 @@ export class PrismaAgentRepository implements AgentRepository {
     const [rows, total] = await this.prisma.$transaction([
       this.prisma.agent.findMany({
         where,
+        include: { author: { select: { name: true } } },
         orderBy:
           params.orderBy === 'createdAt'
             ? { createdAt: 'desc' }
@@ -55,7 +56,7 @@ export class PrismaAgentRepository implements AgentRepository {
     ]);
 
     return {
-      items: rows.map(toDomain),
+      items: rows.map((row) => toDomain(row, row.author?.name)),
       total,
       page: params.page,
       pageSize: params.pageSize,
@@ -63,13 +64,13 @@ export class PrismaAgentRepository implements AgentRepository {
   }
 
   async findById(id: string): Promise<Agent | null> {
-    const row = await this.prisma.agent.findUnique({ where: { id } });
-    return row ? toDomain(row) : null;
+    const row = await this.prisma.agent.findUnique({ where: { id }, include: { author: { select: { name: true } } } });
+    return row ? toDomain(row, row.author?.name) : null;
   }
 
   async findBySlug(slug: string): Promise<Agent | null> {
-    const row = await this.prisma.agent.findUnique({ where: { slug } });
-    return row ? toDomain(row) : null;
+    const row = await this.prisma.agent.findUnique({ where: { slug }, include: { author: { select: { name: true } } } });
+    return row ? toDomain(row, row.author?.name) : null;
   }
 
   async existsSlug(slug: string, excludeId?: string): Promise<boolean> {

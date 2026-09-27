@@ -4,4 +4,5 @@
  * components must import from `@agentrepo/trpc/schemas` instead.
  */
 export * from './lib/schemas/catalog.schemas';
+export * from './lib/schemas/creator.schemas';
 export type { AppRouter, RouterInputs, RouterOutputs } from './lib/routers/_app';

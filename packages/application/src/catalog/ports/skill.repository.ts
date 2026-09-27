@@ -8,8 +8,8 @@ import {
 // `version` is registry-managed (publish/set-latest), never set directly.
 export type CreateSkillInput = Omit<
   Skill,
-  'id' | 'version' | 'createdAt' | 'updatedAt'
->;
+  'id' | 'version' | 'createdAt' | 'updatedAt' | 'authorId' | 'authorName'
+> & { authorId?: string | null };
 export type UpdateSkillInput = Partial<CreateSkillInput>;
 
 export interface SearchSkillsParams {

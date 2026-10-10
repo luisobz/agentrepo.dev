@@ -25,7 +25,7 @@ export function publicCatalogFetch(
     method === 'GET' &&
     !headers.has('authorization') &&
     !headers.has('cookie') &&
-    init?.credentials !== 'include' &&
+    (init?.credentials ?? request?.credentials) !== 'include' &&
     procedures.length > 0 &&
     procedures.every((name) => PUBLIC_READS.has(name));
   const options: RequestInit = {
@@ -33,7 +33,7 @@ export function publicCatalogFetch(
     cache: publicRead ? 'force-cache' : 'no-store',
     ...(publicRead
       ? { next: { revalidate: 30, tags: ['public-catalog'] } }
-      : {}),
+      : { next: undefined }),
   };
   return fetch(input, options);
 }

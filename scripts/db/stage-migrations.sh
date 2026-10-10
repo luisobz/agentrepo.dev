@@ -24,18 +24,14 @@ scripts/db/postgres-client.sh pg_restore --list /backup/public.dump >/dev/null
 
 export DATABASE_URL="$PRE_MIGRATION_DATABASE_URL"
 python3 scripts/db/db-url-to-env.py
-# Extensions are omitted from a schema-scoped dump but its indexes depend on pg_trgm.
+# Reset only the validated preproduction application schema. A newer rehearsal
+# can have foreign keys absent from the production dump, so pg_restore --clean
+# cannot reliably reverse it. Managed auth/storage schemas remain untouched.
 scripts/db/postgres-client.sh psql -v ON_ERROR_STOP=1 -c \
-  'CREATE EXTENSION IF NOT EXISTS pg_trgm WITH SCHEMA public' >/dev/null
-# pg_restore's DROP TRIGGER ... ON table fails if the target schema is empty.
-# Only request cleanup after an earlier rehearsal has populated it.
-restore_options=()
-if [[ "$(scripts/db/postgres-client.sh psql -Atqc "SELECT to_regclass('public.\"Skill\"') IS NOT NULL")" == t ]]; then
-  restore_options=(--clean --if-exists)
-fi
+  'BEGIN; DROP SCHEMA public CASCADE; CREATE SCHEMA public AUTHORIZATION postgres; GRANT USAGE ON SCHEMA public TO PUBLIC; CREATE EXTENSION IF NOT EXISTS pg_trgm WITH SCHEMA public; COMMIT;' >/dev/null
 scripts/db/postgres-client.sh pg_restore \
   --dbname=postgres \
-  --schema=public "${restore_options[@]}" \
+  --schema=public \
   --no-owner --no-acl --exit-on-error --single-transaction \
   /backup/public.dump
 

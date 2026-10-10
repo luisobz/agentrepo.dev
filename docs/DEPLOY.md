@@ -9,20 +9,20 @@ configuración necesaria en el hosting.
 - El código de las apps Node vive **fuera** del docroot, bajo
   `~/backend/agentrepo.dev/<app>/`.
 - Cada app se da de alta en cPanel → **Setup Node.js App** indicando:
-  - *Application root*: la carpeta del código (p. ej. `backend/agentrepo.dev/web`).
-  - *Application URL*: la ruta pública que Passenger enruta hacia la app.
-  - *Application startup file*: ver tabla.
+  - _Application root_: la carpeta del código (p. ej. `backend/agentrepo.dev/web`).
+  - _Application URL_: la ruta pública que Passenger enruta hacia la app.
+  - _Application startup file_: ver tabla.
   - Variables de entorno de la app.
 - Passenger reinicia la app cuando cambia `tmp/restart.txt` (el pipeline lo toca al final de cada deploy).
 
 ## Apps y arranque
 
-| App | Application root (default) | Startup file | URL pública sugerida |
-|---|---|---|---|
-| `web` (Next.js) | `backend/agentrepo.dev/web` | `apps/web/server.js` | `agentrepo.dev/` |
-| `admin` (Next.js) | `backend/agentrepo.dev/admin` | `apps/admin/server.js` | `admin.agentrepo.dev/` |
-| `backend-web` (NestJS + tRPC) | `backend/agentrepo.dev/backend-web` | `src/main.js` | `agentrepo.dev/web/api/v1` |
-| `backend-ai` (NestJS interno) | `backend/agentrepo.dev/backend-ai` | `src/main.js` | `agentrepo.dev/api/ai` (endpoints protegidos salvo health) |
+| App                           | Application root (default)          | Startup file           | URL pública sugerida                                       |
+| ----------------------------- | ----------------------------------- | ---------------------- | ---------------------------------------------------------- |
+| `web` (Next.js)               | `backend/agentrepo.dev/web`         | `apps/web/server.js`   | `agentrepo.dev/`                                           |
+| `admin` (Next.js)             | `backend/agentrepo.dev/admin`       | `apps/admin/server.js` | `admin.agentrepo.dev/`                                     |
+| `backend-web` (NestJS + tRPC) | `backend/agentrepo.dev/backend-web` | `src/main.js`          | `agentrepo.dev/web/api/v1`                                 |
+| `backend-ai` (NestJS interno) | `backend/agentrepo.dev/backend-ai`  | `src/main.js`          | `agentrepo.dev/api/ai` (endpoints protegidos salvo health) |
 
 Notas importantes:
 
@@ -49,33 +49,33 @@ Notas importantes:
 
 ### Secrets
 
-| Secret | Uso |
-|---|---|
-| `SSH_HOST` | Host SSH del hosting |
-| `SSH_USER` | Usuario SSH |
-| `SSH_KEY` | Clave privada (formato OpenSSH) |
-| `SSH_KNOWN_HOSTS` | Clave pública del host SSH en formato `known_hosts`, verificada contra la huella del proveedor. Incluye el puerto si no es 22. |
-| `DATABASE_URL` | Conexión de aplicación a producción; la usan los backends en el hosting. El workflow de migración usa su propia credencial. |
-| `PROD_MIGRATION_DATABASE_URL` | Conexión `postgres.<ref>` de producción. Solo CI; permite aplicar DDL a tablas cuyo dueño es `postgres`. |
-| `PRE_MIGRATION_DATABASE_URL` | Conexión `postgres.<ref>` del proyecto exclusivo de preproducción. Solo CI. |
-| `BACKUP_PASSPHRASE` | Frase aleatoria larga para cifrar los volcados diarios antes de subirlos como artefactos privados de Actions. Guardar una copia fuera de GitHub. |
+| Secret                        | Uso                                                                                                                                              |
+| ----------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `SSH_HOST`                    | Host SSH del hosting                                                                                                                             |
+| `SSH_USER`                    | Usuario SSH                                                                                                                                      |
+| `SSH_KEY`                     | Clave privada (formato OpenSSH)                                                                                                                  |
+| `SSH_KNOWN_HOSTS`             | Clave pública del host SSH en formato `known_hosts`, verificada contra la huella del proveedor. Incluye el puerto si no es 22.                   |
+| `DATABASE_URL`                | Conexión de aplicación a producción; la usan los backends en el hosting. El workflow de migración usa su propia credencial.                      |
+| `PROD_MIGRATION_DATABASE_URL` | Conexión `postgres.<ref>` de producción. Solo CI; permite aplicar DDL a tablas cuyo dueño es `postgres`.                                         |
+| `PRE_MIGRATION_DATABASE_URL`  | Conexión `postgres.<ref>` del proyecto exclusivo de preproducción. Solo CI.                                                                      |
+| `BACKUP_PASSPHRASE`           | Frase aleatoria larga para cifrar los volcados diarios antes de subirlos como artefactos privados de Actions. Guardar una copia fuera de GitHub. |
 
 ### Variables
 
-| Variable | Default | Uso |
-|---|---|---|
-| `SSH_PORT` | `22` | Puerto SSH |
-| `NODE_VERSION` | `24` | Node en CI |
-| `PROD_PROJECT_REF` | — | Referencia Supabase de producción; el pipeline valida que las URL apunten al proyecto correcto. |
-| `PRE_PROJECT_REF` | — | Referencia Supabase de preproducción; debe ser distinta de producción. |
-| `NEXT_PUBLIC_API_URL` | `https://agentrepo.dev/web/api/v1` | Base pública de backend-web (build de web y admin) |
-| `NEXT_PUBLIC_SUPABASE_URL` | — | Supabase (build de web) |
-| `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` | — | Supabase (build de web) |
-| `NEXT_PUBLIC_SENTRY_DSN` | — | Sentry del navegador (build de web y admin) |
-| `WEB_PATH` | `backend/agentrepo.dev/web` | Destino rsync (relativo al home SSH) |
-| `ADMIN_PATH` | `backend/agentrepo.dev/admin` | Destino rsync |
-| `BACKEND_WEB_PATH` | `backend/agentrepo.dev/backend-web` | Destino rsync |
-| `BACKEND_AI_PATH` | `backend/agentrepo.dev/backend-ai` | Destino rsync |
+| Variable                               | Default                             | Uso                                                                                             |
+| -------------------------------------- | ----------------------------------- | ----------------------------------------------------------------------------------------------- |
+| `SSH_PORT`                             | `22`                                | Puerto SSH                                                                                      |
+| `NODE_VERSION`                         | `24`                                | Node en CI                                                                                      |
+| `PROD_PROJECT_REF`                     | —                                   | Referencia Supabase de producción; el pipeline valida que las URL apunten al proyecto correcto. |
+| `PRE_PROJECT_REF`                      | —                                   | Referencia Supabase de preproducción; debe ser distinta de producción.                          |
+| `NEXT_PUBLIC_API_URL`                  | `https://agentrepo.dev/web/api/v1`  | Base pública de backend-web (build de web y admin)                                              |
+| `NEXT_PUBLIC_SUPABASE_URL`             | —                                   | Supabase (build de web)                                                                         |
+| `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` | —                                   | Supabase (build de web)                                                                         |
+| `NEXT_PUBLIC_SENTRY_DSN`               | —                                   | Sentry del navegador (build de web y admin)                                                     |
+| `WEB_PATH`                             | `backend/agentrepo.dev/web`         | Destino rsync (relativo al home SSH)                                                            |
+| `ADMIN_PATH`                           | `backend/agentrepo.dev/admin`       | Destino rsync                                                                                   |
+| `BACKEND_WEB_PATH`                     | `backend/agentrepo.dev/backend-web` | Destino rsync                                                                                   |
+| `BACKEND_AI_PATH`                      | `backend/agentrepo.dev/backend-ai`  | Destino rsync                                                                                   |
 
 ## Variables de entorno en el hosting (por app)
 
@@ -107,11 +107,11 @@ El `DATABASE_URL` de producción verifica TLS contra el certificado del
 proyecto Supabase (`sslmode=verify-full&sslrootcert=<path>`); el path del
 `sslrootcert` debe existir en la máquina que ejecuta el comando (en el
 hosting: `/home/lyqyxfejgb/cert/agentrepo.dev/supabase-agentrepo.crt`; el
-  secret `PROD_MIGRATION_DATABASE_URL` de CI puede usar `sslmode=require`;
-  los comandos `pg_dump` y `pg_restore` verifican TLS con el certificado CA
-  descargado en cada ejecución.
+secret `PROD_MIGRATION_DATABASE_URL` de CI puede usar `sslmode=require`;
+los comandos `pg_dump` y `pg_restore` verifican TLS con el certificado CA
+descargado en cada ejecución.
 
-Los backends cargan un `.env` local si existe en su *Application root*; el
+Los backends cargan un `.env` local si existe en su _Application root_; el
 pipeline nunca sobreescribe ese fichero (`--exclude '.env'`), así que también
 puedes gestionar las variables ahí por SSH.
 
@@ -158,14 +158,14 @@ una restauración completa.
 - **backend-web/backend-ai**: `nx run <app>:prune` genera `dist/` con
   `package.json` podado, `pnpm-lock.yaml` y `workspace_modules/` (los paquetes
   `@agentrepo/*` compilados); el pipeline instala dentro las dependencias de
-  producción y genera el cliente Prisma. El *startup file* queda en
+  producción y genera el cliente Prisma. El _startup file_ queda en
   `src/main.js`.
 - `rsync --delete` con exclusiones de `.env`, `tmp/` y logs: lo que no está en
   el bundle se elimina del servidor, salvo esas rutas.
 
 ## Primer despliegue (checklist)
 
-1. Crea las 4 apps Node en cPanel con los *Application root* de la tabla
+1. Crea las 4 apps Node en cPanel con los _Application root_ de la tabla
    (las carpetas se crean solas si no existen; también las crea el rsync).
 2. Configura las variables de entorno de cada app en cPanel.
 3. Añade los secrets/variables en GitHub.
@@ -185,3 +185,5 @@ una restauración completa.
 Los builds `web` y `admin` no reutilizan la caché de tareas Nx: la restauración de artefactos puede omitir los enlaces bajo `.next/node_modules` necesarios para instrumentación y arranque. También evita reutilizar un frontend compilado con variables públicas de otro entorno. Los tests y paquetes de backend conservan su caché.
 
 CI y la puerta de verificación del despliegue ejecutan las pruebas desktop/móvil sobre los bundles standalone preparados por el mismo script que publica producción. Usan catálogo local de prueba y no requieren credenciales. Las aplicaciones publicadas se compilan después con las variables de producción.
+
+El ensayo reinicia únicamente el esquema público del proyecto de preproducción validado antes de restaurar la copia. Esto permite repetirlo aunque el ensayo anterior añadiera relaciones que aún no existen en producción. Los cuatro despliegues exigen tanto ensayo como migración correctos; una migración omitida nunca habilita la publicación. `python3 tests/deployment/check-gates.py` comprueba estos escenarios en CI.

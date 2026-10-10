@@ -72,6 +72,9 @@ jobs:
           node-version: ${{ env.NODE_VERSION }}
           cache: pnpm
 
+      - name: Check deployment safety gates
+        run: python3 tests/deployment/check-gates.py
+
       - run: pnpm install --frozen-lockfile
 
       - name: Lint + tests
@@ -157,8 +160,8 @@ jobs:
   # ---------------------------------------------------------------- WEB
   web:
     # !cancelled(): el job corre aunque migrate se haya saltado (dispatch selectivo)
-    if: ${{ !cancelled() && needs.verify.result == 'success' && (needs.migrate.result == 'success' || needs.migrate.result == 'skipped') && (github.event_name != 'workflow_dispatch' || inputs.only == 'all' || inputs.only == 'web') }}
-    needs: [verify, migrate]
+    if: ${{ !cancelled() && needs.verify.result == 'success' && needs.rehearse-migrations.result == 'success' && needs.migrate.result == 'success' && (github.event_name != 'workflow_dispatch' || inputs.only == 'all' || inputs.only == 'web') }}
+    needs: [verify, rehearse-migrations, migrate]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -214,8 +217,8 @@ jobs:
 
   # ---------------------------------------------------------------- ADMIN
   admin:
-    if: ${{ !cancelled() && needs.verify.result == 'success' && (needs.migrate.result == 'success' || needs.migrate.result == 'skipped') && (github.event_name != 'workflow_dispatch' || inputs.only == 'all' || inputs.only == 'admin') }}
-    needs: [verify, migrate]
+    if: ${{ !cancelled() && needs.verify.result == 'success' && needs.rehearse-migrations.result == 'success' && needs.migrate.result == 'success' && (github.event_name != 'workflow_dispatch' || inputs.only == 'all' || inputs.only == 'admin') }}
+    needs: [verify, rehearse-migrations, migrate]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -263,8 +266,8 @@ jobs:
 
   # ---------------------------------------------------------------- BACKEND WEB
   backend-web:
-    if: ${{ !cancelled() && needs.verify.result == 'success' && (needs.migrate.result == 'success' || needs.migrate.result == 'skipped') && (github.event_name != 'workflow_dispatch' || inputs.only == 'all' || inputs.only == 'backend-web') }}
-    needs: [verify, migrate]
+    if: ${{ !cancelled() && needs.verify.result == 'success' && needs.rehearse-migrations.result == 'success' && needs.migrate.result == 'success' && (github.event_name != 'workflow_dispatch' || inputs.only == 'all' || inputs.only == 'backend-web') }}
+    needs: [verify, rehearse-migrations, migrate]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -319,8 +322,8 @@ jobs:
 
   # ---------------------------------------------------------------- BACKEND AI
   backend-ai:
-    if: ${{ !cancelled() && needs.verify.result == 'success' && (needs.migrate.result == 'success' || needs.migrate.result == 'skipped') && (github.event_name != 'workflow_dispatch' || inputs.only == 'all' || inputs.only == 'backend-ai') }}
-    needs: [verify, migrate]
+    if: ${{ !cancelled() && needs.verify.result == 'success' && needs.rehearse-migrations.result == 'success' && needs.migrate.result == 'success' && (github.event_name != 'workflow_dispatch' || inputs.only == 'all' || inputs.only == 'backend-ai') }}
+    needs: [verify, rehearse-migrations, migrate]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -372,8 +375,17 @@ jobs:
 
   # A release represents a deployment that passed live checks, not just a build.
   smoke:
-    needs: [verify, migrate, web, admin, backend-web, backend-ai]
-    if: ${{ !cancelled() && needs.verify.result == 'success' && (needs.migrate.result == 'success' || needs.migrate.result == 'skipped') && !contains(needs.*.result, 'failure') }}
+    needs:
+      [
+        verify,
+        rehearse-migrations,
+        migrate,
+        web,
+        admin,
+        backend-web,
+        backend-ai,
+      ]
+    if: ${{ !cancelled() && needs.verify.result == 'success' && needs.rehearse-migrations.result == 'success' && needs.migrate.result == 'success' && !contains(needs.*.result, 'failure') }}
     runs-on: ubuntu-latest
     steps:
       - name: Check deployed routes

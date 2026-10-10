@@ -52,7 +52,7 @@ export function AdminLink({
   if (!isAdmin) return null;
   return (
     <a
-      href="https://admin.agentrepo.dev/admin"
+      href="https://admin.agentrepo.dev/api/auth/sso"
       className={className}
       onClick={onClick}
     >

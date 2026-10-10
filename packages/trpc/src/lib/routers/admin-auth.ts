@@ -1,4 +1,6 @@
 import { z } from 'zod';
+import { InvalidCredentialsError } from '@agentrepo/domain';
+import { createAdminHandoff } from '../auth/admin-handoff';
 import { FixedWindowRateLimiter } from '../auth/login-rate-limit';
 import { publicProcedure, rateLimit, router } from '../trpc';
 
@@ -15,6 +17,20 @@ const loginRateLimiter = new FixedWindowRateLimiter({
  * HttpOnly cookies and never expose them to client-side JavaScript.
  */
 export const adminAuthRouter = router({
+  createHandoff: publicProcedure
+    .use(rateLimit(loginRateLimiter, 'adminAuth.createHandoff'))
+    .input(
+      z.object({
+        token: z.string().min(1).max(16384),
+        challenge: z.string().regex(/^[A-Za-z0-9_-]{43}$/),
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      const secret = process.env['AUTH_SECRET'];
+      if (!secret || !(await ctx.adminAuth.checkAccess.execute(input.token)))
+        throw new InvalidCredentialsError();
+      return createAdminHandoff({ ...input, secret });
+    }),
   login: publicProcedure
     .use(rateLimit(loginRateLimiter, 'adminAuth.login'))
     .input(z.object({ email: z.string().email(), password: z.string().min(1) }))

@@ -8,8 +8,14 @@ The desktop header and mobile menu display an admin-panel shortcut only after
 `/auth/admin-access` verifies the current HttpOnly Supabase token against the
 backend's existing local admin role and exact provider identity. This read-only
 check creates neither users nor admin sessions. Responses are private/no-store;
-logout and window focus refresh visibility. The admin application independently
-requires its own authenticated admin session (GitHub login supported).
+logout and window focus refresh visibility. The shortcut starts a browser-bound SSO bridge to reuse the existing web session.
+The admin app stores a private host-only HttpOnly nonce; only its SHA-256 hash
+crosses domains. The backend verifies the existing admin role, encrypts a
+60-second ticket with a domain-separated AES-GCM key, and the admin callback
+checks the private nonce and revalidates the identity/role before issuing its
+own host-only session. No shared-domain auth cookies or plaintext URL tokens.
+Auth responses are private/no-store with no-referrer; the nonce is cleared on
+both success and failure. Anonymous visitors retain the GitHub/email login.
 
 ## Project references and guides
 

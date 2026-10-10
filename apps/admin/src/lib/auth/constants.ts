@@ -9,3 +9,4 @@ const hostPrefix = process.env.NODE_ENV === 'production' ? '__Host-' : '';
 export const ADMIN_ACCESS_COOKIE = `${hostPrefix}agentrepo_admin_session`;
 export const ADMIN_REFRESH_COOKIE = `${hostPrefix}agentrepo_admin_refresh`;
 export const ADMIN_INFO_COOKIE = 'agentrepo_admin_info';
+export const ADMIN_SSO_COOKIE = `${hostPrefix}agentrepo_admin_sso`;

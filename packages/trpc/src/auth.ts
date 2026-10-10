@@ -4,3 +4,4 @@
  */
 export * from './lib/auth/login-rate-limit';
 export * from './lib/auth/session-token';
+export * from './lib/auth/admin-handoff';

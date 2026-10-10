@@ -26,11 +26,12 @@ for (const kind of ['agents', 'skills', 'blog']) {
     ).toBe(true);
     if (kind === 'agents') {
       await expect(
-        page.getByText('Documentation comes before the file browser.'),
+        page.getByRole('main').getByText('Documentation comes before the file browser.'),
       ).toBeVisible();
-      await expect(page.locator('details')).not.toHaveAttribute('open');
-      await page.getByText('Files & downloads', { exact: true }).click();
-      await expect(page.locator('details')).toHaveAttribute('open');
+      const main = page.getByRole('main');
+      await expect(main.locator('details')).not.toHaveAttribute('open');
+      await main.getByText('Files & downloads', { exact: true }).click();
+      await expect(main.locator('details')).toHaveAttribute('open');
     }
   });
 }

@@ -24,7 +24,7 @@ it.each([false, true])(
     if (isAdmin)
       expect(
         await screen.findByRole('link', { name: 'Admin panel' }),
-      ).toHaveAttribute('href', 'https://admin.agentrepo.dev/admin');
+      ).toHaveAttribute('href', 'https://admin.agentrepo.dev/api/auth/sso');
     else expect(screen.queryByRole('link')).not.toBeInTheDocument();
   },
 );

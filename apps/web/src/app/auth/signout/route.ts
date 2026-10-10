@@ -1,3 +1,4 @@
+import { hasTrustedOrigin } from '../../../lib/request-origin';
 import { NextRequest, NextResponse } from 'next/server';
 import {
   AUTH_COOKIE_OPTIONS,
@@ -6,7 +7,7 @@ import {
 import { getSupabaseServerClient } from '../../../lib/supabase/server';
 
 export async function POST(request: NextRequest) {
-  if (request.headers.get('origin') !== request.nextUrl.origin) {
+  if (!hasTrustedOrigin(request)) {
     return NextResponse.json({ error: 'Invalid origin' }, { status: 403 });
   }
   const supabase = await getSupabaseServerClient();

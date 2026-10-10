@@ -399,6 +399,17 @@ jobs:
             --retry-all-errors --max-time 20 --output /dev/null \
             "https://admin.agentrepo.dev/login"
 
+      - name: Check public origin behind Passenger
+        run: |
+          status=$(curl --silent --show-error --max-time 20 --output /dev/null --write-out '%{http_code}' \
+            'https://admin.agentrepo.dev/api/auth/login' \
+            -H 'Origin: https://admin.agentrepo.dev' -H 'Content-Type: application/json' --data '{}')
+          test "$status" = 401 || { echo "Public admin origin rejected: HTTP $status"; exit 1; }
+          status=$(curl --silent --show-error --max-time 20 --output /dev/null --write-out '%{http_code}' \
+            'https://admin.agentrepo.dev/api/auth/login' \
+            -H 'Origin: https://untrusted.example' -H 'Content-Type: application/json' --data '{}')
+          test "$status" = 403 || { echo "Cross-origin admin request accepted: HTTP $status"; exit 1; }
+
   release:
     needs: smoke
     if: ${{ startsWith(github.ref, 'refs/tags/v') && needs.smoke.result == 'success' }}

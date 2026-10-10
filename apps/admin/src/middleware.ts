@@ -1,3 +1,4 @@
+import { publicRequestOrigin } from './lib/request-origin';
 import { verifySessionToken } from '@agentrepo/trpc/auth';
 import { NextRequest, NextResponse } from 'next/server';
 import {
@@ -20,17 +21,22 @@ export async function middleware(request: NextRequest) {
 
   if (pathname.startsWith('/admin') && !hasValidAccess) {
     if (request.cookies.get(ADMIN_REFRESH_COOKIE)?.value) {
-      const refreshUrl = new URL('/api/auth/refresh', request.url);
+      const refreshUrl = new URL(
+        '/api/auth/refresh',
+        publicRequestOrigin(request),
+      );
       refreshUrl.searchParams.set('from', pathname);
       return NextResponse.redirect(refreshUrl);
     }
-    const loginUrl = new URL('/login', request.url);
+    const loginUrl = new URL('/login', publicRequestOrigin(request));
     loginUrl.searchParams.set('from', pathname);
     return NextResponse.redirect(loginUrl);
   }
 
   if (pathname === '/login' && hasValidAccess) {
-    return NextResponse.redirect(new URL('/admin', request.url));
+    return NextResponse.redirect(
+      new URL('/admin', publicRequestOrigin(request)),
+    );
   }
 
   return NextResponse.next();

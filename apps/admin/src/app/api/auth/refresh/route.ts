@@ -1,3 +1,5 @@
+import { adminReturnPath } from '../../../../lib/auth/return-path';
+import { publicRequestOrigin } from '../../../../lib/request-origin';
 import { NextRequest, NextResponse } from 'next/server';
 import { backendTrpc } from '../../../../lib/auth/backend-client';
 import { ADMIN_REFRESH_COOKIE } from '../../../../lib/auth/constants';
@@ -5,11 +7,6 @@ import {
   applySessionCookies,
   clearSessionCookies,
 } from '../../../../lib/auth/cookies';
-
-/** Only allow same-origin path redirects (no `//host` or absolute URLs). */
-function sanitizeReturnPath(path: string | null): string {
-  return path && path.startsWith('/') && !path.startsWith('//') ? path : '/admin';
-}
 
 /**
  * Rotates the session server-side: the backend revokes the presented refresh
@@ -19,19 +16,25 @@ function sanitizeReturnPath(path: string | null): string {
 export async function GET(request: NextRequest) {
   const refreshToken = request.cookies.get(ADMIN_REFRESH_COOKIE)?.value;
   if (!refreshToken) {
-    const response = NextResponse.redirect(new URL('/login', request.url));
+    const response = NextResponse.redirect(
+      new URL('/login', publicRequestOrigin(request)),
+    );
     clearSessionCookies(response);
     return response;
   }
 
   try {
     const tokens = await backendTrpc.adminAuth.refresh.mutate({ refreshToken });
-    const from = sanitizeReturnPath(request.nextUrl.searchParams.get('from'));
-    const response = NextResponse.redirect(new URL(from, request.url));
+    const from = adminReturnPath(request.nextUrl.searchParams.get('from'));
+    const response = NextResponse.redirect(
+      new URL(from, publicRequestOrigin(request)),
+    );
     applySessionCookies(response, tokens);
     return response;
   } catch {
-    const response = NextResponse.redirect(new URL('/login', request.url));
+    const response = NextResponse.redirect(
+      new URL('/login', publicRequestOrigin(request)),
+    );
     clearSessionCookies(response);
     return response;
   }

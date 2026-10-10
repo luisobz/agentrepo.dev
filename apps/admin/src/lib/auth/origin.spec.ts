@@ -4,7 +4,10 @@ import { POST as login } from '../../app/api/auth/login/route';
 import { POST as logout } from '../../app/api/auth/logout/route';
 import { POST as proxy } from '../../app/api/trpc/[trpc]/route';
 
-afterEach(() => vi.restoreAllMocks());
+afterEach(() => {
+  vi.restoreAllMocks();
+  vi.unstubAllEnvs();
+});
 
 describe('admin mutation origins', () => {
   it('rejects a cross-origin login before authentication', async () => {
@@ -46,4 +49,14 @@ describe('admin mutation origins', () => {
     ).toBe(403);
     expect(fetch).not.toHaveBeenCalled();
   });
+});
+
+it('accepts the configured public origin behind the hosting proxy', async () => {
+  vi.stubEnv('ADMIN_APP_URL', 'https://admin.agentrepo.dev');
+  const request = new NextRequest('http://127.0.0.1:3000/api/auth/login', {
+    method: 'POST',
+    headers: { origin: 'https://admin.agentrepo.dev' },
+    body: '{}',
+  });
+  expect((await login(request)).status).toBe(401);
 });

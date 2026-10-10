@@ -27,5 +27,10 @@ export default defineConfig({
       url: 'http://localhost:3000',
       reuseExistingServer: !process.env.CI,
     },
+    {
+      command: 'pnpm --filter admin exec next start -p 3001',
+      url: 'http://localhost:3001/login',
+      reuseExistingServer: !process.env.CI,
+    },
   ],
 });

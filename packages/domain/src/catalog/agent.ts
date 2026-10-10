@@ -2,6 +2,8 @@ import { FileTree } from './file-tree';
 
 export interface Agent {
   id: string;
+  authorId?: string | null;
+  authorName?: string | null;
   slug: string;
   title: string;
   shortDescription: string;

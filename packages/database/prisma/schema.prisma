@@ -10,6 +10,8 @@ datasource db {
 
 model Skill {
   id             String   @id @default(uuid())
+  authorId       String?
+  author         User?    @relation("SkillAuthor", fields: [authorId], references: [id], onDelete: SetNull)
   slug           String   @unique
   title          String
   description    String?
@@ -35,6 +37,7 @@ model Skill {
   searchVector Unsupported("tsvector")?
 
   @@index([searchVector], type: Gin)
+  @@index([authorId])
   @@index([title(ops: raw("gin_trgm_ops"))], type: Gin)
   @@index([slug(ops: raw("gin_trgm_ops"))], type: Gin)
   @@index([description(ops: raw("gin_trgm_ops"))], type: Gin)
@@ -70,6 +73,8 @@ model SkillVersionDownloadDay {
 
 model Agent {
   id               String   @id @default(uuid())
+  authorId         String?
+  author           User?    @relation("AgentAuthor", fields: [authorId], references: [id], onDelete: SetNull)
   slug             String   @unique
   title            String
   shortDescription String
@@ -93,6 +98,7 @@ model Agent {
   searchVector Unsupported("tsvector")?
 
   @@index([searchVector], type: Gin)
+  @@index([authorId])
   @@index([title(ops: raw("gin_trgm_ops"))], type: Gin)
   @@index([slug(ops: raw("gin_trgm_ops"))], type: Gin)
   @@index([shortDescription(ops: raw("gin_trgm_ops"))], type: Gin)
@@ -159,6 +165,8 @@ model User {
   updatedAt  DateTime   @updatedAt
   roles      UserRole[]
   purchases  Purchase[]
+  skills     Skill[]     @relation("SkillAuthor")
+  agents     Agent[]     @relation("AgentAuthor")
 }
 
 model Role {

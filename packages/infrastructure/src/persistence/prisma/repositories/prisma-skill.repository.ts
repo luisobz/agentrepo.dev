@@ -10,8 +10,8 @@ import { Skill, assertSkillType } from '@agentrepo/domain';
 import { Prisma, PrismaClient, Skill as SkillRow } from '@prisma/client';
 import { toTsQuery } from '../full-text';
 
-function toDomain(row: SkillRow): Skill {
-  return { ...row, type: assertSkillType(row.type) };
+function toDomain(row: SkillRow, authorName?: string | null): Skill {
+  return { ...row, type: assertSkillType(row.type), authorName };
 }
 
 function buildSearchFilter(search: string): Prisma.SkillWhereInput {
@@ -36,6 +36,7 @@ export class PrismaSkillRepository implements SkillRepository {
     const [rows, total] = await this.prisma.$transaction([
       this.prisma.skill.findMany({
         where,
+        include: { author: { select: { name: true } } },
         orderBy:
           params.orderBy === 'createdAt'
             ? { createdAt: 'desc' }
@@ -47,7 +48,7 @@ export class PrismaSkillRepository implements SkillRepository {
     ]);
 
     return {
-      items: rows.map(toDomain),
+      items: rows.map((row) => toDomain(row, row.author?.name)),
       total,
       page: params.page,
       pageSize: params.pageSize,
@@ -67,10 +68,11 @@ export class PrismaSkillRepository implements SkillRepository {
     const filter = Prisma.sql`"isPublished" = true AND "searchVector" @@ to_tsquery('english', ${tsQuery})`;
 
     const [rows, totals] = await this.prisma.$transaction([
-      this.prisma.$queryRaw<SkillRow[]>(Prisma.sql`
+      this.prisma.$queryRaw<(SkillRow & { authorName: string | null })[]>(Prisma.sql`
         SELECT "id", "slug", "title", "description", "content", "type", "version",
                "isPublished", "headerImageUrl", "isPremium", "priceCents", "currency",
-               "previewContent", "createdAt", "updatedAt", "latestVersionId"
+               "previewContent", "createdAt", "updatedAt", "latestVersionId", "authorId",
+               (SELECT "name" FROM "User" WHERE "User"."id" = "Skill"."authorId") AS "authorName"
         FROM "Skill"
         WHERE ${filter}
         ORDER BY "updatedAt" DESC
@@ -82,7 +84,7 @@ export class PrismaSkillRepository implements SkillRepository {
     ]);
 
     return {
-      items: rows.map(toDomain),
+      items: rows.map((row) => toDomain(row, row.authorName)),
       total: totals[0]?.count ?? 0,
       page: params.page,
       pageSize: params.pageSize,
@@ -90,13 +92,13 @@ export class PrismaSkillRepository implements SkillRepository {
   }
 
   async findById(id: string): Promise<Skill | null> {
-    const row = await this.prisma.skill.findUnique({ where: { id } });
-    return row ? toDomain(row) : null;
+    const row = await this.prisma.skill.findUnique({ where: { id }, include: { author: { select: { name: true } } } });
+    return row ? toDomain(row, row.author?.name) : null;
   }
 
   async findBySlug(slug: string): Promise<Skill | null> {
-    const row = await this.prisma.skill.findUnique({ where: { slug } });
-    return row ? toDomain(row) : null;
+    const row = await this.prisma.skill.findUnique({ where: { slug }, include: { author: { select: { name: true } } } });
+    return row ? toDomain(row, row.author?.name) : null;
   }
 
   async existsSlug(slug: string, excludeId?: string): Promise<boolean> {

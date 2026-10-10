@@ -1,6 +1,7 @@
 import type { Dictionary } from '@agentrepo/ui';
 
 export const webDictionary = {
+  'common.loading': { en: 'Loading content…', es: 'Cargando contenido…' },
   'nav.skills': { en: 'Skills', es: 'Skills' },
   'nav.agents': { en: 'Agents', es: 'Agents' },
   'nav.blog': { en: 'Blog', es: 'Blog' },

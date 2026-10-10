@@ -60,6 +60,8 @@ export interface AvatarContextValue {
   emotion: AvatarEmotion;
   isShaking: boolean;
   setAvatarPosition: (slot: AvatarSlotId | null) => void;
+  /** Focus an interaction until its cleanup runs; page updates remain underneath. */
+  focusAvatar: (slot: AvatarSlotId) => () => void;
   setEmotion: (emotion: AvatarEmotion) => void;
   registerAvatarClick: () => void;
   /** Live registry of mounted slot targets, keyed by slot id. */
@@ -70,7 +72,7 @@ export interface AvatarContextValue {
   registerSlot: (
     id: AvatarSlotId,
     el: HTMLElement,
-    scale: number
+    scale: number,
   ) => () => void;
   /** Current avatar configuration (speed, movement, colors). */
   setup: AvatarSetup;
@@ -136,15 +138,27 @@ export function AvatarProvider({
   surpriseMessage,
   onSequenceComplete,
 }: AvatarProviderProps) {
-  const [currentSlot, setCurrentSlot] = useState<AvatarSlotId | null>(initialSlot);
+  const [pageSlot, setCurrentSlot] = useState<AvatarSlotId | null>(initialSlot);
+  const [focusTargets, setFocusTargets] = useState<
+    { token: symbol; slot: AvatarSlotId }[]
+  >([]);
+  const currentSlot = focusTargets.at(-1)?.slot ?? pageSlot;
+  const focusAvatar = useCallback((slot: AvatarSlotId) => {
+    const token = Symbol(slot);
+    setFocusTargets((targets) => [...targets, { token, slot }]);
+    return () =>
+      setFocusTargets((targets) =>
+        targets.filter((target) => target.token !== token),
+      );
+  }, []);
   const [emotion, setEmotionState] = useState<AvatarEmotion>(initialEmotion);
   const [isShaking, setIsShaking] = useState(false);
   const [setup, setSetup] = useState<AvatarSetup>(() =>
-    mergeAvatarSetup(DEFAULT_AVATAR_SETUP, initialSetup)
+    mergeAvatarSetup(DEFAULT_AVATAR_SETUP, initialSetup),
   );
   const [messageQueue, setMessageQueue] = useState<AvatarMessage[]>([]);
   const [currentMessage, setCurrentMessage] = useState<AvatarMessage | null>(
-    null
+    null,
   );
   // Whether the avatar has settled on its slot; messages only show once true.
   const [arrived, setArrived] = useState(true);
@@ -207,7 +221,7 @@ export function AvatarProvider({
     if (currentMessage && currentMessage.durationMs !== null) {
       messageTimerRef.current = setTimeout(
         () => setCurrentMessage(null),
-        currentMessage.durationMs
+        currentMessage.durationMs,
       );
       return () => {
         if (messageTimerRef.current !== null) {
@@ -235,7 +249,7 @@ export function AvatarProvider({
         }
       };
     },
-    []
+    [],
   );
 
   const clickCountRef = useRef(0);
@@ -315,6 +329,7 @@ export function AvatarProvider({
       emotion,
       isShaking,
       setAvatarPosition,
+      focusAvatar,
       setEmotion,
       registerAvatarClick,
       slotsRef,
@@ -335,6 +350,7 @@ export function AvatarProvider({
       emotion,
       isShaking,
       setAvatarPosition,
+      focusAvatar,
       setEmotion,
       registerAvatarClick,
       slotVersion,

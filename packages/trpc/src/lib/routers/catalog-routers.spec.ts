@@ -9,7 +9,12 @@ import { describe, expect, it, vi } from 'vitest';
 import { TRPCContext } from '../trpc';
 import { appRouter } from './_app';
 
-const emptyPage: Paginated<never> = { items: [], total: 0, page: 1, pageSize: 20 };
+const emptyPage: Paginated<never> = {
+  items: [],
+  total: 0,
+  page: 1,
+  pageSize: 20,
+};
 
 interface StubUseCase {
   execute: ReturnType<typeof vi.fn>;
@@ -27,12 +32,14 @@ function stubUseCase(result: unknown): StubUseCase {
 }
 
 function buildCatalogStub(
-  overrides?: Partial<Record<'create', StubUseCase>>
+  overrides?: Partial<Record<'create', StubUseCase>>,
 ): CatalogUseCases {
   const contentUseCases = () => ({
     list: stubUseCase(emptyPage),
     getById: stubUseCase(new EntityNotFoundError('Entity', 'unknown')),
-    getPublishedBySlug: stubUseCase(new EntityNotFoundError('Entity', 'unknown')),
+    getPublishedBySlug: stubUseCase(
+      new EntityNotFoundError('Entity', 'unknown'),
+    ),
     create: stubUseCase(emptyPage),
     update: stubUseCase(emptyPage),
     remove: stubUseCase(undefined),
@@ -55,6 +62,7 @@ function buildContext(options?: {
     isAdmin: options?.isAdmin ?? false,
     clientIp: crypto.randomUUID(),
     adminAuth: {
+      loginWithToken: { execute: vi.fn() },
       login: stubUseCase(undefined),
       refresh: stubUseCase(undefined),
       logout: stubUseCase(undefined),
@@ -76,7 +84,7 @@ function createCaller(options?: Parameters<typeof buildContext>[0]) {
 
 async function expectTRPCCode(promise: Promise<unknown>, code: string) {
   await expect(promise).rejects.toSatisfy(
-    (error) => error instanceof TRPCError && error.code === code
+    (error) => error instanceof TRPCError && error.code === code,
   );
 }
 
@@ -86,11 +94,11 @@ describe('admin guard', () => {
 
     await expectTRPCCode(
       caller.skills.admin.list({ page: 1, pageSize: 10 }),
-      'UNAUTHORIZED'
+      'UNAUTHORIZED',
     );
     await expectTRPCCode(
       caller.blogPosts.admin.delete({ id: crypto.randomUUID() }),
-      'UNAUTHORIZED'
+      'UNAUTHORIZED',
     );
   });
 
@@ -131,7 +139,7 @@ describe('input validation', () => {
 
     await expectTRPCCode(
       caller.skills.admin.create({ ...validSkill, slug: 'Not A Slug!' }),
-      'BAD_REQUEST'
+      'BAD_REQUEST',
     );
   });
 
@@ -181,11 +189,9 @@ describe('input validation', () => {
         slug: 'my-agent',
         title: 'My Agent',
         shortDescription: 'Does things',
-        fileTree: [
-          { name: 'weird', type: 'symlink' } as never,
-        ],
+        fileTree: [{ name: 'weird', type: 'symlink' } as never],
       }),
-      'BAD_REQUEST'
+      'BAD_REQUEST',
     );
   });
 
@@ -199,7 +205,7 @@ describe('input validation', () => {
         shortDescription: 'Does things',
         fileTree: [{ name: 'src', type: 'directory' } as never],
       }),
-      'BAD_REQUEST'
+      'BAD_REQUEST',
     );
   });
 });
@@ -223,7 +229,7 @@ describe('public blog reading API', () => {
 
     await expectTRPCCode(
       caller.blog.getPostBySlug({ slug: 'missing-post' }),
-      'NOT_FOUND'
+      'NOT_FOUND',
     );
   });
 
@@ -232,7 +238,7 @@ describe('public blog reading API', () => {
 
     await expectTRPCCode(
       caller.blog.getPostBySlug({ slug: 'Not Valid!' }),
-      'BAD_REQUEST'
+      'BAD_REQUEST',
     );
   });
 });
@@ -298,14 +304,14 @@ describe('premium content', () => {
         type: 'prompt',
         isPremium: true,
       }),
-      'BAD_REQUEST'
+      'BAD_REQUEST',
     );
   });
 
   it('strips premium skill content from public reads', async () => {
     const catalog = buildCatalogStub();
     catalog.skills.getPublishedBySlug = stubUseCase(
-      premiumSkill
+      premiumSkill,
     ) as unknown as typeof catalog.skills.getPublishedBySlug;
     const caller = createCaller({ catalog });
 
@@ -323,7 +329,7 @@ describe('domain error mapping', () => {
 
     await expectTRPCCode(
       caller.skills.admin.byId({ id: crypto.randomUUID() }),
-      'NOT_FOUND'
+      'NOT_FOUND',
     );
   });
 
@@ -339,7 +345,7 @@ describe('domain error mapping', () => {
         title: 'Post',
         content: 'Body',
       }),
-      'CONFLICT'
+      'CONFLICT',
     );
   });
 });

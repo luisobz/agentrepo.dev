@@ -1,4 +1,8 @@
-import { InvalidCredentialsError, InvalidRefreshTokenError } from '@agentrepo/domain';
+import { ContributorSessionVerifier } from '../creator-identity';
+import {
+  InvalidCredentialsError,
+  InvalidRefreshTokenError,
+} from '@agentrepo/domain';
 import { UseCase } from '../../shared/base.use-case';
 import { AccessTokenIssuer } from '../ports/access-token-issuer';
 import { AdminSessionRepository } from '../ports/admin-session.repository';
@@ -33,11 +37,14 @@ export interface AdminAuthDependencies {
   sessions: AdminSessionRepository;
   accessTokens: AccessTokenIssuer;
   passwordAuthenticator: PasswordAuthenticator;
+  tokenVerifier: ContributorSessionVerifier;
   adminUsers: AdminUserRepository;
   config: AdminAuthConfig;
 }
 
-async function issueAccessToken(deps: AdminAuthDependencies): Promise<AdminSessionTokens> {
+async function issueAccessToken(
+  deps: AdminAuthDependencies,
+): Promise<AdminSessionTokens> {
   const accessToken = await deps.accessTokens.issue(deps.config.accessTtlMs);
   return {
     accessToken,
@@ -52,7 +59,7 @@ interface IssuedSessionPair {
 
 async function issueSessionPair(
   deps: AdminAuthDependencies,
-  familyId: string
+  familyId: string,
 ): Promise<IssuedSessionPair> {
   const refreshToken = generateOpaqueToken();
   const refreshExpiresAt = new Date(Date.now() + deps.config.refreshTtlMs);
@@ -62,12 +69,18 @@ async function issueSessionPair(
     expiresAt: refreshExpiresAt,
   });
   return {
-    tokens: { ...(await issueAccessToken(deps)), refreshToken, refreshExpiresAt },
+    tokens: {
+      ...(await issueAccessToken(deps)),
+      refreshToken,
+      refreshExpiresAt,
+    },
     sessionId: session.id,
   };
 }
 
-export class LoginAdmin implements UseCase<AdminLoginInput, AdminSessionTokens> {
+export class LoginAdmin
+  implements UseCase<AdminLoginInput, AdminSessionTokens>
+{
   constructor(private readonly deps: AdminAuthDependencies) {}
 
   async execute(input?: AdminLoginInput): Promise<AdminSessionTokens> {
@@ -76,17 +89,26 @@ export class LoginAdmin implements UseCase<AdminLoginInput, AdminSessionTokens> 
     if (!email || !password) {
       throw new InvalidCredentialsError();
     }
-    const identity = await this.deps.passwordAuthenticator.verify(email, password);
+    const identity = await this.deps.passwordAuthenticator.verify(
+      email,
+      password,
+    );
     if (!identity) {
       throw new InvalidCredentialsError();
     }
     const admin = await this.deps.adminUsers.findAdminByEmail(email);
     // A provider identity that maps to a different local user is not an admin.
-    if (!admin || (admin.supabaseId && admin.supabaseId !== identity.providerUserId)) {
+    if (
+      !admin ||
+      (admin.supabaseId && admin.supabaseId !== identity.providerUserId)
+    ) {
       throw new InvalidCredentialsError();
     }
     if (!admin.supabaseId) {
-      await this.deps.adminUsers.linkSupabaseId(admin.id, identity.providerUserId);
+      await this.deps.adminUsers.linkSupabaseId(
+        admin.id,
+        identity.providerUserId,
+      );
     }
     await this.deps.sessions.deleteExpired(new Date());
     const { tokens } = await issueSessionPair(this.deps, crypto.randomUUID());
@@ -94,7 +116,25 @@ export class LoginAdmin implements UseCase<AdminLoginInput, AdminSessionTokens> 
   }
 }
 
-export class RefreshAdminSession implements UseCase<string, AdminSessionTokens> {
+/** OAuth proves identity; only a pre-existing, exact admin link grants access. */
+export class LoginAdminWithToken
+  implements UseCase<string, AdminSessionTokens>
+{
+  constructor(private readonly deps: AdminAuthDependencies) {}
+  async execute(token = ''): Promise<AdminSessionTokens> {
+    const identity = token ? await this.deps.tokenVerifier.verify(token) : null;
+    if (!identity) throw new InvalidCredentialsError();
+    const admin = await this.deps.adminUsers.findAdminByEmail(identity.email);
+    if (!admin || admin.supabaseId !== identity.providerUserId)
+      throw new InvalidCredentialsError();
+    await this.deps.sessions.deleteExpired(new Date());
+    return (await issueSessionPair(this.deps, crypto.randomUUID())).tokens;
+  }
+}
+
+export class RefreshAdminSession
+  implements UseCase<string, AdminSessionTokens>
+{
   constructor(private readonly deps: AdminAuthDependencies) {}
 
   async execute(refreshToken = ''): Promise<AdminSessionTokens> {
@@ -109,7 +149,8 @@ export class RefreshAdminSession implements UseCase<string, AdminSessionTokens> 
     if (session.revokedAt) {
       const rotatedRace =
         session.replacedById !== null &&
-        now.getTime() - session.revokedAt.getTime() <= this.deps.config.rotationGraceMs;
+        now.getTime() - session.revokedAt.getTime() <=
+          this.deps.config.rotationGraceMs;
       if (rotatedRace) {
         // A sibling request already rotated this token; its successor cookie
         // is on its way to the browser, so only a fresh access token is needed.
@@ -120,7 +161,10 @@ export class RefreshAdminSession implements UseCase<string, AdminSessionTokens> 
       throw new InvalidRefreshTokenError();
     }
 
-    const { tokens, sessionId } = await issueSessionPair(this.deps, session.familyId);
+    const { tokens, sessionId } = await issueSessionPair(
+      this.deps,
+      session.familyId,
+    );
     await this.deps.sessions.markReplaced(session.id, sessionId, now);
     return tokens;
   }
@@ -134,7 +178,7 @@ export class LogoutAdmin implements UseCase<string, void> {
       return;
     }
     const session = await this.deps.sessions.findByTokenHash(
-      await hashToken(refreshToken)
+      await hashToken(refreshToken),
     );
     if (session) {
       await this.deps.sessions.revokeFamily(session.familyId, new Date());
@@ -144,13 +188,17 @@ export class LogoutAdmin implements UseCase<string, void> {
 
 export interface AdminAuthUseCases {
   login: UseCase<AdminLoginInput, AdminSessionTokens>;
+  loginWithToken: UseCase<string, AdminSessionTokens>;
   refresh: UseCase<string, AdminSessionTokens>;
   logout: UseCase<string, void>;
 }
 
-export function createAdminAuthUseCases(deps: AdminAuthDependencies): AdminAuthUseCases {
+export function createAdminAuthUseCases(
+  deps: AdminAuthDependencies,
+): AdminAuthUseCases {
   return {
     login: new LoginAdmin(deps),
+    loginWithToken: new LoginAdminWithToken(deps),
     refresh: new RefreshAdminSession(deps),
     logout: new LogoutAdmin(deps),
   };

@@ -1,4 +1,8 @@
-import { AdminSession, InvalidCredentialsError, InvalidRefreshTokenError } from '@agentrepo/domain';
+import {
+  AdminSession,
+  InvalidCredentialsError,
+  InvalidRefreshTokenError,
+} from '@agentrepo/domain';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import {
   AdminSessionRepository,
@@ -6,7 +10,10 @@ import {
 } from '../ports/admin-session.repository';
 import { AdminUser, AdminUserRepository } from '../ports/admin-user.repository';
 import { PasswordAuthenticator } from '../ports/password-authenticator';
-import { AdminAuthUseCases, createAdminAuthUseCases } from './admin-auth.use-cases';
+import {
+  AdminAuthUseCases,
+  createAdminAuthUseCases,
+} from './admin-auth.use-cases';
 
 class InMemoryAdminSessionRepository implements AdminSessionRepository {
   readonly sessions: AdminSession[] = [];
@@ -25,10 +32,16 @@ class InMemoryAdminSessionRepository implements AdminSessionRepository {
   }
 
   async findByTokenHash(tokenHash: string): Promise<AdminSession | null> {
-    return this.sessions.find((session) => session.tokenHash === tokenHash) ?? null;
+    return (
+      this.sessions.find((session) => session.tokenHash === tokenHash) ?? null
+    );
   }
 
-  async markReplaced(id: string, replacedById: string, revokedAt: Date): Promise<void> {
+  async markReplaced(
+    id: string,
+    replacedById: string,
+    revokedAt: Date,
+  ): Promise<void> {
     const session = this.sessions.find((candidate) => candidate.id === id);
     if (session && !session.revokedAt) {
       session.revokedAt = revokedAt;
@@ -91,13 +104,26 @@ function buildUseCases(overrides?: { admins?: AdminUser[] }): {
 } {
   const repository = new InMemoryAdminSessionRepository();
   const adminUsers = new InMemoryAdminUserRepository(
-    overrides?.admins ?? [{ id: 'user-1', email: ADMIN_EMAIL, supabaseId: null }]
+    overrides?.admins ?? [
+      { id: 'user-1', email: ADMIN_EMAIL, supabaseId: null },
+    ],
   );
   let issued = 0;
   const useCases = createAdminAuthUseCases({
     sessions: repository,
     accessTokens: { issue: async () => `access-${++issued}` },
     passwordAuthenticator: new FakePasswordAuthenticator(),
+    tokenVerifier: {
+      verify: async (token) =>
+        token === 'verified-github'
+          ? {
+              providerUserId: SUPABASE_ID,
+              email: ADMIN_EMAIL,
+              name: 'Owner',
+              provider: 'github' as const,
+            }
+          : null,
+    },
     adminUsers,
     config: {
       accessTtlMs: ACCESS_TTL_MS,
@@ -126,9 +152,13 @@ describe('admin auth use cases', () => {
 
       expect(tokens.accessToken).toBeTruthy();
       expect(tokens.refreshToken).toBeTruthy();
-      expect(tokens.refreshExpiresAt?.getTime()).toBe(Date.now() + REFRESH_TTL_MS);
+      expect(tokens.refreshExpiresAt?.getTime()).toBe(
+        Date.now() + REFRESH_TTL_MS,
+      );
       expect(repository.sessions).toHaveLength(1);
-      expect(repository.sessions[0].tokenHash).not.toContain(tokens.refreshToken);
+      expect(repository.sessions[0].tokenHash).not.toContain(
+        tokens.refreshToken,
+      );
     });
 
     it('links the provider id to the local user on first login', async () => {
@@ -143,33 +173,35 @@ describe('admin auth use cases', () => {
       const { useCases } = buildUseCases();
 
       await expect(
-        useCases.login.execute({ email: ADMIN_EMAIL, password: 'wrong' })
+        useCases.login.execute({ email: ADMIN_EMAIL, password: 'wrong' }),
       ).rejects.toBeInstanceOf(InvalidCredentialsError);
     });
 
     it('rejects a user authenticated by the provider but without the admin role', async () => {
       const { useCases } = buildUseCases({ admins: [] });
 
-      await expect(useCases.login.execute(ADMIN_CREDENTIALS)).rejects.toBeInstanceOf(
-        InvalidCredentialsError
-      );
+      await expect(
+        useCases.login.execute(ADMIN_CREDENTIALS),
+      ).rejects.toBeInstanceOf(InvalidCredentialsError);
     });
 
     it('rejects an admin whose linked provider id does not match the authenticated identity', async () => {
       const { useCases } = buildUseCases({
-        admins: [{ id: 'user-1', email: ADMIN_EMAIL, supabaseId: 'someone-else' }],
+        admins: [
+          { id: 'user-1', email: ADMIN_EMAIL, supabaseId: 'someone-else' },
+        ],
       });
 
-      await expect(useCases.login.execute(ADMIN_CREDENTIALS)).rejects.toBeInstanceOf(
-        InvalidCredentialsError
-      );
+      await expect(
+        useCases.login.execute(ADMIN_CREDENTIALS),
+      ).rejects.toBeInstanceOf(InvalidCredentialsError);
     });
 
     it('fails closed on empty credentials', async () => {
       const { useCases } = buildUseCases();
 
       await expect(
-        useCases.login.execute({ email: '', password: '' })
+        useCases.login.execute({ email: '', password: '' }),
       ).rejects.toBeInstanceOf(InvalidCredentialsError);
     });
   });
@@ -179,21 +211,25 @@ describe('admin auth use cases', () => {
       const { useCases, repository } = buildUseCases();
       const first = await useCases.login.execute(ADMIN_CREDENTIALS);
 
-      const second = await useCases.refresh.execute(first.refreshToken as string);
+      const second = await useCases.refresh.execute(
+        first.refreshToken as string,
+      );
 
       expect(second.refreshToken).toBeTruthy();
       expect(second.refreshToken).not.toBe(first.refreshToken);
       expect(repository.sessions).toHaveLength(2);
       expect(repository.sessions[0].revokedAt).not.toBeNull();
       expect(repository.sessions[1].revokedAt).toBeNull();
-      expect(repository.sessions[1].familyId).toBe(repository.sessions[0].familyId);
+      expect(repository.sessions[1].familyId).toBe(
+        repository.sessions[0].familyId,
+      );
     });
 
     it('rejects an unknown refresh token', async () => {
       const { useCases } = buildUseCases();
 
       await expect(useCases.refresh.execute('made-up')).rejects.toBeInstanceOf(
-        InvalidRefreshTokenError
+        InvalidRefreshTokenError,
       );
     });
 
@@ -204,7 +240,7 @@ describe('admin auth use cases', () => {
       vi.advanceTimersByTime(REFRESH_TTL_MS + 1);
 
       await expect(
-        useCases.refresh.execute(tokens.refreshToken as string)
+        useCases.refresh.execute(tokens.refreshToken as string),
       ).rejects.toBeInstanceOf(InvalidRefreshTokenError);
     });
 
@@ -214,7 +250,9 @@ describe('admin auth use cases', () => {
       await useCases.refresh.execute(first.refreshToken as string);
 
       vi.advanceTimersByTime(ROTATION_GRACE_MS - 1);
-      const raced = await useCases.refresh.execute(first.refreshToken as string);
+      const raced = await useCases.refresh.execute(
+        first.refreshToken as string,
+      );
 
       expect(raced.accessToken).toBeTruthy();
       expect(raced.refreshToken).toBeUndefined();
@@ -228,23 +266,27 @@ describe('admin auth use cases', () => {
       await useCases.logout.execute(tokens.refreshToken as string);
 
       await expect(
-        useCases.refresh.execute(tokens.refreshToken as string)
+        useCases.refresh.execute(tokens.refreshToken as string),
       ).rejects.toBeInstanceOf(InvalidRefreshTokenError);
     });
 
     it('revokes the whole family when a rotated token is reused after the grace window', async () => {
       const { useCases, repository } = buildUseCases();
       const first = await useCases.login.execute(ADMIN_CREDENTIALS);
-      const second = await useCases.refresh.execute(first.refreshToken as string);
+      const second = await useCases.refresh.execute(
+        first.refreshToken as string,
+      );
 
       vi.advanceTimersByTime(ROTATION_GRACE_MS + 1);
 
       await expect(
-        useCases.refresh.execute(first.refreshToken as string)
+        useCases.refresh.execute(first.refreshToken as string),
       ).rejects.toBeInstanceOf(InvalidRefreshTokenError);
-      expect(repository.sessions.every((session) => session.revokedAt)).toBe(true);
+      expect(repository.sessions.every((session) => session.revokedAt)).toBe(
+        true,
+      );
       await expect(
-        useCases.refresh.execute(second.refreshToken as string)
+        useCases.refresh.execute(second.refreshToken as string),
       ).rejects.toBeInstanceOf(InvalidRefreshTokenError);
     });
   });
@@ -253,12 +295,14 @@ describe('admin auth use cases', () => {
     it('revokes the whole session family', async () => {
       const { useCases } = buildUseCases();
       const first = await useCases.login.execute(ADMIN_CREDENTIALS);
-      const second = await useCases.refresh.execute(first.refreshToken as string);
+      const second = await useCases.refresh.execute(
+        first.refreshToken as string,
+      );
 
       await useCases.logout.execute(second.refreshToken as string);
 
       await expect(
-        useCases.refresh.execute(second.refreshToken as string)
+        useCases.refresh.execute(second.refreshToken as string),
       ).rejects.toBeInstanceOf(InvalidRefreshTokenError);
     });
 
@@ -267,5 +311,40 @@ describe('admin auth use cases', () => {
 
       await expect(useCases.logout.execute('made-up')).resolves.toBeUndefined();
     });
+  });
+});
+
+describe('admin OAuth identity', () => {
+  it('issues a session only for an already linked admin identity', async () => {
+    const { useCases } = buildUseCases({
+      admins: [{ id: 'user-1', email: ADMIN_EMAIL, supabaseId: SUPABASE_ID }],
+    });
+    expect(
+      (await useCases.loginWithToken.execute('verified-github')).accessToken,
+    ).toBeTruthy();
+  });
+  it.each([null, 'another-provider-id'])(
+    'refuses unlinked or mismatched identities (%s)',
+    async (supabaseId) => {
+      const { useCases, repository } = buildUseCases({
+        admins: [{ id: 'user-1', email: ADMIN_EMAIL, supabaseId }],
+      });
+      await expect(
+        useCases.loginWithToken.execute('verified-github'),
+      ).rejects.toBeInstanceOf(InvalidCredentialsError);
+      expect(repository.sessions).toHaveLength(0);
+    },
+  );
+  it('refuses a valid contributor without an admin role', async () => {
+    const { useCases } = buildUseCases({ admins: [] });
+    await expect(
+      useCases.loginWithToken.execute('verified-github'),
+    ).rejects.toBeInstanceOf(InvalidCredentialsError);
+  });
+  it('refuses an unverified token', async () => {
+    const { useCases } = buildUseCases();
+    await expect(
+      useCases.loginWithToken.execute('forged'),
+    ).rejects.toBeInstanceOf(InvalidCredentialsError);
   });
 });

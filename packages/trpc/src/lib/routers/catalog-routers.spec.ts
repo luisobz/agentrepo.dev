@@ -63,6 +63,7 @@ function buildContext(options?: {
     clientIp: crypto.randomUUID(),
     adminAuth: {
       loginWithToken: { execute: vi.fn() },
+      checkAccess: { execute: vi.fn() },
       login: stubUseCase(undefined),
       refresh: stubUseCase(undefined),
       logout: stubUseCase(undefined),

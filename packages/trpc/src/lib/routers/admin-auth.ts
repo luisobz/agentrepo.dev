@@ -27,6 +27,12 @@ export const adminAuthRouter = router({
       ctx.adminAuth.loginWithToken.execute(input.token),
     ),
 
+  checkAccess: publicProcedure
+    .input(z.object({ token: z.string().min(1).max(16384) }))
+    .mutation(({ ctx, input }) =>
+      ctx.adminAuth.checkAccess.execute(input.token),
+    ),
+
   refresh: publicProcedure
     .input(z.object({ refreshToken: z.string().min(1) }))
     .mutation(({ ctx, input }) =>

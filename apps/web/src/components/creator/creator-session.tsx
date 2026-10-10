@@ -18,6 +18,7 @@ export function CreatorSession({ authorName }: { authorName: string }) {
         setFailed(true);
         return;
       }
+      window.dispatchEvent(new Event('auth-session-changed'));
       router.refresh();
     } catch {
       setFailed(true);

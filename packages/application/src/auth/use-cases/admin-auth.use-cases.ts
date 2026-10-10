@@ -132,6 +132,17 @@ export class LoginAdminWithToken
   }
 }
 
+/** Read-only role check: never provisions users or creates admin sessions. */
+export class CheckAdminAccess implements UseCase<string, boolean> {
+  constructor(private readonly deps: AdminAuthDependencies) {}
+  async execute(token = ''): Promise<boolean> {
+    const identity = token ? await this.deps.tokenVerifier.verify(token) : null;
+    if (!identity) return false;
+    const admin = await this.deps.adminUsers.findAdminByEmail(identity.email);
+    return !!admin && admin.supabaseId === identity.providerUserId;
+  }
+}
+
 export class RefreshAdminSession
   implements UseCase<string, AdminSessionTokens>
 {
@@ -189,6 +200,7 @@ export class LogoutAdmin implements UseCase<string, void> {
 export interface AdminAuthUseCases {
   login: UseCase<AdminLoginInput, AdminSessionTokens>;
   loginWithToken: UseCase<string, AdminSessionTokens>;
+  checkAccess: UseCase<string, boolean>;
   refresh: UseCase<string, AdminSessionTokens>;
   logout: UseCase<string, void>;
 }
@@ -199,6 +211,7 @@ export function createAdminAuthUseCases(
   return {
     login: new LoginAdmin(deps),
     loginWithToken: new LoginAdminWithToken(deps),
+    checkAccess: new CheckAdminAccess(deps),
     refresh: new RefreshAdminSession(deps),
     logout: new LogoutAdmin(deps),
   };

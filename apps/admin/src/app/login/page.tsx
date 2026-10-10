@@ -1,8 +1,16 @@
 'use client';
 
-import { Button, Card, CardContent, CardHeader, CardTitle, Input } from '@agentrepo/ui';
+import {
+  Button,
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+  Input,
+} from '@agentrepo/ui';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { FormEvent, Suspense, useState } from 'react';
+import { adminReturnPath } from '../../lib/auth/return-path';
 import { FormError } from '../../components/admin/form/form-error';
 
 function LoginForm() {
@@ -18,25 +26,27 @@ function LoginForm() {
     setError(null);
     setIsSubmitting(true);
 
-    const response = await fetch('/api/auth/login', {
-      method: 'POST',
-      headers: { 'content-type': 'application/json' },
-      body: JSON.stringify({ email, password }),
-    });
-
-    if (response.ok) {
-      router.push(searchParams.get('from') ?? '/admin');
-      router.refresh();
-      return;
+    try {
+      const response = await fetch('/api/auth/login', {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({ email, password }),
+      });
+      if (response.ok) {
+        router.push(adminReturnPath(searchParams.get('from')));
+        router.refresh();
+        return;
+      }
+      setError(
+        response.status === 401
+          ? 'Invalid credentials'
+          : 'Authentication service unavailable. Please try again.',
+      );
+    } catch {
+      setError('Could not reach the server. Please try again.');
+    } finally {
+      setIsSubmitting(false);
     }
-
-    const body: unknown = await response.json().catch(() => null);
-    const message =
-      typeof body === 'object' && body !== null && 'error' in body
-        ? String((body as Record<string, unknown>)['error'])
-        : 'Login failed';
-    setError(message);
-    setIsSubmitting(false);
   };
 
   return (
@@ -46,23 +56,29 @@ function LoginForm() {
       </CardHeader>
       <CardContent>
         <form onSubmit={handleSubmit} className="flex flex-col gap-4">
-          <Input
-            type="email"
-            placeholder="Email"
-            value={email}
-            onChange={(event) => setEmail(event.target.value)}
-            autoComplete="username"
-            autoFocus
-            required
-          />
-          <Input
-            type="password"
-            placeholder="Password"
-            value={password}
-            onChange={(event) => setPassword(event.target.value)}
-            autoComplete="current-password"
-            required
-          />
+          <label className="text-sm">
+            Email
+            <Input
+              type="email"
+              placeholder="Email"
+              value={email}
+              onChange={(event) => setEmail(event.target.value)}
+              autoComplete="username"
+              autoFocus
+              required
+            />
+          </label>
+          <label className="text-sm">
+            Password
+            <Input
+              type="password"
+              placeholder="Password"
+              value={password}
+              onChange={(event) => setPassword(event.target.value)}
+              autoComplete="current-password"
+              required
+            />
+          </label>
           <FormError message={error} />
           <Button type="submit" disabled={isSubmitting || !email || !password}>
             {isSubmitting ? 'Signing in…' : 'Sign in'}

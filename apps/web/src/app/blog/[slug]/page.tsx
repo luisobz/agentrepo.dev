@@ -5,7 +5,6 @@ import { ContentCover, MarkdownContent } from '@agentrepo/ui';
 import { getPublishedPostBySlug } from '../../../lib/blog';
 import { formatDate } from '../../../lib/public-content';
 
-export const dynamic = 'force-dynamic';
 
 interface BlogPostPageProps {
   params: Promise<{ slug: string }>;
@@ -74,6 +73,7 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
         <h1 className="mt-3 text-3xl font-semibold leading-tight tracking-tight sm:text-4xl">
           {post.title}
         </h1>
+        {post.authorName && <p className="mt-3 text-sm text-[var(--color-text-muted)]">Autoría: {post.authorName}</p>}
         {post.excerpt && (
           <p className="mt-4 text-lg leading-relaxed text-[var(--color-text-secondary)]">
             {post.excerpt}

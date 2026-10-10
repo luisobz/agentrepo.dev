@@ -6,6 +6,7 @@ import { agentsRouter } from "./agents";
 import { blogRouter } from "./blog";
 import { blogPostsRouter } from "./blog-posts";
 import { contactRouter } from "./contact";
+import { creatorRouter } from "./creator";
 import { playgroundRouter } from "./playground";
 import { searchRouter } from "./search";
 import { skillsRouter } from "./skills";
@@ -29,6 +30,7 @@ export const appRouter = router({
   blogPosts: blogPostsRouter,
   blog: blogRouter,
   contact: contactRouter,
+  creator: creatorRouter,
   playground: playgroundRouter,
 });
 

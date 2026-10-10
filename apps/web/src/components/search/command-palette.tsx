@@ -1,6 +1,6 @@
 'use client';
 
-import { AvatarSlot, useAvatar, type AvatarSlotId } from '@agentrepo/avatar';
+import { AvatarSlot, useAvatar } from '@agentrepo/avatar';
 import { skillTypeSchema } from '@agentrepo/trpc/schemas';
 import { TypeChip } from '@agentrepo/ui';
 import { FileText, Loader2, Search } from 'lucide-react';
@@ -29,22 +29,17 @@ function HitBadge({ hit }: { hit: SearchHit }) {
   }
   return (
     <span className="shrink-0 rounded-full border border-[var(--color-border-medium)] px-2 py-0.5 font-mono text-[11px] text-[var(--color-text-secondary)]">
-      {hit.type === 'agent' ? hit.badge ?? 'agent' : hit.type}
+      {hit.type === 'agent' ? (hit.badge ?? 'agent') : hit.type}
     </span>
   );
 }
 
 export function CommandPalette() {
   const { isOpen, close } = useCommandPalette();
-  const { setEmotion, setAvatarPosition, currentSlot, say, clearMessages } =
-    useAvatar();
+  const { setEmotion, focusAvatar, say, clearMessages } = useAvatar();
   const t = useT();
   const router = useRouter();
   const inputRef = useRef<HTMLInputElement>(null);
-  // Remember where the avatar was perched so we can send it back on close.
-  const currentSlotRef = useRef<AvatarSlotId | null>(currentSlot);
-  currentSlotRef.current = currentSlot;
-  const restoreSlotRef = useRef<AvatarSlotId | null>(null);
 
   const [query, setQuery] = useState('');
   const [selectedIndex, setSelectedIndex] = useState(0);
@@ -60,12 +55,12 @@ export function CommandPalette() {
       enabled: isOpen && isQueryReady,
       placeholderData: (previous) => previous,
       staleTime: 30_000,
-    }
+    },
   );
 
   const groups = useMemo(
-    () => groupHits(isQueryReady ? search.data ?? [] : []),
-    [isQueryReady, search.data]
+    () => groupHits(isQueryReady ? (search.data ?? []) : []),
+    [isQueryReady, search.data],
   );
   const flatHits = useMemo(() => flattenGroups(groups), [groups]);
 
@@ -81,18 +76,17 @@ export function CommandPalette() {
       document.documentElement.style.overflow = 'hidden';
 
       // The avatar flies over to the search box and greets the visitor.
-      restoreSlotRef.current = currentSlotRef.current;
-      setAvatarPosition('search');
+      const releaseFocus = focusAvatar('search');
       say(hintRef.current);
 
       return () => {
         document.documentElement.style.overflow = '';
-        setAvatarPosition(restoreSlotRef.current);
+        releaseFocus();
         clearMessages();
       };
     }
     return undefined;
-  }, [isOpen, setAvatarPosition, say, clearMessages]);
+  }, [isOpen, focusAvatar, say, clearMessages]);
 
   useEffect(() => {
     if (!isOpen || !isQueryReady) {
@@ -120,7 +114,7 @@ export function CommandPalette() {
       event.preventDefault();
       const delta = event.key === 'ArrowDown' ? 1 : -1;
       setSelectedIndex((current) =>
-        moveSelection(current, delta, flatHits.length)
+        moveSelection(current, delta, flatHits.length),
       );
     } else if (event.key === 'Enter') {
       event.preventDefault();

@@ -6,7 +6,6 @@ import { formatPrice } from '../../lib/format-price';
 import { formatDate } from '../../lib/public-content';
 import { getPublishedSkills } from '../../lib/skills';
 
-export const dynamic = 'force-dynamic';
 
 export const metadata: Metadata = {
   title: 'Skills | AgentRepo.dev',

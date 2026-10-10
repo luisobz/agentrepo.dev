@@ -117,3 +117,27 @@ describe('envSchema — production secret guards', () => {
     expect(result.success).toBe(true);
   });
 });
+
+describe('deployment environment precedence', () => {
+  it('preserves injected database configuration over the local dotenv file', async () => {
+    const { mkdtempSync, writeFileSync, rmSync } = await import('node:fs');
+    const { tmpdir } = await import('node:os');
+    const { join } = await import('node:path');
+    const { vi } = await import('vitest');
+    const directory = mkdtempSync(join(tmpdir(), 'agentrepo-env-'));
+    writeFileSync(join(directory, '.env'), 'DATABASE_URL=postgresql://local:local@localhost/local\n');
+    vi.spyOn(process, 'cwd').mockReturnValue(directory);
+    vi.stubEnv('DATABASE_URL', DB_URL);
+    vi.stubEnv('NODE_ENV', 'test');
+    try {
+      vi.resetModules();
+      const { BackendEnvironments } = await import('./backend.js');
+      BackendEnvironments.load();
+      expect(BackendEnvironments.DATABASE_URL).toBe(DB_URL);
+    } finally {
+      vi.restoreAllMocks();
+      vi.unstubAllEnvs();
+      rmSync(directory, { recursive: true });
+    }
+  });
+});

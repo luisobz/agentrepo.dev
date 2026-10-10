@@ -1,6 +1,7 @@
 import { createTRPCClient, httpBatchLink } from '@trpc/client';
 import superjson from 'superjson';
 import type { AppRouter } from '@agentrepo/trpc/schemas';
+import { publicCatalogFetch } from './public-catalog-fetch';
 
 const API_BASE = (
   process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000'
@@ -12,6 +13,7 @@ export const serverTrpc = createTRPCClient<AppRouter>({
     httpBatchLink({
       url: `${API_BASE}/api/trpc`,
       transformer: superjson,
+      fetch: publicCatalogFetch,
     }),
   ],
 });

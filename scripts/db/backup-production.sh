@@ -10,7 +10,7 @@ export DB_WORK_DIR="${RUNNER_TEMP:-/tmp}/agentrepo-backup-${GITHUB_RUN_ID:-manua
 mkdir -p "$DB_WORK_DIR"
 chmod 700 "$DB_WORK_DIR"
 cp /tmp/supabase-ca.crt "$DB_WORK_DIR/ca.crt"
-trap 'rm -f "$DB_WORK_DIR/prod.dump"' EXIT
+trap 'rm -f "$DB_WORK_DIR/prod.dump" "$DB_WORK_DIR/db.env"' EXIT
 
 export DATABASE_URL="$PROD_MIGRATION_DATABASE_URL"
 python3 scripts/db/db-url-to-env.py

@@ -100,7 +100,7 @@ export class BackendEnvironments {
 
     // Cargar .env desde la raíz del proyecto (compatible CJS/ESM)
     const envPath = path.resolve(process.cwd(), '.env');
-    const result = dotenv.config({ path: envPath, override: true });
+    const result = dotenv.config({ path: envPath, override: false });
 
     if (result.error) {
       console.warn(

@@ -14,7 +14,9 @@ const signInRateLimiter = new FixedWindowRateLimiter({
 });
 
 function getClientKey(request: NextRequest): string {
-  return request.headers.get('x-forwarded-for')?.split(',')[0]?.trim() ?? 'unknown';
+  return (
+    request.headers.get('x-forwarded-for')?.split(',')[0]?.trim() ?? 'unknown'
+  );
 }
 
 /**
@@ -22,11 +24,14 @@ function getClientKey(request: NextRequest): string {
  * are written as HttpOnly and tokens never touch client-side JavaScript.
  */
 export async function POST(request: NextRequest) {
+  if (request.headers.get('origin') !== request.nextUrl.origin) {
+    return NextResponse.json({ error: 'Invalid origin' }, { status: 403 });
+  }
   const supabase = await getSupabaseServerClient();
   if (!supabase) {
     return NextResponse.json(
       { error: 'Authentication is not configured' },
-      { status: 500 }
+      { status: 500 },
     );
   }
 
@@ -34,19 +39,25 @@ export async function POST(request: NextRequest) {
   if (!signInRateLimiter.consume(clientKey)) {
     return NextResponse.json(
       { error: 'Too many attempts, try again later' },
-      { status: 429 }
+      { status: 429 },
     );
   }
 
   const body: unknown = await request.json().catch(() => null);
   const credentials = credentialsSchema.safeParse(body);
   if (!credentials.success) {
-    return NextResponse.json({ error: 'Invalid credentials payload' }, { status: 400 });
+    return NextResponse.json(
+      { error: 'Invalid credentials payload' },
+      { status: 400 },
+    );
   }
 
   const { error } = await supabase.auth.signInWithPassword(credentials.data);
   if (error) {
-    return NextResponse.json({ error: 'Invalid email or password' }, { status: 401 });
+    return NextResponse.json(
+      { error: 'Invalid email or password' },
+      { status: 401 },
+    );
   }
 
   signInRateLimiter.reset(clientKey);

@@ -5,7 +5,6 @@ import { getPublishedPosts } from '../../lib/blog';
 import { getServerT } from '../../lib/i18n/server';
 import { formatDate } from '../../lib/public-content';
 
-export const dynamic = 'force-dynamic';
 
 export const metadata: Metadata = {
   title: 'Blog | AgentRepo.dev',

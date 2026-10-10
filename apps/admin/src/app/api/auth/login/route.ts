@@ -13,6 +13,9 @@ function getClientKey(request: Request): string {
 }
 
 export async function POST(request: Request) {
+  if (request.headers.get('origin') !== new URL(request.url).origin) {
+    return NextResponse.json({ error: 'Invalid origin' }, { status: 403 });
+  }
   const clientKey = getClientKey(request);
   if (!loginRateLimiter.consume(clientKey)) {
     return NextResponse.json(

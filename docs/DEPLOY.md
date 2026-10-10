@@ -179,3 +179,9 @@ una restauración completa.
    El pipeline sólo ejecuta migraciones; no crea usuarios.
 6. Comprueba `https://agentrepo.dev/web/api/v1/api/health`, la home,
    `https://admin.agentrepo.dev/login` y una llamada de backend a backend.
+
+## Compilación y pruebas de los bundles Next
+
+Los builds `web` y `admin` no reutilizan la caché de tareas Nx: la restauración de artefactos puede omitir los enlaces bajo `.next/node_modules` necesarios para instrumentación y arranque. También evita reutilizar un frontend compilado con variables públicas de otro entorno. Los tests y paquetes de backend conservan su caché.
+
+CI y la puerta de verificación del despliegue ejecutan las pruebas desktop/móvil sobre los bundles standalone preparados por el mismo script que publica producción. Usan catálogo local de prueba y no requieren credenciales. Las aplicaciones publicadas se compilan después con las variables de producción.

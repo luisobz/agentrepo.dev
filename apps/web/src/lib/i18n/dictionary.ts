@@ -1,6 +1,119 @@
 import type { Dictionary } from '@agentrepo/ui';
 
 export const webDictionary = {
+  'creator.githubPending': { en: 'GitHub sign-in is being configured. You can register with email below.', es: 'Estamos terminando de configurar GitHub. Puedes registrarte con tu correo aquí abajo.' },
+  'creator.signout': { en: 'Sign out', es: 'Cerrar sesión' },
+  'creator.signin': { en: 'Sign in', es: 'Entrar' },
+  'creator.signup': { en: 'Create account', es: 'Crear cuenta' },
+  'creator.intro': {
+    en: 'Sign in to submit skills, agent projects and articles under your name.',
+    es: 'Accede para proponer skills, proyectos de agentes y artículos con tu autoría.',
+  },
+  'creator.github': { en: 'Continue with GitHub', es: 'Continuar con GitHub' },
+  'creator.connecting': { en: 'Connecting…', es: 'Conectando…' },
+  'creator.authInfo': {
+    en: 'Sign in as a contributor. Proposals are reviewed before publication. You can also use email.',
+    es: 'Accede como colaborador. Tus propuestas se revisan antes de publicarse. También puedes usar tu correo.',
+  },
+  'creator.email': { en: 'Email', es: 'Correo' },
+  'creator.password': { en: 'Password', es: 'Contraseña' },
+  'creator.passwordHelp': {
+    en: 'Use at least 10 characters. Email confirmation is required.',
+    es: 'Utiliza al menos 10 caracteres. Tendrás que confirmar tu correo.',
+  },
+  'creator.unavailable': {
+    en: 'Authentication is not configured.',
+    es: 'El acceso todavía no está configurado.',
+  },
+  'creator.wait': { en: 'Please wait…', es: 'Espera…' },
+  'creator.network': {
+    en: 'Could not reach the server. Please try again.',
+    es: 'No se pudo conectar. Inténtalo de nuevo.',
+  },
+  'creator.authFailed': {
+    en: 'Authentication failed.',
+    es: 'No se pudo iniciar sesión.',
+  },
+  'creator.registered': {
+    en: 'Account created. Check your email to confirm it, then sign in.',
+    es: 'Cuenta creada. Confirma tu correo y después inicia sesión.',
+  },
+  'creator.oauthError': {
+    en: 'Could not sign in with GitHub. Please try again.',
+    es: 'No se pudo acceder con GitHub. Inténtalo de nuevo.',
+  },
+  'creator.title': { en: 'Title', es: 'Título' },
+  'creator.slug': { en: 'URL slug', es: 'Identificador de URL' },
+  'creator.description': { en: 'Description', es: 'Descripción' },
+  'creator.summary': { en: 'Article summary', es: 'Resumen del artículo' },
+  'creator.repo': {
+    en: 'Project repository (HTTPS)',
+    es: 'Repositorio del proyecto (HTTPS)',
+  },
+  'creator.agentHelp': {
+    en: 'Propose a complete agent project with installation, configuration, requirements and license documented below.',
+    es: 'Propón un proyecto de agente completo y documenta su instalación, configuración, requisitos y licencia.',
+  },
+  'creator.skillType': { en: 'Skill type', es: 'Tipo de skill' },
+  'creator.documentation': {
+    en: 'Documentation and installation (Markdown)',
+    es: 'Documentación e instalación (Markdown)',
+  },
+  'creator.article': { en: 'Article (Markdown)', es: 'Artículo (Markdown)' },
+  'creator.skillContent': {
+    en: 'Skill content (Markdown)',
+    es: 'Contenido de la skill (Markdown)',
+  },
+  'creator.upload': {
+    en: 'Or upload a Markdown file (.md or .txt)',
+    es: 'O sube un fichero Markdown (.md o .txt)',
+  },
+  'creator.pendingHelp': {
+    en: 'Submitted content stays unpublished until reviewed. One Markdown file can be uploaded per draft.',
+    es: 'El contenido queda privado hasta su revisión. Puedes subir un fichero Markdown por propuesta.',
+  },
+  'creator.submit': {
+    en: 'Submit draft for review',
+    es: 'Enviar propuesta a revisión',
+  },
+  'creator.saving': { en: 'Saving…', es: 'Guardando…' },
+  'creator.submitted': { en: 'Draft submitted', es: 'Propuesta enviada' },
+  'creator.another': { en: 'Create another', es: 'Crear otra propuesta' },
+  'creator.fileSize': {
+    en: 'The Markdown file must be smaller than 100 KB.',
+    es: 'El fichero Markdown debe ocupar menos de 100 KB.',
+  },
+  'creator.saveFailed': {
+    en: 'Could not save your draft.',
+    es: 'No se pudo guardar tu propuesta.',
+  },
+  'creator.author': { en: 'Author', es: 'Autoría' },
+  'creator.heading': {
+    en: 'Contribute to AgentRepo',
+    es: 'Colabora con AgentRepo',
+  },
+  'creator.pageInfo': {
+    en: 'Propose a skill, agent project or article. Your account is recorded as the author and the administrator reviews each proposal before publication.',
+    es: 'Propón una skill, un proyecto de agente o un artículo. Tu cuenta queda registrada como autora y el administrador revisa cada propuesta antes de publicarla.',
+  },
+  'creator.access': {
+    en: 'Sign in to contribute',
+    es: 'Accede para colaborar',
+  },
+  'creator.accessInfo': {
+    en: 'Proposals remain pending review. They will be published with your authorship when approved by the administrator.',
+    es: 'Tus propuestas quedarán pendientes de revisión. Se publicarán con tu autoría cuando el administrador las apruebe.',
+  },
+  'creator.accessLink': {
+    en: 'Sign in with GitHub or create an account',
+    es: 'Acceder con GitHub o crear una cuenta',
+  },
+  'creator.successInfo': {
+    en: 'Your proposal has been saved with your authorship. It will appear publicly after editorial review.',
+    es: 'Tu propuesta se ha guardado con tu autoría. Aparecerá públicamente después de la revisión editorial.',
+  },
+
+  'common.loading': { en: 'Loading content…', es: 'Cargando contenido…' },
   'nav.skills': { en: 'Skills', es: 'Skills' },
   'nav.agents': { en: 'Agents', es: 'Agents' },
   'nav.blog': { en: 'Blog', es: 'Blog' },
@@ -39,8 +152,8 @@ export const webDictionary = {
   'skills.back': { en: '← Back to skills', es: '← Volver a skills' },
   'agents.title': { en: 'Agents', es: 'Agentes' },
   'agents.subtitle': {
-    en: 'Complete agent definitions you can browse file by file, like in an IDE.',
-    es: 'Definiciones completas de agentes que puedes explorar archivo a archivo, como en un IDE.',
+    en: 'Agent projects with their repository, installation guide and configuration, ready to explore.',
+    es: 'Proyectos de agentes con su repositorio, guía de instalación y configuración, listos para explorar.',
   },
   'agents.back': { en: '← Back to agents', es: '← Volver a agentes' },
   'blog.title': { en: 'Blog', es: 'Blog' },

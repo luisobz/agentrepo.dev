@@ -12,7 +12,6 @@ import {
   getSkillVersions,
 } from '../../../lib/skills';
 
-export const dynamic = 'force-dynamic';
 
 interface SkillPageProps {
   params: Promise<{ slug: string }>;
@@ -119,6 +118,7 @@ export default async function SkillPage({ params, searchParams }: SkillPageProps
           </p>
         )}
         <dl className="mt-4 flex flex-wrap gap-x-6 gap-y-1 font-mono text-xs text-[var(--color-text-muted)]">
+          {skill.authorName && <div className="flex gap-1.5"><dt>Author:</dt><dd>{skill.authorName}</dd></div>}
           <div className="flex gap-1.5">
             <dt>Updated:</dt>
             <dd>

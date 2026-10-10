@@ -1,0 +1,75 @@
+import { expect, test } from '@playwright/test';
+
+test('Creator opens the contribution flow and requires authentication', async ({
+  page,
+  isMobile,
+}) => {
+  await page.goto('/');
+  if (isMobile) await page.getByRole('button', { name: 'Open menu' }).click();
+  await page
+    .getByRole('link', { name: 'Creator', exact: true })
+    .filter({ visible: true })
+    .click();
+  await expect(page).toHaveURL(/\/creator$/);
+  await expect(
+    page.getByRole('heading', { name: 'Sign in to contribute' }),
+  ).toBeVisible();
+  await page
+    .getByRole('link', { name: 'Sign in with GitHub or create an account' })
+    .click();
+  await expect(page).toHaveURL(/\/auth\/login\?next=/);
+  await expect(
+    page.getByRole('button', { name: 'Continue with GitHub' }),
+  ).toBeVisible();
+  await expect(page.locator('input[type=password]')).toBeVisible();
+});
+
+test('mobile menu reserves its top right for the avatar and releases focus on Escape', async ({
+  page,
+  isMobile,
+}) => {
+  test.skip(!isMobile, 'Mobile menu');
+  await page.goto('/');
+  await page.getByRole('button', { name: 'Open menu' }).click();
+  const menu = page.locator('#mobile-navigation');
+  const avatar = page.getByTestId('avatar-slot-mobile-menu');
+  await expect(menu).toBeVisible();
+  await expect(avatar).toHaveAttribute('data-active', 'true');
+  const slot = await avatar.boundingBox();
+  const firstLink = await menu
+    .getByRole('link', { name: 'Skills', exact: true })
+    .boundingBox();
+  expect(slot).not.toBeNull();
+  expect(firstLink).not.toBeNull();
+  expect(slot!.y + slot!.height).toBeLessThanOrEqual(firstLink!.y);
+  await expect(page.locator('body')).toHaveCSS('overflow', 'hidden');
+  await page.keyboard.press('Escape');
+  await expect(menu).toHaveAttribute('aria-hidden', 'true');
+  await expect(avatar).toHaveAttribute('data-active', 'false');
+  await expect(page.locator('body')).not.toHaveCSS('overflow', 'hidden');
+});
+
+test('navigation closes the drawer and renders the selected catalogue', async ({
+  page,
+  isMobile,
+}) => {
+  await page.goto('/');
+  if (isMobile) await page.getByRole('button', { name: 'Open menu' }).click();
+  await (isMobile ? page.locator('#mobile-navigation') : page.locator('header'))
+    .getByRole('link', { name: 'Agents', exact: true })
+    .click();
+  await expect(page).toHaveURL(/\/agents$/);
+  await expect(
+    page.getByRole('heading', { name: 'Agents', exact: true }),
+  ).toBeVisible();
+  if (isMobile)
+    await expect(page.locator('#mobile-navigation')).toHaveAttribute(
+      'aria-hidden',
+      'true',
+    );
+  expect(
+    await page.evaluate(
+      () => document.documentElement.scrollWidth <= window.innerWidth,
+    ),
+  ).toBe(true);
+});

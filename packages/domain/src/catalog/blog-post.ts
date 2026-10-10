@@ -1,4 +1,6 @@
 export interface BlogPost {
+  authorId?: string | null;
+  authorName?: string | null;
   id: string;
   slug: string;
   title: string;

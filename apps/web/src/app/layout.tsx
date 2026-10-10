@@ -60,7 +60,7 @@ export const metadata: Metadata = {
     icon: [{ url: '/favicon.ico', sizes: 'any' }, { url: '/icon.svg', type: 'image/svg+xml' }],
     apple: '/icon.svg',
   },
-  robots: { index: true, follow: true },
+  robots: { index: false, follow: false },
 };
 
 export default async function RootLayout({

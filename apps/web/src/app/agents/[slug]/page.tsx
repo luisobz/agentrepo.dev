@@ -17,7 +17,6 @@ import {
 } from '../../../lib/agents';
 import { formatDate } from '../../../lib/public-content';
 
-export const dynamic = 'force-dynamic';
 
 interface AgentPageProps {
   params: Promise<{ slug: string }>;
@@ -129,6 +128,8 @@ export default async function AgentPage({ params, searchParams }: AgentPageProps
         <p className="mt-3 max-w-2xl text-lg leading-relaxed text-[var(--color-text-secondary)]">
           {agent.shortDescription}
         </p>
+        {agent.repositoryUrl && <a href={agent.repositoryUrl} target="_blank" rel="noopener noreferrer" className="mt-4 inline-block text-sm font-semibold underline underline-offset-4">Repositorio del proyecto ↗</a>}
+        {agent.authorName && <p className="mt-3 font-mono text-xs text-[var(--color-text-muted)]">Author: {agent.authorName}</p>}
       </header>
 
       <ContentCover

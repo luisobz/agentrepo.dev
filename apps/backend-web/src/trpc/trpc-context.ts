@@ -5,11 +5,14 @@ import {
   createPlaygroundUseCases,
   createPortfolioUseCases,
   SearchCatalog,
+  ResolveCreatorIdentity,
 } from '@agentrepo/application';
 import { BackendEnvironments } from '@agentrepo/config';
 import {
   DeepSeekCoderService,
   InternalWorkflowClient,
+  PrismaContributorRepository,
+  SupabaseContributorVerifier,
   PrismaAdminSessionRepository,
   PrismaAdminUserRepository,
   PrismaAgentRepository,
@@ -52,6 +55,13 @@ export function buildCreateContext(prisma: PrismaService) {
     blogPostRepository: new PrismaBlogPostRepository(prisma),
     skillVersionRepository: new PrismaSkillVersionRepository(prisma),
     agentVersionRepository: new PrismaAgentVersionRepository(prisma),
+  });
+  const creatorIdentity = new ResolveCreatorIdentity({
+    contributors: new PrismaContributorRepository(prisma),
+    sessions: new SupabaseContributorVerifier({
+      url: BackendEnvironments.NEXT_PUBLIC_SUPABASE_URL,
+      publishableKey: BackendEnvironments.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY,
+    }),
   });
   const globalSearch = new SearchCatalog(new PrismaGlobalSearchRepository(prisma));
   const portfolioLogger = new Logger('ContactWorkflow');
@@ -102,9 +112,13 @@ export function buildCreateContext(prisma: PrismaService) {
       token,
       BackendEnvironments.AUTH_SECRET
     );
+    const creatorUserId = token && !isAdmin
+      ? await creatorIdentity.execute(token)
+      : null;
 
     return {
       isAdmin,
+      creatorUserId,
       clientIp: req.ip ?? null,
       adminAuth,
       catalog,

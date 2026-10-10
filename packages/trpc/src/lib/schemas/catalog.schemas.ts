@@ -29,6 +29,7 @@ export const paginationSchema = z.object({
 
 export const adminListSchema = paginationSchema.extend({
   search: z.string().trim().min(1).optional(),
+  pendingReviewOnly: z.boolean().optional(),
 });
 
 export const idInputSchema = z.object({ id: z.uuid() });
@@ -70,6 +71,11 @@ const premiumFieldsSchema = {
   currency: currencySchema,
   previewContent: z.string().max(10_000).nullable(),
 };
+
+export const repositoryUrlSchema = z.url().max(500).refine((value) => {
+  const url = new URL(value);
+  return url.protocol === 'https:' && !url.username && !url.password;
+}, 'Use a public HTTPS repository URL');
 
 function requirePriceWhenPremium(
   value: { isPremium?: boolean; priceCents?: number | null },
@@ -142,6 +148,7 @@ export const fileTreeNodeSchema: z.ZodType<FileTreeNode> = z.lazy(() =>
 export const fileTreeSchema = z.array(fileTreeNodeSchema);
 
 const agentBaseSchema = z.object({
+  repositoryUrl: repositoryUrlSchema.nullable().optional(),
   slug: slugSchema,
   title: z.string().trim().min(1).max(200),
   shortDescription: z.string().trim().min(1).max(300),

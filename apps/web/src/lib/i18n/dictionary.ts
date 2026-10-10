@@ -1,9 +1,19 @@
 import type { Dictionary } from '@agentrepo/ui';
 
 export const webDictionary = {
-  'creator.useEmail': { en: 'Use email instead', es: 'Usar correo electrónico' },
-  'creator.hideEmail': { en: 'Hide email access', es: 'Ocultar acceso por correo' },
-  'creator.githubPending': { en: 'GitHub sign-in is being configured. You can register with email below.', es: 'Estamos terminando de configurar GitHub. Puedes registrarte con tu correo aquí abajo.' },
+  'nav.admin': { en: 'Admin panel', es: 'Administración' },
+  'creator.useEmail': {
+    en: 'Use email instead',
+    es: 'Usar correo electrónico',
+  },
+  'creator.hideEmail': {
+    en: 'Hide email access',
+    es: 'Ocultar acceso por correo',
+  },
+  'creator.githubPending': {
+    en: 'GitHub sign-in is being configured. You can register with email below.',
+    es: 'Estamos terminando de configurar GitHub. Puedes registrarte con tu correo aquí abajo.',
+  },
   'creator.signout': { en: 'Sign out', es: 'Cerrar sesión' },
   'creator.signin': { en: 'Sign in', es: 'Entrar' },
   'creator.signup': { en: 'Create account', es: 'Crear cuenta' },

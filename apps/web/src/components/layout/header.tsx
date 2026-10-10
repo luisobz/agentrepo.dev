@@ -8,6 +8,7 @@ import { cn } from '@agentrepo/ui';
 import { Menu, X, ArrowUpRight, Search } from 'lucide-react';
 import { useT } from '../../lib/i18n/use-t';
 import { LocaleSwitcher } from './locale-switcher';
+import { AdminLink } from './admin-link';
 
 export function Header() {
   const t = useT();
@@ -136,6 +137,12 @@ export function Header() {
 
             {/* CTA/Actions */}
             <div className="flex items-center gap-3">
+              <AdminLink
+                className={cn(
+                  navLinkClass,
+                  'hidden md:inline-flex items-center gap-1',
+                )}
+              />
               <LocaleSwitcher className="hidden sm:flex" onDark={onDark} />
               {/* Cmd+K trigger hint inside the header when full-sized */}
               {!isScrolled && (
@@ -232,6 +239,10 @@ export function Header() {
       >
         <AvatarSlot id="mobile-menu" className="absolute right-6 top-3" />
         <nav className="flex flex-col gap-4">
+          <AdminLink
+            onClick={() => setMobileMenuOpen(false)}
+            className="flex items-center gap-2 py-2 font-sans text-sm font-semibold text-[var(--color-brand-garnet)] border-b border-[var(--color-border-soft)]/40"
+          />
           <Link
             prefetch={mobileMenuOpen}
             href="/skills"

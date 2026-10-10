@@ -348,3 +348,23 @@ describe('admin OAuth identity', () => {
     ).rejects.toBeInstanceOf(InvalidCredentialsError);
   });
 });
+
+describe('admin navigation eligibility', () => {
+  it.each([SUPABASE_ID, null, 'different-user'])(
+    'requires an exact existing admin link (%s)',
+    async (supabaseId) => {
+      const { useCases, repository } = buildUseCases({
+        admins: [{ id: 'user-1', email: ADMIN_EMAIL, supabaseId }],
+      });
+      expect(await useCases.checkAccess.execute('verified-github')).toBe(
+        supabaseId === SUPABASE_ID,
+      );
+      expect(repository.sessions).toHaveLength(0);
+    },
+  );
+  it('hides access for contributors and invalid tokens', async () => {
+    const { useCases } = buildUseCases({ admins: [] });
+    expect(await useCases.checkAccess.execute('verified-github')).toBe(false);
+    expect(await useCases.checkAccess.execute('forged')).toBe(false);
+  });
+});

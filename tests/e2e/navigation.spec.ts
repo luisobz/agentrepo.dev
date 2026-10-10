@@ -72,3 +72,40 @@ test('navigation closes the drawer and renders the selected catalogue', async ({
     ),
   ).toBe(true);
 });
+
+for (const isAdmin of [false, true]) {
+  test(`admin shortcut visibility follows verified role (${isAdmin})`, async ({
+    page,
+    isMobile,
+  }) => {
+    await page.route('**/auth/admin-access', (route) =>
+      route.fulfill({
+        json: { isAdmin },
+        headers: { 'Cache-Control': 'private, no-store' },
+      }),
+    );
+    await page.goto('/');
+    if (isMobile) await page.getByRole('button', { name: 'Open menu' }).click();
+    const container = isMobile
+      ? page.locator('#mobile-navigation')
+      : page.locator('header');
+    const link = container.getByRole('link', { name: 'Admin panel' });
+    if (isAdmin) {
+      await expect(link).toBeVisible();
+      await expect(link).toHaveAttribute(
+        'href',
+        'https://admin.agentrepo.dev/admin',
+      );
+      const box = await link.boundingBox();
+      expect(box!.x).toBeGreaterThanOrEqual(0);
+      expect(box!.x + box!.width).toBeLessThanOrEqual(
+        page.viewportSize()!.width,
+      );
+    } else await expect(link).toHaveCount(0);
+    expect(
+      await page.evaluate(
+        () => document.documentElement.scrollWidth <= innerWidth,
+      ),
+    ).toBe(true);
+  });
+}

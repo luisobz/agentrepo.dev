@@ -12,6 +12,13 @@ for (const kind of ['agents', 'skills', 'blog']) {
     await expect(
       links.getByRole('link', { name: /Documentation/ }),
     ).toBeVisible();
+    if (kind === 'agents')
+      await expect(
+        page.getByRole('heading', {
+          name: 'nanobot — guía técnica de instalación, VPS y operación',
+          exact: true,
+        }),
+      ).toBeVisible();
     expect(
       await page.evaluate(
         () => document.documentElement.scrollWidth <= innerWidth,
@@ -27,3 +34,20 @@ for (const kind of ['agents', 'skills', 'blog']) {
     }
   });
 }
+
+test('full guide fits a narrow viewport after fonts load', async ({ page }) => {
+  await page.setViewportSize({ width: 393, height: 950 });
+  await page.goto('/agents/linked-project', { waitUntil: 'networkidle' });
+  await page.evaluate(() => document.fonts.ready);
+  await expect(
+    page.getByRole('heading', {
+      name: 'nanobot — guía técnica de instalación, VPS y operación',
+      exact: true,
+    }),
+  ).toBeVisible();
+  expect(
+    await page.evaluate(
+      () => document.documentElement.scrollWidth <= innerWidth,
+    ),
+  ).toBe(true);
+});

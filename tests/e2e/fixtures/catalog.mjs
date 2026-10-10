@@ -1,7 +1,7 @@
 import { createServer } from 'node:http';
 import { readFileSync } from 'node:fs';
 const projectGuide = readFileSync(
-  new URL('../../../content/agents/03-GENTLE-SHELL.md', import.meta.url),
+  new URL('../../../content/agents/01-NANOBOT.md', import.meta.url),
   'utf8',
 );
 

@@ -187,3 +187,5 @@ Los builds `web` y `admin` no reutilizan la caché de tareas Nx: la restauració
 CI y la puerta de verificación del despliegue ejecutan las pruebas desktop/móvil sobre los bundles standalone preparados por el mismo script que publica producción. Usan catálogo local de prueba y no requieren credenciales. Las aplicaciones publicadas se compilan después con las variables de producción.
 
 El ensayo reinicia únicamente el esquema público del proyecto de preproducción validado antes de restaurar la copia. Esto permite repetirlo aunque el ensayo anterior añadiera relaciones que aún no existen en producción. Los cuatro despliegues exigen tanto ensayo como migración correctos; una migración omitida nunca habilita la publicación. `python3 tests/deployment/check-gates.py` comprueba estos escenarios en CI.
+
+Passenger termina HTTPS antes de enviar peticiones a Next.js. `WEB_APP_URL` y `ADMIN_APP_URL` deben contener los dominios públicos HTTPS correspondientes: se usan para validar Origin y construir redirecciones y callbacks, sin confiar en cabeceras Forwarded del cliente.

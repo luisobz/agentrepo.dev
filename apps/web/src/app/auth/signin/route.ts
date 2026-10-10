@@ -1,3 +1,4 @@
+import { hasTrustedOrigin } from '../../../lib/request-origin';
 import { FixedWindowRateLimiter } from '@agentrepo/trpc/auth';
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
@@ -24,7 +25,7 @@ function getClientKey(request: NextRequest): string {
  * are written as HttpOnly and tokens never touch client-side JavaScript.
  */
 export async function POST(request: NextRequest) {
-  if (request.headers.get('origin') !== request.nextUrl.origin) {
+  if (!hasTrustedOrigin(request)) {
     return NextResponse.json({ error: 'Invalid origin' }, { status: 403 });
   }
   const supabase = await getSupabaseServerClient();

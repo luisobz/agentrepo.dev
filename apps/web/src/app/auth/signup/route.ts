@@ -1,3 +1,7 @@
+import {
+  hasTrustedOrigin,
+  publicRequestOrigin,
+} from '../../../lib/request-origin';
 import { FixedWindowRateLimiter } from '@agentrepo/trpc/auth';
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
@@ -13,7 +17,7 @@ const signupLimiter = new FixedWindowRateLimiter({
 });
 
 export async function POST(request: NextRequest) {
-  if (request.headers.get('origin') !== request.nextUrl.origin) {
+  if (!hasTrustedOrigin(request)) {
     return NextResponse.json({ error: 'Invalid origin' }, { status: 403 });
   }
   const clientKey =
@@ -39,7 +43,7 @@ export async function POST(request: NextRequest) {
     options: {
       emailRedirectTo: new URL(
         '/auth/callback?next=/creator',
-        request.url,
+        publicRequestOrigin(request),
       ).toString(),
     },
   });

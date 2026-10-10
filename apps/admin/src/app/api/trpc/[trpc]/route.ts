@@ -1,3 +1,4 @@
+import { hasTrustedOrigin } from '../../../../lib/request-origin';
 import { verifySessionToken } from '@agentrepo/trpc/auth';
 import { NextRequest, NextResponse } from 'next/server';
 import { backendTrpc } from '../../../../lib/auth/backend-client';
@@ -62,7 +63,7 @@ async function forward(
   if (
     request.method !== 'GET' &&
     request.method !== 'HEAD' &&
-    request.headers.get('origin') !== request.nextUrl.origin
+    !hasTrustedOrigin(request)
   ) {
     return NextResponse.json({ error: 'Invalid origin' }, { status: 403 });
   }

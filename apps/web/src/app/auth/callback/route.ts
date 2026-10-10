@@ -1,3 +1,4 @@
+import { publicRequestOrigin } from '../../../lib/request-origin';
 import { NextRequest, NextResponse } from 'next/server';
 import { getSupabaseServerClient } from '../../../lib/supabase/server';
 import { safeReturnPath } from '../../../lib/auth/return-path';
@@ -16,12 +17,14 @@ export async function GET(request: NextRequest) {
       const { error } = await supabase.auth.exchangeCodeForSession(code);
       if (error) {
         return NextResponse.redirect(
-          new URL('/auth/login?error=oauth', request.url),
+          new URL('/auth/login?error=oauth', publicRequestOrigin(request)),
         );
       }
-      return NextResponse.redirect(new URL(next, request.url));
+      return NextResponse.redirect(new URL(next, publicRequestOrigin(request)));
     }
   }
 
-  return NextResponse.redirect(new URL('/auth/login?error=oauth', request.url));
+  return NextResponse.redirect(
+    new URL('/auth/login?error=oauth', publicRequestOrigin(request)),
+  );
 }

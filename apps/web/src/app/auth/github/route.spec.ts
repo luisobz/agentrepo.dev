@@ -1,5 +1,5 @@
 import { NextRequest } from 'next/server';
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { POST } from './route';
 
 const { signInWithOAuth, client } = vi.hoisted(() => ({
@@ -52,4 +52,25 @@ describe('GitHub creator sign-in', () => {
     expect(response.status).toBe(502);
     expect(await response.text()).not.toContain('private details');
   });
+});
+
+afterEach(() => vi.unstubAllEnvs());
+it('uses the public callback behind Passenger instead of its internal URL', async () => {
+  vi.stubEnv('WEB_APP_URL', 'https://agentrepo.dev');
+  signInWithOAuth.mockResolvedValue({
+    data: { url: 'https://project.supabase.co/auth/v1/authorize' },
+    error: null,
+  });
+  const proxyRequest = new NextRequest('http://127.0.0.1:3000/auth/github', {
+    method: 'POST',
+    headers: { origin: 'https://agentrepo.dev' },
+  });
+  expect((await POST(proxyRequest)).status).toBe(200);
+  expect(signInWithOAuth).toHaveBeenLastCalledWith(
+    expect.objectContaining({
+      options: expect.objectContaining({
+        redirectTo: 'https://agentrepo.dev/auth/callback?next=/creator',
+      }),
+    }),
+  );
 });

@@ -1,3 +1,4 @@
+import { hasTrustedOrigin } from '../../../../lib/request-origin';
 import { FixedWindowRateLimiter } from '@agentrepo/trpc/auth';
 import { NextResponse } from 'next/server';
 import { backendTrpc } from '../../../../lib/auth/backend-client';
@@ -9,18 +10,20 @@ const loginRateLimiter = new FixedWindowRateLimiter({
 });
 
 function getClientKey(request: Request): string {
-  return request.headers.get('x-forwarded-for')?.split(',')[0]?.trim() ?? 'unknown';
+  return (
+    request.headers.get('x-forwarded-for')?.split(',')[0]?.trim() ?? 'unknown'
+  );
 }
 
 export async function POST(request: Request) {
-  if (request.headers.get('origin') !== new URL(request.url).origin) {
+  if (!hasTrustedOrigin(request)) {
     return NextResponse.json({ error: 'Invalid origin' }, { status: 403 });
   }
   const clientKey = getClientKey(request);
   if (!loginRateLimiter.consume(clientKey)) {
     return NextResponse.json(
       { error: 'Too many attempts, try again later' },
-      { status: 429 }
+      { status: 429 },
     );
   }
 
@@ -32,12 +35,20 @@ export async function POST(request: Request) {
   const email = fields['email'];
   const password = fields['password'];
 
-  if (typeof email !== 'string' || !email || typeof password !== 'string' || !password) {
+  if (
+    typeof email !== 'string' ||
+    !email ||
+    typeof password !== 'string' ||
+    !password
+  ) {
     return NextResponse.json({ error: 'Invalid credentials' }, { status: 401 });
   }
 
   try {
-    const tokens = await backendTrpc.adminAuth.login.mutate({ email, password });
+    const tokens = await backendTrpc.adminAuth.login.mutate({
+      email,
+      password,
+    });
     loginRateLimiter.reset(clientKey);
     const response = NextResponse.json({ ok: true });
     applySessionCookies(response, tokens);
@@ -48,11 +59,14 @@ export async function POST(request: Request) {
         ? (error as { data?: { code?: string } }).data?.code
         : undefined;
     if (code === 'UNAUTHORIZED') {
-      return NextResponse.json({ error: 'Invalid credentials' }, { status: 401 });
+      return NextResponse.json(
+        { error: 'Invalid credentials' },
+        { status: 401 },
+      );
     }
     return NextResponse.json(
       { error: 'Authentication service unavailable' },
-      { status: 502 }
+      { status: 502 },
     );
   }
 }

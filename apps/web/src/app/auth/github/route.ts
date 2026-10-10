@@ -1,8 +1,12 @@
+import {
+  hasTrustedOrigin,
+  publicRequestOrigin,
+} from '../../../lib/request-origin';
 import { NextRequest, NextResponse } from 'next/server';
 import { getSupabaseServerClient } from '../../../lib/supabase/server';
 
 export async function POST(request: NextRequest) {
-  if (request.headers.get('origin') !== request.nextUrl.origin) {
+  if (!hasTrustedOrigin(request)) {
     return NextResponse.json({ error: 'Invalid origin' }, { status: 403 });
   }
   const supabase = await getSupabaseServerClient();
@@ -17,7 +21,7 @@ export async function POST(request: NextRequest) {
       scopes: 'read:user user:email',
       redirectTo: new URL(
         '/auth/callback?next=/creator',
-        request.url,
+        publicRequestOrigin(request),
       ).toString(),
       skipBrowserRedirect: true,
     },

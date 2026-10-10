@@ -1,3 +1,4 @@
+import { publicRequestOrigin } from '../../../../lib/request-origin';
 import { NextRequest, NextResponse } from 'next/server';
 import { getSupabaseServerClient } from '../../../../lib/supabase/server';
 import { safeReturnPath } from '../../../../lib/auth/return-path';
@@ -31,7 +32,7 @@ export async function GET(
   }
 
   const next = safeReturnPath(request.nextUrl.searchParams.get('next'));
-  const callbackUrl = new URL('/auth/callback', request.nextUrl.origin);
+  const callbackUrl = new URL('/auth/callback', publicRequestOrigin(request));
   callbackUrl.searchParams.set('next', next);
 
   const { data, error } = await supabase.auth.signInWithOAuth({
@@ -44,7 +45,7 @@ export async function GET(
 
   if (error || !data.url) {
     return NextResponse.redirect(
-      new URL('/auth/login?error=oauth', request.url),
+      new URL('/auth/login?error=oauth', publicRequestOrigin(request)),
     );
   }
 

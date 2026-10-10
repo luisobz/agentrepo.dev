@@ -5,6 +5,7 @@ import {
   type RouterOutputs,
 } from '@agentrepo/trpc/schemas';
 import { Button, Input } from '@agentrepo/ui';
+import { RelatedLinksEditor, type ContentRelatedLink } from '@agentrepo/ui';
 import { useRouter } from 'next/navigation';
 import { FormEvent, useState } from 'react';
 import { slugify } from '../../../lib/slugify';
@@ -21,6 +22,9 @@ import { ViewSwitch, type FormView } from '../preview/view-switch';
 type BlogPost = RouterOutputs['blogPosts']['admin']['byId'];
 
 export function BlogPostForm({ post }: { post?: BlogPost }) {
+  const [relatedLinks, setRelatedLinks] = useState<ContentRelatedLink[]>(
+    post?.relatedLinks ?? [],
+  );
   const router = useRouter();
   const utils = trpc.useUtils();
   const [error, setError] = useState<string | null>(null);
@@ -57,6 +61,7 @@ export function BlogPostForm({ post }: { post?: BlogPost }) {
 
     const parsed = createBlogPostSchema.safeParse({
       ...values,
+      relatedLinks,
       excerpt: values.excerpt.trim() ? values.excerpt.trim() : null,
       headerImageUrl: values.headerImageUrl.trim() || null,
     });
@@ -97,6 +102,11 @@ export function BlogPostForm({ post }: { post?: BlogPost }) {
         onSubmit={handleSubmit}
         className={view === 'edit' ? 'flex flex-col gap-5' : 'hidden'}
       >
+        <RelatedLinksEditor
+          value={relatedLinks}
+          onChange={setRelatedLinks}
+          disabled={isSaving}
+        />
         <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
           <FormField label="Title" htmlFor="title">
             <Input
@@ -112,7 +122,11 @@ export function BlogPostForm({ post }: { post?: BlogPost }) {
               required
             />
           </FormField>
-          <FormField label="Slug" htmlFor="slug" hint="Lowercase letters, numbers and hyphens">
+          <FormField
+            label="Slug"
+            htmlFor="slug"
+            hint="Lowercase letters, numbers and hyphens"
+          >
             <Input
               id="slug"
               value={values.slug}
@@ -144,7 +158,10 @@ export function BlogPostForm({ post }: { post?: BlogPost }) {
             placeholder="https://…"
             value={values.headerImageUrl}
             onChange={(event) =>
-              setValues((prev) => ({ ...prev, headerImageUrl: event.target.value }))
+              setValues((prev) => ({
+                ...prev,
+                headerImageUrl: event.target.value,
+              }))
             }
           />
         </FormField>

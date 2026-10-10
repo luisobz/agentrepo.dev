@@ -1,5 +1,6 @@
 'use client';
 
+import { RelatedLinksEditor, type ContentRelatedLink } from '@agentrepo/ui';
 import { useT } from '../../lib/i18n/use-t';
 
 import { useState, type ChangeEvent, type FormEvent } from 'react';
@@ -18,6 +19,7 @@ function toSlug(value: string): string {
 
 export function CreatorForm({ authorName }: { authorName: string }) {
   const t = useT();
+  const [relatedLinks, setRelatedLinks] = useState<ContentRelatedLink[]>([]);
   const [kind, setKind] = useState<AssetKind>('skill');
   const [title, setTitle] = useState('');
   const [slug, setSlug] = useState('');
@@ -69,7 +71,7 @@ export function CreatorForm({ authorName }: { authorName: string }) {
       const response = await fetch('/api/creator/submit', {
         method: 'POST',
         headers: { 'content-type': 'application/json' },
-        body: JSON.stringify(payload),
+        body: JSON.stringify({ ...payload, relatedLinks }),
       });
       if (!response.ok) {
         const body: { error?: string } = await response.json();
@@ -96,6 +98,7 @@ export function CreatorForm({ authorName }: { authorName: string }) {
           type="button"
           onClick={() => {
             setSubmitted(false);
+            setRelatedLinks([]);
             setTitle('');
             setSlug('');
             setDescription('');
@@ -146,6 +149,11 @@ export function CreatorForm({ authorName }: { authorName: string }) {
           {t('creator.author')}: <strong>{authorName}</strong>
         </p>
       </div>
+      <RelatedLinksEditor
+        value={relatedLinks}
+        onChange={setRelatedLinks}
+        disabled={busy}
+      />
       <label className="block text-sm font-medium">
         {t('creator.title')}
         <input

@@ -1,7 +1,13 @@
 import { z } from 'zod';
-import { skillTypeSchema, slugSchema, repositoryUrlSchema } from './catalog.schemas';
+import {
+  skillTypeSchema,
+  slugSchema,
+  repositoryUrlSchema,
+  relatedLinksSchema,
+} from './catalog.schemas';
 
 export const submitSkillSchema = z.object({
+  relatedLinks: relatedLinksSchema.default([]),
   slug: slugSchema,
   title: z.string().trim().min(1).max(200),
   description: z.string().trim().max(500).default(''),
@@ -10,6 +16,7 @@ export const submitSkillSchema = z.object({
 });
 
 export const submitAgentSchema = z.object({
+  relatedLinks: relatedLinksSchema.default([]),
   slug: slugSchema,
   title: z.string().trim().min(1).max(200),
   shortDescription: z.string().trim().min(1).max(300),
@@ -18,6 +25,7 @@ export const submitAgentSchema = z.object({
 });
 
 export const submitBlogSchema = z.object({
+  relatedLinks: relatedLinksSchema.default([]),
   slug: slugSchema,
   title: z.string().trim().min(1).max(200),
   excerpt: z.string().trim().max(500).default(''),

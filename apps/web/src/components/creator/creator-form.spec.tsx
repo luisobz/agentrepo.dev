@@ -86,3 +86,36 @@ describe('creator proposals', () => {
     expect(screen.getByLabelText('Title')).toHaveValue('Existing title');
   });
 });
+
+it('preserves labelled references in a contribution', async () => {
+  const fetcher = vi.fn().mockResolvedValue({ ok: true });
+  vi.stubGlobal('fetch', fetcher);
+  render(
+    <LocaleProvider>
+      <CreatorForm authorName="Contributor" />
+    </LocaleProvider>,
+  );
+  fireEvent.click(screen.getByRole('button', { name: 'Add link' }));
+  fireEvent.change(screen.getByLabelText('Link type 1'), {
+    target: { value: 'x' },
+  });
+  fireEvent.change(screen.getByLabelText('Link label 1'), {
+    target: { value: 'Creator on X' },
+  });
+  fireEvent.change(screen.getByLabelText('Link URL 1'), {
+    target: { value: 'https://x.com/creator' },
+  });
+  fireEvent.change(screen.getByLabelText('Title'), {
+    target: { value: 'Linked asset' },
+  });
+  fireEvent.change(screen.getByRole('textbox', { name: /Markdown\)/ }), {
+    target: { value: '# Description' },
+  });
+  fireEvent.click(
+    screen.getByRole('button', { name: 'Submit draft for review' }),
+  );
+  await waitFor(() => expect(fetcher).toHaveBeenCalled());
+  expect(JSON.parse(fetcher.mock.calls[0][1].body).relatedLinks).toEqual([
+    { kind: 'x', label: 'Creator on X', url: 'https://x.com/creator' },
+  ]);
+});

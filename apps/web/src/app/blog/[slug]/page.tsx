@@ -1,10 +1,10 @@
+import { RelatedLinks } from '@agentrepo/ui';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import type { Metadata } from 'next';
 import { ContentCover, MarkdownContent } from '@agentrepo/ui';
 import { getPublishedPostBySlug } from '../../../lib/blog';
 import { formatDate } from '../../../lib/public-content';
-
 
 interface BlogPostPageProps {
   params: Promise<{ slug: string }>;
@@ -14,7 +14,10 @@ function buildDescription(excerpt: string | null, content: string): string {
   if (excerpt) {
     return excerpt;
   }
-  const plain = content.replace(/[#*_`>[\]()]/g, '').replace(/\s+/g, ' ').trim();
+  const plain = content
+    .replace(/[#*_`>[\]()]/g, '')
+    .replace(/\s+/g, ' ')
+    .trim();
   return plain.length > 160 ? `${plain.slice(0, 157)}…` : plain;
 }
 
@@ -73,13 +76,18 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
         <h1 className="mt-3 text-3xl font-semibold leading-tight tracking-tight sm:text-4xl">
           {post.title}
         </h1>
-        {post.authorName && <p className="mt-3 text-sm text-[var(--color-text-muted)]">Autoría: {post.authorName}</p>}
+        {post.authorName && (
+          <p className="mt-3 text-sm text-[var(--color-text-muted)]">
+            Autoría: {post.authorName}
+          </p>
+        )}
         {post.excerpt && (
           <p className="mt-4 text-lg leading-relaxed text-[var(--color-text-secondary)]">
             {post.excerpt}
           </p>
         )}
       </header>
+      <RelatedLinks links={post.relatedLinks} />
 
       {post.headerImageUrl && (
         <ContentCover

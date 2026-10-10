@@ -1,4 +1,9 @@
-import { FileTreeNode, SKILL_TYPES } from '@agentrepo/domain';
+import {
+  FileTreeNode,
+  SKILL_TYPES,
+  RELATED_LINK_KINDS,
+  isPublicReferenceUrl,
+} from '@agentrepo/domain';
 import { z } from 'zod';
 
 export {
@@ -14,13 +19,53 @@ export type {
   SkillType,
 } from '@agentrepo/domain';
 
+export const relatedLinkSchema = z
+  .object({
+    kind: z.enum(RELATED_LINK_KINDS),
+    label: z.string().trim().min(1).max(100),
+    url: z
+      .string()
+      .trim()
+      .max(1000)
+      .refine(isPublicReferenceUrl, 'Use a public HTTPS URL'),
+  })
+  .superRefine((link, ctx) => {
+    if (!isPublicReferenceUrl(link.url)) return;
+    const host = new URL(link.url).hostname.toLowerCase();
+    const expected =
+      link.kind === 'github'
+        ? ['github.com', 'www.github.com']
+        : link.kind === 'x'
+          ? ['x.com', 'www.x.com', 'twitter.com', 'www.twitter.com']
+          : null;
+    if (expected && !expected.includes(host))
+      ctx.addIssue({
+        code: 'custom',
+        path: ['url'],
+        message: `Use a ${link.kind} URL or choose another link type`,
+      });
+  });
+export const relatedLinksSchema = z
+  .array(relatedLinkSchema)
+  .max(12)
+  .refine(
+    (links) =>
+      new Set(links.map((link) => link.url.replace(/\/$/, ''))).size ===
+      links.length,
+    'Each URL can only appear once',
+  );
+export type RelatedLink = z.infer<typeof relatedLinkSchema>;
+
 // ─── Shared ─────────────────────────────────────
 
 export const slugSchema = z
   .string()
   .min(1)
   .max(120)
-  .regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/, 'Use lowercase letters, numbers and hyphens');
+  .regex(
+    /^[a-z0-9]+(?:-[a-z0-9]+)*$/,
+    'Use lowercase letters, numbers and hyphens',
+  );
 
 export const paginationSchema = z.object({
   page: z.number().int().min(1).default(1),
@@ -72,14 +117,17 @@ const premiumFieldsSchema = {
   previewContent: z.string().max(10_000).nullable(),
 };
 
-export const repositoryUrlSchema = z.url().max(500).refine((value) => {
-  const url = new URL(value);
-  return url.protocol === 'https:' && !url.username && !url.password;
-}, 'Use a public HTTPS repository URL');
+export const repositoryUrlSchema = z
+  .url()
+  .max(500)
+  .refine((value) => {
+    const url = new URL(value);
+    return url.protocol === 'https:' && !url.username && !url.password;
+  }, 'Use a public HTTPS repository URL');
 
 function requirePriceWhenPremium(
   value: { isPremium?: boolean; priceCents?: number | null },
-  ctx: z.RefinementCtx
+  ctx: z.RefinementCtx,
 ) {
   if (value.isPremium && value.priceCents == null) {
     ctx.addIssue({
@@ -97,6 +145,7 @@ export const skillTypeSchema = z.enum(SKILL_TYPES);
 // Base schemas hold no defaults: defaults belong to creation only. Reusing
 // them in updates would silently reset fields omitted from a partial patch.
 const skillBaseSchema = z.object({
+  relatedLinks: relatedLinksSchema,
   slug: slugSchema,
   title: z.string().trim().min(1).max(200),
   description: z.string().trim().max(500).nullable(),
@@ -108,6 +157,7 @@ const skillBaseSchema = z.object({
 
 export const createSkillSchema = skillBaseSchema
   .extend({
+    relatedLinks: relatedLinksSchema.default([]),
     description: skillBaseSchema.shape.description.default(null),
     isPublished: z.boolean().default(false),
     headerImageUrl: premiumFieldsSchema.headerImageUrl.default(null),
@@ -142,12 +192,13 @@ export const fileTreeNodeSchema: z.ZodType<FileTreeNode> = z.lazy(() =>
       type: z.literal('directory'),
       children: z.array(fileTreeNodeSchema),
     }),
-  ])
+  ]),
 );
 
 export const fileTreeSchema = z.array(fileTreeNodeSchema);
 
 const agentBaseSchema = z.object({
+  relatedLinks: relatedLinksSchema,
   repositoryUrl: repositoryUrlSchema.nullable().optional(),
   slug: slugSchema,
   title: z.string().trim().min(1).max(200),
@@ -163,6 +214,7 @@ const agentBaseSchema = z.object({
 
 export const createAgentSchema = agentBaseSchema
   .extend({
+    relatedLinks: relatedLinksSchema.default([]),
     version: agentBaseSchema.shape.version.default('1.0.0'),
     readmeContent: agentBaseSchema.shape.readmeContent.default(null),
     isPublished: z.boolean().default(false),
@@ -181,6 +233,7 @@ export const updateAgentSchema = agentBaseSchema
 // ─── BlogPost ───────────────────────────────────
 
 const blogPostBaseSchema = z.object({
+  relatedLinks: relatedLinksSchema,
   slug: slugSchema,
   title: z.string().trim().min(1).max(200),
   excerpt: z.string().trim().max(500).nullable(),
@@ -190,6 +243,7 @@ const blogPostBaseSchema = z.object({
 });
 
 export const createBlogPostSchema = blogPostBaseSchema.extend({
+  relatedLinks: relatedLinksSchema.default([]),
   excerpt: blogPostBaseSchema.shape.excerpt.default(null),
   isPublished: z.boolean().default(false),
   headerImageUrl: blogPostBaseSchema.shape.headerImageUrl.default(null),

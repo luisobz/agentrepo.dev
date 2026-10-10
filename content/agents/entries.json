@@ -1,0 +1,169 @@
+[
+  {
+    "slug": "nanobot",
+    "title": "nanobot",
+    "shortDescription": "Asistente personal autoalojable en Python con WebUI, canales de chat, herramientas, memoria, MCP y automatizaciones. Guía práctica de instalación y operación.",
+    "repositoryUrl": "https://github.com/HKUDS/nanobot",
+    "guide": "01-NANOBOT.md",
+    "relatedLinks": [
+      {
+        "kind": "github",
+        "label": "Repositorio · HKUDS/nanobot",
+        "url": "https://github.com/HKUDS/nanobot"
+      },
+      {
+        "kind": "website",
+        "label": "Web y documentación · nanobot.wiki",
+        "url": "https://nanobot.wiki"
+      },
+      {
+        "kind": "x",
+        "label": "X oficial · @nanobot_project",
+        "url": "https://x.com/nanobot_project"
+      },
+      {
+        "kind": "community",
+        "label": "Comunidad · Discord nanobot",
+        "url": "https://discord.gg/MnCvHqpUGB"
+      },
+      {
+        "kind": "github",
+        "label": "Organización · HKUDS",
+        "url": "https://github.com/HKUDS"
+      },
+      {
+        "kind": "github",
+        "label": "Mantenedor · Xubin Ren",
+        "url": "https://github.com/re-bin"
+      },
+      {
+        "kind": "github",
+        "label": "Mantenedor · Yongru Chen",
+        "url": "https://github.com/chengyongru"
+      },
+      {
+        "kind": "x",
+        "label": "X · Xubin Ren",
+        "url": "https://x.com/xubinrencs"
+      },
+      {
+        "kind": "x",
+        "label": "X · Yongru Chen",
+        "url": "https://x.com/chengyongru"
+      },
+      {
+        "kind": "github",
+        "label": "Releases · nanobot",
+        "url": "https://github.com/HKUDS/nanobot/releases"
+      }
+    ]
+  },
+  {
+    "slug": "nanoclaw",
+    "title": "NanoClaw",
+    "shortDescription": "Asistente autoalojable con agentes en contenedores, memoria y tareas programadas. Guía de NanoClaw v2 centrada en aislamiento, credenciales y operación.",
+    "repositoryUrl": "https://github.com/nanocoai/nanoclaw",
+    "guide": "02-NANOCLAW.md",
+    "relatedLinks": [
+      {
+        "kind": "github",
+        "label": "Repositorio · nanocoai/nanoclaw",
+        "url": "https://github.com/nanocoai/nanoclaw"
+      },
+      {
+        "kind": "website",
+        "label": "Web oficial · NanoClaw",
+        "url": "https://nanoclaw.dev"
+      },
+      {
+        "kind": "documentation",
+        "label": "Documentación · NanoClaw",
+        "url": "https://docs.nanoclaw.dev"
+      },
+      {
+        "kind": "x",
+        "label": "X del creador · Gavriel Cohen",
+        "url": "https://x.com/Gavriel_Cohen"
+      },
+      {
+        "kind": "community",
+        "label": "Comunidad · Discord NanoClaw",
+        "url": "https://discord.gg/VDdww8qS42"
+      },
+      {
+        "kind": "github",
+        "label": "Organización · NanoCo",
+        "url": "https://github.com/nanocoai"
+      },
+      {
+        "kind": "video",
+        "label": "YouTube · @NanoClaw",
+        "url": "https://www.youtube.com/@NanoClaw"
+      },
+      {
+        "kind": "github",
+        "label": "Releases · NanoClaw",
+        "url": "https://github.com/nanocoai/nanoclaw/releases"
+      }
+    ]
+  },
+  {
+    "slug": "gentle-shell",
+    "title": "Gentle Shell",
+    "shortDescription": "Entorno de programación basado en Pi con Organic Driven Development, subagentes, revisión de cambios y guardas. Guía de instalación, perfiles y trabajo en repositorios.",
+    "repositoryUrl": "https://github.com/Gentleman-Programming/gentle-shell",
+    "guide": "03-GENTLE-SHELL.md",
+    "relatedLinks": [
+      {
+        "kind": "github",
+        "label": "Repositorio · gentle-shell",
+        "url": "https://github.com/Gentleman-Programming/gentle-shell"
+      },
+      {
+        "kind": "website",
+        "label": "Web del ecosistema · Gentle-AI",
+        "url": "https://gentle-ai.gentlemanprogramming.com/"
+      },
+      {
+        "kind": "documentation",
+        "label": "Wiki del ecosistema · Gentle-AI",
+        "url": "https://gentle-ai-wiki.gentlemanprogramming.com/"
+      },
+      {
+        "kind": "x",
+        "label": "X · Gentleman Programming",
+        "url": "https://x.com/G_Programming"
+      },
+      {
+        "kind": "github",
+        "label": "Organización · Gentleman-Programming",
+        "url": "https://github.com/Gentleman-Programming"
+      },
+      {
+        "kind": "github",
+        "label": "Creador · Alan Buscaglia",
+        "url": "https://github.com/Alan-TheGentleman"
+      },
+      {
+        "kind": "x",
+        "label": "X del creador · Alan Buscaglia",
+        "url": "https://x.com/alan_buscaglia"
+      },
+      {
+        "kind": "video",
+        "label": "YouTube · @GentlemanProgramming",
+        "url": "https://www.youtube.com/@GentlemanProgramming"
+      },
+      {
+        "kind": "community",
+        "label": "Comunidad · Gentleman Programming",
+        "url": "https://discord.gg/8Wu7ZzGhgG"
+      },
+      {
+        "kind": "github",
+        "label": "Releases · Gentle Shell",
+        "url": "https://github.com/Gentleman-Programming/gentle-shell/releases"
+      }
+    ]
+  }
+]

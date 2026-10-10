@@ -9,6 +9,7 @@ datasource db {
 }
 
 model Skill {
+  relatedLinks Json @default("[]")
   id             String   @id @default(uuid())
   authorId       String?
   author         User?    @relation("SkillAuthor", fields: [authorId], references: [id], onDelete: SetNull)
@@ -72,6 +73,7 @@ model SkillVersionDownloadDay {
 }
 
 model Agent {
+  relatedLinks Json @default("[]")
   repositoryUrl String?
   id               String   @id @default(uuid())
   authorId         String?
@@ -134,6 +136,7 @@ model AgentVersionDownloadDay {
 }
 
 model BlogPost {
+  relatedLinks Json @default("[]")
   authorId String?
   author User? @relation("BlogAuthor", fields: [authorId], references: [id], onDelete: SetNull)
 

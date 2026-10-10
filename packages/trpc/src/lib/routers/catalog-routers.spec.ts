@@ -152,6 +152,7 @@ describe('input validation', () => {
 
     expect(catalog.skills.create.execute).toHaveBeenCalledWith({
       ...validSkill,
+      relatedLinks: [],
       description: null,
       isPublished: false,
       headerImageUrl: null,

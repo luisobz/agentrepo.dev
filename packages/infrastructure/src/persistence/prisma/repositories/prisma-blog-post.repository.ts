@@ -5,7 +5,7 @@ import {
   Paginated,
   UpdateBlogPostInput,
 } from '@agentrepo/application';
-import { BlogPost } from '@agentrepo/domain';
+import { BlogPost, relatedLinksFromJson } from '@agentrepo/domain';
 import { Prisma, PrismaClient } from '@prisma/client';
 
 export class PrismaBlogPostRepository implements BlogPostRepository {
@@ -48,6 +48,7 @@ export class PrismaBlogPostRepository implements BlogPostRepository {
     return {
       items: items.map((row) => ({
         ...row,
+        relatedLinks: relatedLinksFromJson(row.relatedLinks),
         authorName: row.author?.name ?? null,
       })),
       total,
@@ -61,7 +62,13 @@ export class PrismaBlogPostRepository implements BlogPostRepository {
       where: { id },
       include: { author: { select: { name: true } } },
     });
-    return row ? { ...row, authorName: row.author?.name ?? null } : null;
+    return row
+      ? {
+          ...row,
+          relatedLinks: relatedLinksFromJson(row.relatedLinks),
+          authorName: row.author?.name ?? null,
+        }
+      : null;
   }
 
   async findBySlug(slug: string): Promise<BlogPost | null> {
@@ -69,7 +76,13 @@ export class PrismaBlogPostRepository implements BlogPostRepository {
       where: { slug },
       include: { author: { select: { name: true } } },
     });
-    return row ? { ...row, authorName: row.author?.name ?? null } : null;
+    return row
+      ? {
+          ...row,
+          relatedLinks: relatedLinksFromJson(row.relatedLinks),
+          authorName: row.author?.name ?? null,
+        }
+      : null;
   }
 
   async existsSlug(slug: string, excludeId?: string): Promise<boolean> {
@@ -79,12 +92,14 @@ export class PrismaBlogPostRepository implements BlogPostRepository {
     return count > 0;
   }
 
-  create(data: CreateBlogPostInput): Promise<BlogPost> {
-    return this.prisma.blogPost.create({ data });
+  async create(data: CreateBlogPostInput): Promise<BlogPost> {
+    const row = await this.prisma.blogPost.create({ data });
+    return { ...row, relatedLinks: relatedLinksFromJson(row.relatedLinks) };
   }
 
-  update(id: string, data: UpdateBlogPostInput): Promise<BlogPost> {
-    return this.prisma.blogPost.update({ where: { id }, data });
+  async update(id: string, data: UpdateBlogPostInput): Promise<BlogPost> {
+    const row = await this.prisma.blogPost.update({ where: { id }, data });
+    return { ...row, relatedLinks: relatedLinksFromJson(row.relatedLinks) };
   }
 
   async delete(id: string): Promise<void> {

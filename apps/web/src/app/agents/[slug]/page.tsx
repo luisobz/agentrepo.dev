@@ -1,3 +1,4 @@
+import { RelatedLinks } from '@agentrepo/ui';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import type { Metadata } from 'next';
@@ -16,7 +17,6 @@ import {
   hasPlayground,
 } from '../../../lib/agents';
 import { formatDate } from '../../../lib/public-content';
-
 
 interface AgentPageProps {
   params: Promise<{ slug: string }>;
@@ -44,7 +44,10 @@ export async function generateMetadata({
   };
 }
 
-export default async function AgentPage({ params, searchParams }: AgentPageProps) {
+export default async function AgentPage({
+  params,
+  searchParams,
+}: AgentPageProps) {
   const [{ slug }, { version: requestedVersion }] = await Promise.all([
     params,
     searchParams,
@@ -71,11 +74,11 @@ export default async function AgentPage({ params, searchParams }: AgentPageProps
   const shownReadme = pinned?.readmeContent ?? agent.readmeContent;
   const downloadsTotal = versions.reduce(
     (sum, entry) => sum + entry.downloadsTotal,
-    0
+    0,
   );
   const downloadsWeekly = versions.reduce(
     (sum, entry) => sum + entry.downloadsWeekly,
-    0
+    0,
   );
 
   const playgroundIncluded = hasPlayground(shownFileTree);
@@ -128,9 +131,26 @@ export default async function AgentPage({ params, searchParams }: AgentPageProps
         <p className="mt-3 max-w-2xl text-lg leading-relaxed text-[var(--color-text-secondary)]">
           {agent.shortDescription}
         </p>
-        {agent.repositoryUrl && <a href={agent.repositoryUrl} target="_blank" rel="noopener noreferrer" className="mt-4 inline-block text-sm font-semibold underline underline-offset-4">Repositorio del proyecto ↗</a>}
-        {agent.authorName && <p className="mt-3 font-mono text-xs text-[var(--color-text-muted)]">Author: {agent.authorName}</p>}
+        {agent.repositoryUrl &&
+          !agent.relatedLinks?.some(
+            (link) => link.url === agent.repositoryUrl,
+          ) && (
+            <a
+              href={agent.repositoryUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="mt-4 inline-block text-sm font-semibold underline underline-offset-4"
+            >
+              Repositorio del proyecto ↗
+            </a>
+          )}
+        {agent.authorName && (
+          <p className="mt-3 font-mono text-xs text-[var(--color-text-muted)]">
+            Author: {agent.authorName}
+          </p>
+        )}
       </header>
+      <RelatedLinks links={agent.relatedLinks} />
 
       <ContentCover
         title={agent.title}
@@ -147,31 +167,40 @@ export default async function AgentPage({ params, searchParams }: AgentPageProps
         />
       ) : (
         <>
-          <div className="mb-4 flex justify-end">
-            <AgentDownloadButton
-              slug={agent.slug}
-              version={shownVersion}
-              fileTree={shownFileTree}
-              readmeContent={shownReadme}
-            />
-          </div>
-          <AgentWorkbench
-            fileTree={shownFileTree}
-            meta={{
-              slug: agent.slug,
-              version: shownVersion,
-              updatedAt: formatDate(agent.updatedAt),
-              fileCount: countFiles(shownFileTree),
-              hasPlayground: playgroundIncluded,
-            }}
-          />
-
           {shownReadme && (
             <section className="mt-12">
-              <h2 className="mb-4 text-xl font-semibold tracking-tight">About</h2>
+              <h2 className="mb-4 text-xl font-semibold tracking-tight">
+                About
+              </h2>
               <MarkdownContent content={shownReadme} />
             </section>
           )}
+          <details
+            open={!agent.repositoryUrl}
+            className="mt-8 rounded-xl border border-[var(--color-border-soft)] p-4"
+          >
+            <summary className="mb-4 cursor-pointer font-semibold">
+              Files & downloads
+            </summary>
+            <div className="mb-4 flex justify-end">
+              <AgentDownloadButton
+                slug={agent.slug}
+                version={shownVersion}
+                fileTree={shownFileTree}
+                readmeContent={shownReadme}
+              />
+            </div>
+            <AgentWorkbench
+              fileTree={shownFileTree}
+              meta={{
+                slug: agent.slug,
+                version: shownVersion,
+                updatedAt: formatDate(agent.updatedAt),
+                fileCount: countFiles(shownFileTree),
+                hasPlayground: playgroundIncluded,
+              }}
+            />
+          </details>
         </>
       )}
 

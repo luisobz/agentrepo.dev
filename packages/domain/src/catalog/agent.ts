@@ -1,7 +1,9 @@
+import type { RelatedLink } from './related-link';
 import { FileTree } from './file-tree';
 
 export interface Agent {
   repositoryUrl?: string | null;
+  relatedLinks?: RelatedLink[];
   id: string;
   authorId?: string | null;
   authorName?: string | null;

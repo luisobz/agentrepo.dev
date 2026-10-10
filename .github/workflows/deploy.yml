@@ -59,6 +59,10 @@ jobs:
   # Un build que compile pero rompa tests no debe llegar a desplegarse.
   verify:
     runs-on: ubuntu-latest
+    env:
+      NEXT_PUBLIC_API_URL: http://localhost:4000
+      NEXT_PUBLIC_SUPABASE_URL: ''
+      NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: ''
     steps:
       - uses: actions/checkout@v4
 
@@ -75,6 +79,12 @@ jobs:
 
       - name: Build (todas las apps y paquetes)
         run: pnpm build
+
+      - name: Install UI test browser
+        run: pnpm exec playwright install --with-deps chromium
+
+      - name: Validate deployable web and admin bundles
+        run: pnpm test:e2e
 
   # ---------------------------------------------------------------- REHEARSE
   rehearse-migrations:

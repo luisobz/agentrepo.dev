@@ -3,12 +3,17 @@
   "$schema": "../../node_modules/nx/schemas/project-schema.json",
   "sourceRoot": "apps/web",
   "projectType": "application",
-  "tags": ["scope:frontend"],
+  "tags": [
+    "scope:frontend"
+  ],
   "targets": {
     "dev": {
       "options": {
         "port": 3000
       }
+    },
+    "build": {
+      "cache": false
     }
   }
 }

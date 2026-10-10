@@ -23,12 +23,14 @@ export default defineConfig({
       reuseExistingServer: !process.env.CI,
     },
     {
-      command: 'pnpm --filter web exec next start -p 3000',
+      command:
+        'bash scripts/package-next-standalone.sh web .tmp/e2e/web && HOSTNAME=127.0.0.1 PORT=3000 node .tmp/e2e/web/apps/web/server.js',
       url: 'http://localhost:3000',
       reuseExistingServer: !process.env.CI,
     },
     {
-      command: 'pnpm --filter admin exec next start -p 3001',
+      command:
+        'bash scripts/package-next-standalone.sh admin .tmp/e2e/admin && HOSTNAME=127.0.0.1 PORT=3001 node .tmp/e2e/admin/apps/admin/server.js',
       url: 'http://localhost:3001/login',
       reuseExistingServer: !process.env.CI,
     },

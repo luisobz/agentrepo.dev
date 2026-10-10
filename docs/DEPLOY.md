@@ -55,7 +55,10 @@ Notas importantes:
 | `SSH_USER` | Usuario SSH |
 | `SSH_KEY` | Clave privada (formato OpenSSH) |
 | `SSH_KNOWN_HOSTS` | Clave pública del host SSH en formato `known_hosts`, verificada contra la huella del proveedor. Incluye el puerto si no es 22. |
-| `DATABASE_URL` | Postgres de producción (Supabase). Obligatorio para migrar y desplegar los backends. |
+| `DATABASE_URL` | Conexión de aplicación a producción; la usan los backends en el hosting. El workflow de migración usa su propia credencial. |
+| `PROD_MIGRATION_DATABASE_URL` | Conexión `postgres.<ref>` de producción. Solo CI; permite aplicar DDL a tablas cuyo dueño es `postgres`. |
+| `PRE_MIGRATION_DATABASE_URL` | Conexión `postgres.<ref>` del proyecto exclusivo de preproducción. Solo CI. |
+| `BACKUP_PASSPHRASE` | Frase aleatoria larga para cifrar los volcados diarios antes de subirlos como artefactos privados de Actions. Guardar una copia fuera de GitHub. |
 
 ### Variables
 
@@ -63,6 +66,8 @@ Notas importantes:
 |---|---|---|
 | `SSH_PORT` | `22` | Puerto SSH |
 | `NODE_VERSION` | `24` | Node en CI |
+| `PROD_PROJECT_REF` | — | Referencia Supabase de producción; el pipeline valida que las URL apunten al proyecto correcto. |
+| `PRE_PROJECT_REF` | — | Referencia Supabase de preproducción; debe ser distinta de producción. |
 | `NEXT_PUBLIC_API_URL` | `https://agentrepo.dev/web/api/v1` | Base pública de backend-web (build de web y admin) |
 | `NEXT_PUBLIC_SUPABASE_URL` | — | Supabase (build de web) |
 | `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` | — | Supabase (build de web) |
@@ -102,8 +107,9 @@ El `DATABASE_URL` de producción verifica TLS contra el certificado del
 proyecto Supabase (`sslmode=verify-full&sslrootcert=<path>`); el path del
 `sslrootcert` debe existir en la máquina que ejecuta el comando (en el
 hosting: `/home/lyqyxfejgb/cert/agentrepo.dev/supabase-agentrepo.crt`; el
-secret `DATABASE_URL` de CI para `migrate` debe usar un path válido en el
-runner o `sslmode=require`).
+  secret `PROD_MIGRATION_DATABASE_URL` de CI puede usar `sslmode=require`;
+  los comandos `pg_dump` y `pg_restore` verifican TLS con el certificado CA
+  descargado en cada ejecución.
 
 Los backends cargan un `.env` local si existe en su *Application root*; el
 pipeline nunca sobreescribe ese fichero (`--exclude '.env'`), así que también
@@ -115,10 +121,35 @@ puedes gestionar las variables ahí por SSH.
 - **Actions → Deploy (tag) → Run workflow** → eliges qué desplegar
   (`all`, `web`, `admin`, `backend-web`, `backend-ai`, `migrate`).
 
-Orden: `migrate` corre primero; las apps sólo se despliegan si las migraciones
-terminaron bien. Si falta el secret `DATABASE_URL`, el despliegue completo
-falla antes de subir las apps. Un despliegue selectivo de `web` o `admin`
-no ejecuta migraciones.
+Orden: verify → copia del esquema `public` y sus datos de producción a un
+proyecto Supabase dedicado de preproducción → ensayo de las migraciones allí →
+migraciones de producción → despliegue de apps. También se ensayan las
+migraciones en los despliegues selectivos. Si faltan secretos o falla el
+ensayo, el despliegue se detiene antes de modificar producción.
+
+El proyecto de preproducción se borra y restaura en cada ejecución: no se debe
+usar para datos propios. La copia para ensayar migraciones cubre `public`
+(tablas, datos, funciones, políticas y el historial Prisma); conserva los
+esquemas gestionados por Supabase del proyecto de preproducción (`auth`,
+`storage`, etc.). Los datos de producción copiados a pre deben tratarse como
+confidenciales; limitar el acceso a ese proyecto. Las credenciales de migración
+`postgres` solo se guardan en Actions y nunca en el hosting ni en el frontend.
+
+## Copias diarias
+
+`.github/workflows/database-backup.yml` se ejecuta diariamente a las 02:17
+UTC y también manualmente. Genera un `pg_dump` completo con PostgreSQL 17,
+comprueba que el archivo se puede leer, lo cifra con GPG AES-256 y sube el
+volcado cifrado más su checksum como artefacto de GitHub Actions. La retención
+es de siete días, lo que limpia automáticamente los antiguos. Guarda
+`BACKUP_PASSPHRASE` fuera de GitHub: sin ella no se puede restaurar un backup.
+Los objetos binarios de Supabase Storage requieren una copia aparte; el volcado
+incluye solo sus metadatos.
+
+Para restaurar, descarga un artefacto, verifica el archivo `.sha256`, descifra
+con `gpg --decrypt` y usa `pg_restore` contra un proyecto Supabase nuevo. Se
+debe probar una restauración periódica; la validación del archivo no sustituye
+una restauración completa.
 
 ## Qué sube exactamente el pipeline
 

@@ -35,7 +35,7 @@ on:
         options: [all, web, admin, backend-web, backend-ai, migrate]
 
 concurrency:
-  group: deploy-${{ github.ref }}
+  group: agentrepo-database-operations
   cancel-in-progress: false
 
 permissions:
@@ -75,10 +75,9 @@ jobs:
       - name: Build (todas las apps y paquetes)
         run: pnpm build
 
-  # ---------------------------------------------------------------- MIGRATE
-  migrate:
+  # ---------------------------------------------------------------- REHEARSE
+  rehearse-migrations:
     needs: verify
-    if: ${{ github.event_name != 'workflow_dispatch' || contains(fromJSON('["all","migrate","backend-web","backend-ai"]'), inputs.only) }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -97,14 +96,51 @@ jobs:
             https://supabase-downloads.s3-ap-southeast-1.amazonaws.com/prod/ssl/prod-ca-2021.crt \
             --output /tmp/supabase-ca.crt
 
+      - name: Clone production public schema to preproduction and test migrations
+        env:
+          PROD_MIGRATION_DATABASE_URL: ${{ secrets.PROD_MIGRATION_DATABASE_URL }}
+          PRE_MIGRATION_DATABASE_URL: ${{ secrets.PRE_MIGRATION_DATABASE_URL }}
+          PROD_PROJECT_REF: ${{ vars.PROD_PROJECT_REF }}
+          PRE_PROJECT_REF: ${{ vars.PRE_PROJECT_REF }}
+        run: |
+          test -n "$PROD_MIGRATION_DATABASE_URL" && test -n "$PRE_MIGRATION_DATABASE_URL" || {
+            echo "::error::Faltan las URL de migración de producción o preproducción"
+            exit 1
+          }
+          bash scripts/db/stage-migrations.sh
+
+  # ---------------------------------------------------------------- MIGRATE
+  migrate:
+    needs: rehearse-migrations
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: pnpm
+
+      - run: pnpm install --frozen-lockfile
+
+      - name: Install Supabase pooler CA
+        run: |
+          curl --fail --silent --show-error --location \
+            https://supabase-downloads.s3-ap-southeast-1.amazonaws.com/prod/ssl/prod-ca-2021.crt \
+            --output /tmp/supabase-ca.crt
+
       - name: Prisma migrate deploy
         env:
-          PROD_DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          PROD_DATABASE_URL: ${{ secrets.PROD_MIGRATION_DATABASE_URL }}
+          PROD_MIGRATION_DATABASE_URL: ${{ secrets.PROD_MIGRATION_DATABASE_URL }}
+          PROD_PROJECT_REF: ${{ vars.PROD_PROJECT_REF }}
         run: |
           if [ -z "$PROD_DATABASE_URL" ]; then
-            echo "::error::Falta el secret DATABASE_URL: no se puede desplegar sin aplicar las migraciones."
+            echo "::error::Falta PROD_MIGRATION_DATABASE_URL: no se puede desplegar sin aplicar las migraciones."
             exit 1
           fi
+          python3 scripts/db/validate-targets.py
           DATABASE_URL="$PROD_DATABASE_URL" pnpm db:migrate:deploy
 
   # ---------------------------------------------------------------- WEB

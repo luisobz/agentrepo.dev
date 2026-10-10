@@ -7,6 +7,7 @@ import {
   type RouterOutputs,
 } from '@agentrepo/trpc/schemas';
 import { Button, Input } from '@agentrepo/ui';
+import { RelatedLinksEditor, type ContentRelatedLink } from '@agentrepo/ui';
 import { useRouter } from 'next/navigation';
 import { FormEvent, useState } from 'react';
 import { slugify } from '../../../lib/slugify';
@@ -34,6 +35,9 @@ const FILE_TREE_PLACEHOLDER: FileTree = [
 ];
 
 export function AgentForm({ agent }: { agent?: Agent }) {
+  const [relatedLinks, setRelatedLinks] = useState<ContentRelatedLink[]>(
+    agent?.relatedLinks ?? [],
+  );
   const router = useRouter();
   const utils = trpc.useUtils();
   const [error, setError] = useState<string | null>(null);
@@ -128,6 +132,7 @@ export function AgentForm({ agent }: { agent?: Agent }) {
 
     const parsed = createAgentSchema.safeParse({
       ...values,
+      relatedLinks,
       repositoryUrl: values.repositoryUrl.trim() || null,
       readmeContent: values.readmeContent.trim() ? values.readmeContent : null,
       fileTree: tree,
@@ -297,6 +302,11 @@ export function AgentForm({ agent }: { agent?: Agent }) {
         <FormError message={treeNotice} />
       </div>
 
+      <RelatedLinksEditor
+        value={relatedLinks}
+        onChange={setRelatedLinks}
+        disabled={isSaving}
+      />
       <MonacoField
         label="README (Markdown, optional)"
         language="markdown"

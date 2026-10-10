@@ -7,3 +7,5 @@ export * from './components/content/markdown-content';
 export * from './components/content/content-cover';
 export * from './i18n/locale-core';
 export * from './i18n/locale';
+
+export * from './components/content/related-links';

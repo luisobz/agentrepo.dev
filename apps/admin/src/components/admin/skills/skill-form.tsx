@@ -7,6 +7,7 @@ import {
   type RouterOutputs,
 } from '@agentrepo/trpc/schemas';
 import { Button, Input } from '@agentrepo/ui';
+import { RelatedLinksEditor, type ContentRelatedLink } from '@agentrepo/ui';
 import { useRouter } from 'next/navigation';
 import { FormEvent, useState } from 'react';
 import { slugify } from '../../../lib/slugify';
@@ -29,6 +30,9 @@ import { ViewSwitch, type FormView } from '../preview/view-switch';
 type Skill = RouterOutputs['skills']['admin']['byId'];
 
 export function SkillForm({ skill }: { skill?: Skill }) {
+  const [relatedLinks, setRelatedLinks] = useState<ContentRelatedLink[]>(
+    skill?.relatedLinks ?? [],
+  );
   const router = useRouter();
   const utils = trpc.useUtils();
   const [error, setError] = useState<string | null>(null);
@@ -43,7 +47,7 @@ export function SkillForm({ skill }: { skill?: Skill }) {
     content: skill?.content ?? '',
   });
   const [premium, setPremium] = useState<PremiumFormValues>(
-    premiumValuesFrom(skill)
+    premiumValuesFrom(skill),
   );
 
   const finishSaving = async () => {
@@ -68,6 +72,7 @@ export function SkillForm({ skill }: { skill?: Skill }) {
 
     const parsed = createSkillSchema.safeParse({
       ...values,
+      relatedLinks,
       description: values.description.trim() ? values.description.trim() : null,
       ...premiumPayloadFrom(premium),
     });
@@ -117,6 +122,11 @@ export function SkillForm({ skill }: { skill?: Skill }) {
         onSubmit={handleSubmit}
         className={view === 'edit' ? 'flex flex-col gap-5' : 'hidden'}
       >
+        <RelatedLinksEditor
+          value={relatedLinks}
+          onChange={setRelatedLinks}
+          disabled={isSaving}
+        />
         <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
           <FormField label="Title" htmlFor="title">
             <Input
@@ -132,7 +142,11 @@ export function SkillForm({ skill }: { skill?: Skill }) {
               required
             />
           </FormField>
-          <FormField label="Slug" htmlFor="slug" hint="Lowercase letters, numbers and hyphens">
+          <FormField
+            label="Slug"
+            htmlFor="slug"
+            hint="Lowercase letters, numbers and hyphens"
+          >
             <Input
               id="slug"
               value={values.slug}
@@ -149,7 +163,10 @@ export function SkillForm({ skill }: { skill?: Skill }) {
             id="description"
             value={values.description}
             onChange={(event) =>
-              setValues((prev) => ({ ...prev, description: event.target.value }))
+              setValues((prev) => ({
+                ...prev,
+                description: event.target.value,
+              }))
             }
           />
         </FormField>

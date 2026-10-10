@@ -6,12 +6,21 @@ import {
   SkillRepository,
   UpdateSkillInput,
 } from '@agentrepo/application';
-import { Skill, assertSkillType } from '@agentrepo/domain';
+import {
+  relatedLinksFromJson,
+  Skill,
+  assertSkillType,
+} from '@agentrepo/domain';
 import { Prisma, PrismaClient, Skill as SkillRow } from '@prisma/client';
 import { toTsQuery } from '../full-text';
 
 function toDomain(row: SkillRow, authorName?: string | null): Skill {
-  return { ...row, type: assertSkillType(row.type), authorName };
+  return {
+    ...row,
+    relatedLinks: relatedLinksFromJson(row.relatedLinks),
+    type: assertSkillType(row.type),
+    authorName,
+  };
 }
 
 function buildSearchFilter(search: string): Prisma.SkillWhereInput {
@@ -31,7 +40,11 @@ export class PrismaSkillRepository implements SkillRepository {
     const where: Prisma.SkillWhereInput = {
       ...(params.publishedOnly ? { isPublished: true } : {}),
       ...(params.pendingReviewOnly ? { isPublished: false } : {}),
-      ...(params.authorId ? { authorId: params.authorId } : params.pendingReviewOnly ? { authorId: { not: null } } : {}),
+      ...(params.authorId
+        ? { authorId: params.authorId }
+        : params.pendingReviewOnly
+          ? { authorId: { not: null } }
+          : {}),
       ...(params.search ? buildSearchFilter(params.search) : {}),
     };
 
@@ -60,7 +73,12 @@ export class PrismaSkillRepository implements SkillRepository {
   async searchPublished(params: SearchSkillsParams): Promise<Paginated<Skill>> {
     const tsQuery = toTsQuery(params.query, { prefixLast: true });
     if (!tsQuery) {
-      return { items: [], total: 0, page: params.page, pageSize: params.pageSize };
+      return {
+        items: [],
+        total: 0,
+        page: params.page,
+        pageSize: params.pageSize,
+      };
     }
 
     // Query the trigger-maintained `searchVector` GIN index directly. Prisma's
@@ -70,10 +88,12 @@ export class PrismaSkillRepository implements SkillRepository {
     const filter = Prisma.sql`"isPublished" = true AND "searchVector" @@ to_tsquery('english', ${tsQuery})`;
 
     const [rows, totals] = await this.prisma.$transaction([
-      this.prisma.$queryRaw<(SkillRow & { authorName: string | null })[]>(Prisma.sql`
+      this.prisma.$queryRaw<
+        (SkillRow & { authorName: string | null })[]
+      >(Prisma.sql`
         SELECT "id", "slug", "title", "description", "content", "type", "version",
                "isPublished", "headerImageUrl", "isPremium", "priceCents", "currency",
-               "previewContent", "createdAt", "updatedAt", "latestVersionId", "authorId",
+               "previewContent", "createdAt", "updatedAt", "latestVersionId", "authorId", "relatedLinks",
                (SELECT "name" FROM "User" WHERE "User"."id" = "Skill"."authorId") AS "authorName"
         FROM "Skill"
         WHERE ${filter}
@@ -81,7 +101,7 @@ export class PrismaSkillRepository implements SkillRepository {
         LIMIT ${params.pageSize} OFFSET ${skip}
       `),
       this.prisma.$queryRaw<{ count: number }[]>(
-        Prisma.sql`SELECT count(*)::int AS count FROM "Skill" WHERE ${filter}`
+        Prisma.sql`SELECT count(*)::int AS count FROM "Skill" WHERE ${filter}`,
       ),
     ]);
 
@@ -94,12 +114,18 @@ export class PrismaSkillRepository implements SkillRepository {
   }
 
   async findById(id: string): Promise<Skill | null> {
-    const row = await this.prisma.skill.findUnique({ where: { id }, include: { author: { select: { name: true } } } });
+    const row = await this.prisma.skill.findUnique({
+      where: { id },
+      include: { author: { select: { name: true } } },
+    });
     return row ? toDomain(row, row.author?.name) : null;
   }
 
   async findBySlug(slug: string): Promise<Skill | null> {
-    const row = await this.prisma.skill.findUnique({ where: { slug }, include: { author: { select: { name: true } } } });
+    const row = await this.prisma.skill.findUnique({
+      where: { slug },
+      include: { author: { select: { name: true } } },
+    });
     return row ? toDomain(row, row.author?.name) : null;
   }
 

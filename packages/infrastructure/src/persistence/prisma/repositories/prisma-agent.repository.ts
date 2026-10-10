@@ -5,7 +5,13 @@ import {
   Paginated,
   UpdateAgentInput,
 } from '@agentrepo/application';
-import { Agent, DataIntegrityError, FileTree, isFileTree } from '@agentrepo/domain';
+import {
+  relatedLinksFromJson,
+  Agent,
+  DataIntegrityError,
+  FileTree,
+  isFileTree,
+} from '@agentrepo/domain';
 import { Prisma, PrismaClient, Agent as AgentRow } from '@prisma/client';
 
 function fileTreeFromJson(value: Prisma.JsonValue, agentId: string): FileTree {
@@ -16,7 +22,12 @@ function fileTreeFromJson(value: Prisma.JsonValue, agentId: string): FileTree {
 }
 
 function toDomain(row: AgentRow, authorName?: string | null): Agent {
-  return { ...row, fileTree: fileTreeFromJson(row.fileTree, row.id), authorName };
+  return {
+    ...row,
+    relatedLinks: relatedLinksFromJson(row.relatedLinks),
+    fileTree: fileTreeFromJson(row.fileTree, row.id),
+    authorName,
+  };
 }
 
 export class PrismaAgentRepository implements AgentRepository {
@@ -26,7 +37,11 @@ export class PrismaAgentRepository implements AgentRepository {
     const where: Prisma.AgentWhereInput = {
       ...(params.publishedOnly ? { isPublished: true } : {}),
       ...(params.pendingReviewOnly ? { isPublished: false } : {}),
-      ...(params.authorId ? { authorId: params.authorId } : params.pendingReviewOnly ? { authorId: { not: null } } : {}),
+      ...(params.authorId
+        ? { authorId: params.authorId }
+        : params.pendingReviewOnly
+          ? { authorId: { not: null } }
+          : {}),
       ...(params.search
         ? {
             OR: [
@@ -66,12 +81,18 @@ export class PrismaAgentRepository implements AgentRepository {
   }
 
   async findById(id: string): Promise<Agent | null> {
-    const row = await this.prisma.agent.findUnique({ where: { id }, include: { author: { select: { name: true } } } });
+    const row = await this.prisma.agent.findUnique({
+      where: { id },
+      include: { author: { select: { name: true } } },
+    });
     return row ? toDomain(row, row.author?.name) : null;
   }
 
   async findBySlug(slug: string): Promise<Agent | null> {
-    const row = await this.prisma.agent.findUnique({ where: { slug }, include: { author: { select: { name: true } } } });
+    const row = await this.prisma.agent.findUnique({
+      where: { slug },
+      include: { author: { select: { name: true } } },
+    });
     return row ? toDomain(row, row.author?.name) : null;
   }
 

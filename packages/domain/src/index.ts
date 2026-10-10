@@ -11,3 +11,5 @@ export * from './catalog/premium';
 export * from './catalog/asset-version';
 export * from './portfolio/contact-request';
 export * from './playground/playground-token';
+
+export * from './catalog/related-link';

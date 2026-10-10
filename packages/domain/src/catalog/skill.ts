@@ -1,3 +1,4 @@
+import type { RelatedLink } from './related-link';
 import { DataIntegrityError } from '../errors/domain.error';
 
 export const SKILL_TYPES = ['prompt', 'system', 'config', 'template'] as const;
@@ -5,6 +6,7 @@ export const SKILL_TYPES = ['prompt', 'system', 'config', 'template'] as const;
 export type SkillType = (typeof SKILL_TYPES)[number];
 
 export interface Skill {
+  relatedLinks?: RelatedLink[];
   id: string;
   authorId?: string | null;
   authorName?: string | null;
@@ -27,7 +29,8 @@ export interface Skill {
 
 export function isSkillType(value: unknown): value is SkillType {
   return (
-    typeof value === 'string' && (SKILL_TYPES as readonly string[]).includes(value)
+    typeof value === 'string' &&
+    (SKILL_TYPES as readonly string[]).includes(value)
   );
 }
 

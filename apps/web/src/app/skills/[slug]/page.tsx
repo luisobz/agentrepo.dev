@@ -1,3 +1,4 @@
+import { RelatedLinks } from '@agentrepo/ui';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import type { Metadata } from 'next';
@@ -11,7 +12,6 @@ import {
   getSkillVersion,
   getSkillVersions,
 } from '../../../lib/skills';
-
 
 interface SkillPageProps {
   params: Promise<{ slug: string }>;
@@ -45,7 +45,10 @@ function countWords(content: string): number {
   return content.split(/\s+/).filter(Boolean).length;
 }
 
-export default async function SkillPage({ params, searchParams }: SkillPageProps) {
+export default async function SkillPage({
+  params,
+  searchParams,
+}: SkillPageProps) {
   const [{ slug }, { version: requestedVersion }] = await Promise.all([
     params,
     searchParams,
@@ -71,11 +74,11 @@ export default async function SkillPage({ params, searchParams }: SkillPageProps
   const shownContent = pinned?.content ?? skill.content;
   const downloadsTotal = versions.reduce(
     (sum, entry) => sum + entry.downloadsTotal,
-    0
+    0,
   );
   const downloadsWeekly = versions.reduce(
     (sum, entry) => sum + entry.downloadsWeekly,
-    0
+    0,
   );
 
   return (
@@ -118,7 +121,12 @@ export default async function SkillPage({ params, searchParams }: SkillPageProps
           </p>
         )}
         <dl className="mt-4 flex flex-wrap gap-x-6 gap-y-1 font-mono text-xs text-[var(--color-text-muted)]">
-          {skill.authorName && <div className="flex gap-1.5"><dt>Author:</dt><dd>{skill.authorName}</dd></div>}
+          {skill.authorName && (
+            <div className="flex gap-1.5">
+              <dt>Author:</dt>
+              <dd>{skill.authorName}</dd>
+            </div>
+          )}
           <div className="flex gap-1.5">
             <dt>Updated:</dt>
             <dd>
@@ -141,6 +149,7 @@ export default async function SkillPage({ params, searchParams }: SkillPageProps
           </div>
         </dl>
       </header>
+      <RelatedLinks links={skill.relatedLinks} />
 
       <ContentCover
         title={skill.title}

@@ -24,3 +24,12 @@ The browser never talks to the backend directly: `src/app/api/trpc/[trpc]/route.
 `POST /api/auth/github` starts server-side PKCE with minimal profile/email scopes and a callback at `https://admin.agentrepo.dev/api/auth/github/callback`. Add that exact URL to Supabase Auth redirect allowlist; the GitHub OAuth App itself keeps the Supabase project callback.
 
 The callback exchanges the one-time code server-side, then `adminAuth.loginWithToken` validates the provider token against Supabase and requires an existing local admin role with the exact linked Supabase user ID. OAuth never creates admins or links accounts by email. Only after backend approval does it issue the existing host-only HttpOnly admin cookies. The temporary Supabase OAuth session is signed out locally afterwards; public-site sessions are preserved.
+
+## Related references
+
+Skills, agents and blog forms share a labelled link editor (up to 12 references).
+Creator proposals use the same structure and remain private until approval.
+The API validates HTTPS, labels, duplicate URLs and GitHub/X hostnames. References
+are editorial metadata on the current entry, not immutable version snapshot bodies.
+Editing another field does not clear omitted references. Public pages show links
+as external cards, with no embedded social widgets or server-side URL fetching.

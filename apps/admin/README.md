@@ -33,3 +33,17 @@ The API validates HTTPS, labels, duplicate URLs and GitHub/X hostnames. Referenc
 are editorial metadata on the current entry, not immutable version snapshot bodies.
 Editing another field does not clear omitted references. Public pages show links
 as external cards, with no embedded social widgets or server-side URL fetching.
+
+## Web session handoff
+
+The public site's Administration shortcut enters `/api/auth/sso`. A valid admin
+session goes straight to the dashboard. Otherwise the route creates a private,
+host-only HttpOnly random nonce and redirects to the public site with only its
+SHA-256 challenge. The existing web session asks the backend for an AES-GCM
+encrypted ticket (60 seconds, domain-separated key derived from AUTH_SECRET)
+after provider identity and exact local admin-role verification. The callback
+requires the initiating nonce and rechecks the role before setting admin cookies.
+It clears the nonce, disables caching and referrers, and falls back to login on
+failure. Provider tokens never cross domains in plaintext or shared cookies.
+Logging out of the public site does not revoke an already established separate
+admin session; the panel's existing logout remains authoritative for that session.

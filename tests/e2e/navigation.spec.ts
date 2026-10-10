@@ -94,7 +94,7 @@ for (const isAdmin of [false, true]) {
       await expect(link).toBeVisible();
       await expect(link).toHaveAttribute(
         'href',
-        'https://admin.agentrepo.dev/admin',
+        'https://admin.agentrepo.dev/api/auth/sso',
       );
       const box = await link.boundingBox();
       expect(box!.x).toBeGreaterThanOrEqual(0);

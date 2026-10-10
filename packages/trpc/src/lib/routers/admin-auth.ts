@@ -20,11 +20,22 @@ export const adminAuthRouter = router({
     .input(z.object({ email: z.string().email(), password: z.string().min(1) }))
     .mutation(({ ctx, input }) => ctx.adminAuth.login.execute(input)),
 
+  loginWithToken: publicProcedure
+    .use(rateLimit(loginRateLimiter, 'adminAuth.loginWithToken'))
+    .input(z.object({ token: z.string().min(1).max(16384) }))
+    .mutation(({ ctx, input }) =>
+      ctx.adminAuth.loginWithToken.execute(input.token),
+    ),
+
   refresh: publicProcedure
     .input(z.object({ refreshToken: z.string().min(1) }))
-    .mutation(({ ctx, input }) => ctx.adminAuth.refresh.execute(input.refreshToken)),
+    .mutation(({ ctx, input }) =>
+      ctx.adminAuth.refresh.execute(input.refreshToken),
+    ),
 
   logout: publicProcedure
     .input(z.object({ refreshToken: z.string().min(1) }))
-    .mutation(({ ctx, input }) => ctx.adminAuth.logout.execute(input.refreshToken)),
+    .mutation(({ ctx, input }) =>
+      ctx.adminAuth.logout.execute(input.refreshToken),
+    ),
 });

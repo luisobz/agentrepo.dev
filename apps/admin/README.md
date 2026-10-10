@@ -4,7 +4,7 @@ Next.js Admin panel for managing Skills, Agents and Blog posts.
 
 ## Routes
 
-- `/login` — email+password login, rate limited; `backend-web` (`adminAuth` tRPC router) verifies the credentials against Supabase Auth, requires the `admin` role in the DB and issues the session. Sets three cookies: a short-lived HttpOnly access token (15 min, HMAC-signed with `AUTH_SECRET`), a long-lived HttpOnly **opaque** refresh token (7 days, stored hashed in the `AdminSession` table) and a JS-readable info cookie with non-sensitive session metadata. Cookie names use the `__Host-` prefix in production.
+- `/login` — GitHub OAuth or email+password login, rate limited; `backend-web` (`adminAuth` tRPC router) verifies the credentials against Supabase Auth, requires the `admin` role in the DB and issues the session. Sets three cookies: a short-lived HttpOnly access token (15 min, HMAC-signed with `AUTH_SECRET`), a long-lived HttpOnly **opaque** refresh token (7 days, stored hashed in the `AdminSession` table) and a JS-readable info cookie with non-sensitive session metadata. Cookie names use the `__Host-` prefix in production.
 - `/api/auth/refresh` — rotates the pair against the backend; `src/middleware.ts` detours expired sessions through it transparently. Reusing an already-rotated refresh token (outside a 30s race-grace window) revokes the whole session family; logout revokes it immediately.
 - `/admin` — dashboard with content counts. All `/admin/*` routes are protected by `src/middleware.ts` (signature verification at the edge, auto-refresh) and the `/admin` layout (server-side verification).
 - `/admin/skills`, `/admin/agents`, `/admin/blog` — table listings with search, pagination, edit and delete.
@@ -18,3 +18,9 @@ The browser never talks to the backend directly: `src/app/api/trpc/[trpc]/route.
 
 - `AUTH_SECRET` — shared HMAC secret with `backend-web` (verifies access tokens). Login credentials live in Supabase Auth; `backend-web` owns login and session storage. Admin users are provisioned by the seeds (`DEV_ADMIN_PASSWORD` in dev, encrypted `prod.seed.data.enc` in production).
 - `NEXT_PUBLIC_API_URL` — backend base URL (default `http://localhost:4000`).
+
+## GitHub administrator access
+
+`POST /api/auth/github` starts server-side PKCE with minimal profile/email scopes and a callback at `https://admin.agentrepo.dev/api/auth/github/callback`. Add that exact URL to Supabase Auth redirect allowlist; the GitHub OAuth App itself keeps the Supabase project callback.
+
+The callback exchanges the one-time code server-side, then `adminAuth.loginWithToken` validates the provider token against Supabase and requires an existing local admin role with the exact linked Supabase user ID. OAuth never creates admins or links accounts by email. Only after backend approval does it issue the existing host-only HttpOnly admin cookies. The temporary Supabase OAuth session is signed out locally afterwards; public-site sessions are preserved.

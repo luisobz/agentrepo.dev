@@ -28,7 +28,11 @@ import {
   StaticCodeValidator,
   SupabasePasswordAuthenticator,
 } from '@agentrepo/infrastructure';
-import { createSessionToken, TRPCContext, verifySessionToken } from '@agentrepo/trpc';
+import {
+  createSessionToken,
+  TRPCContext,
+  verifySessionToken,
+} from '@agentrepo/trpc';
 import type { CreateExpressContextOptions } from '@trpc/server/adapters/express';
 
 const BEARER_PREFIX = 'Bearer ';
@@ -37,7 +41,9 @@ const ACCESS_TTL_MS = 15 * 60 * 1000;
 const REFRESH_TTL_MS = 7 * 24 * 60 * 60 * 1000;
 const ROTATION_GRACE_MS = 30 * 1000;
 
-function extractBearerToken(authorization: string | undefined): string | undefined {
+function extractBearerToken(
+  authorization: string | undefined,
+): string | undefined {
   if (!authorization?.startsWith(BEARER_PREFIX)) {
     return undefined;
   }
@@ -63,7 +69,9 @@ export function buildCreateContext(prisma: PrismaService) {
       publishableKey: BackendEnvironments.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY,
     }),
   });
-  const globalSearch = new SearchCatalog(new PrismaGlobalSearchRepository(prisma));
+  const globalSearch = new SearchCatalog(
+    new PrismaGlobalSearchRepository(prisma),
+  );
   const portfolioLogger = new Logger('ContactWorkflow');
   const portfolio = createPortfolioUseCases({
     contactRequestRepository: new PrismaContactRequestRepository(prisma),
@@ -96,6 +104,10 @@ export function buildCreateContext(prisma: PrismaService) {
       url: BackendEnvironments.NEXT_PUBLIC_SUPABASE_URL,
       publishableKey: BackendEnvironments.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY,
     }),
+    tokenVerifier: new SupabaseContributorVerifier({
+      url: BackendEnvironments.NEXT_PUBLIC_SUPABASE_URL,
+      publishableKey: BackendEnvironments.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY,
+    }),
     adminUsers: new PrismaAdminUserRepository(prisma),
     config: {
       accessTtlMs: ACCESS_TTL_MS,
@@ -110,11 +122,10 @@ export function buildCreateContext(prisma: PrismaService) {
     const token = extractBearerToken(req.headers.authorization);
     const isAdmin = await verifySessionToken(
       token,
-      BackendEnvironments.AUTH_SECRET
+      BackendEnvironments.AUTH_SECRET,
     );
-    const creatorUserId = token && !isAdmin
-      ? await creatorIdentity.execute(token)
-      : null;
+    const creatorUserId =
+      token && !isAdmin ? await creatorIdentity.execute(token) : null;
 
     return {
       isAdmin,

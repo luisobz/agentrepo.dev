@@ -43,18 +43,19 @@ export function AgentForm({ agent }: { agent?: Agent }) {
     title: agent?.title ?? '',
     slug: agent?.slug ?? '',
     shortDescription: agent?.shortDescription ?? '',
+    repositoryUrl: agent?.repositoryUrl ?? '',
     version: agent?.version ?? '1.0.0',
     isPublished: agent?.isPublished ?? false,
     readmeContent: agent?.readmeContent ?? '',
   });
   const [premium, setPremium] = useState<PremiumFormValues>(
-    premiumValuesFrom(agent)
+    premiumValuesFrom(agent),
   );
 
   // The FileTree is the single source of truth; the JSON mode edits a text
   // snapshot that must parse + validate before going back to the IDE.
   const [fileTree, setFileTree] = useState<FileTree>(
-    agent?.fileTree ?? FILE_TREE_PLACEHOLDER
+    agent?.fileTree ?? FILE_TREE_PLACEHOLDER,
   );
   const [treeMode, setTreeMode] = useState<TreeEditorMode>('ide');
   const [jsonDraft, setJsonDraft] = useState('');
@@ -80,7 +81,9 @@ export function AgentForm({ agent }: { agent?: Agent }) {
       const parsed = fileTreeSchema.safeParse(JSON.parse(jsonDraft));
       if (!parsed.success) {
         const issue = parsed.error.issues[0];
-        setTreeNotice(`FileTree ${issue.path.join('.') || 'root'}: ${issue.message}`);
+        setTreeNotice(
+          `FileTree ${issue.path.join('.') || 'root'}: ${issue.message}`,
+        );
         return false;
       }
       setFileTree(parsed.data);
@@ -125,6 +128,7 @@ export function AgentForm({ agent }: { agent?: Agent }) {
 
     const parsed = createAgentSchema.safeParse({
       ...values,
+      repositoryUrl: values.repositoryUrl.trim() || null,
       readmeContent: values.readmeContent.trim() ? values.readmeContent : null,
       fileTree: tree,
       ...premiumPayloadFrom(premium),
@@ -159,7 +163,11 @@ export function AgentForm({ agent }: { agent?: Agent }) {
             required
           />
         </FormField>
-        <FormField label="Slug" htmlFor="slug" hint="Lowercase letters, numbers and hyphens">
+        <FormField
+          label="Slug"
+          htmlFor="slug"
+          hint="Lowercase letters, numbers and hyphens"
+        >
           <Input
             id="slug"
             value={values.slug}
@@ -171,6 +179,21 @@ export function AgentForm({ agent }: { agent?: Agent }) {
           />
         </FormField>
       </div>
+      <FormField label="Project repository (HTTPS)" htmlFor="repositoryUrl">
+        <Input
+          id="repositoryUrl"
+          type="url"
+          value={values.repositoryUrl}
+          onChange={(event) =>
+            setValues((previous) => ({
+              ...previous,
+              repositoryUrl: event.target.value,
+            }))
+          }
+          placeholder="https://github.com/owner/project"
+          maxLength={500}
+        />
+      </FormField>
       <FormField label="Short description" htmlFor="shortDescription">
         <Input
           id="shortDescription"

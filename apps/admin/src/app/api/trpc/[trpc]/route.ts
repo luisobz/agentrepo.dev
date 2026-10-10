@@ -28,7 +28,9 @@ interface ResolvedSession {
   refreshedTokens?: AdminSessionTokens;
 }
 
-async function resolveSession(request: NextRequest): Promise<ResolvedSession | null> {
+async function resolveSession(
+  request: NextRequest,
+): Promise<ResolvedSession | null> {
   const secret = getAuthSecret();
   if (!secret) {
     return null;
@@ -44,7 +46,9 @@ async function resolveSession(request: NextRequest): Promise<ResolvedSession | n
     return null;
   }
   try {
-    const refreshedTokens = await backendTrpc.adminAuth.refresh.mutate({ refreshToken });
+    const refreshedTokens = await backendTrpc.adminAuth.refresh.mutate({
+      refreshToken,
+    });
     return { accessToken: refreshedTokens.accessToken, refreshedTokens };
   } catch {
     return null;
@@ -53,8 +57,15 @@ async function resolveSession(request: NextRequest): Promise<ResolvedSession | n
 
 async function forward(
   request: NextRequest,
-  { params }: { params: Promise<{ trpc: string }> }
+  { params }: { params: Promise<{ trpc: string }> },
 ) {
+  if (
+    request.method !== 'GET' &&
+    request.method !== 'HEAD' &&
+    request.headers.get('origin') !== request.nextUrl.origin
+  ) {
+    return NextResponse.json({ error: 'Invalid origin' }, { status: 403 });
+  }
   const { trpc } = await params;
   const search = request.nextUrl.search;
   const target = `${API_BASE}/api/trpc/${trpc}${search}`;
@@ -80,7 +91,8 @@ async function forward(
   const proxied = new NextResponse(response.body, {
     status: response.status,
     headers: {
-      'content-type': response.headers.get('content-type') ?? 'application/json',
+      'content-type':
+        response.headers.get('content-type') ?? 'application/json',
     },
   });
   if (session?.refreshedTokens) {

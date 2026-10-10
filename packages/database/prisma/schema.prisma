@@ -72,6 +72,7 @@ model SkillVersionDownloadDay {
 }
 
 model Agent {
+  repositoryUrl String?
   id               String   @id @default(uuid())
   authorId         String?
   author           User?    @relation("AgentAuthor", fields: [authorId], references: [id], onDelete: SetNull)
@@ -133,6 +134,10 @@ model AgentVersionDownloadDay {
 }
 
 model BlogPost {
+  authorId String?
+  author User? @relation("BlogAuthor", fields: [authorId], references: [id], onDelete: SetNull)
+
+  @@index([authorId])
   id             String   @id @default(uuid())
   slug           String   @unique
   title          String
@@ -167,6 +172,7 @@ model User {
   purchases  Purchase[]
   skills     Skill[]     @relation("SkillAuthor")
   agents     Agent[]     @relation("AgentAuthor")
+  blogPosts BlogPost[] @relation("BlogAuthor")
 }
 
 model Role {

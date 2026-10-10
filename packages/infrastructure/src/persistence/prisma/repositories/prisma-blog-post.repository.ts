@@ -14,6 +14,12 @@ export class PrismaBlogPostRepository implements BlogPostRepository {
   async list(params: ListContentParams): Promise<Paginated<BlogPost>> {
     const where: Prisma.BlogPostWhereInput = {
       ...(params.publishedOnly ? { isPublished: true } : {}),
+      ...(params.pendingReviewOnly ? { isPublished: false } : {}),
+      ...(params.authorId
+        ? { authorId: params.authorId }
+        : params.pendingReviewOnly
+          ? { authorId: { not: null } }
+          : {}),
       ...(params.search
         ? {
             OR: [
@@ -28,6 +34,7 @@ export class PrismaBlogPostRepository implements BlogPostRepository {
     const [items, total] = await this.prisma.$transaction([
       this.prisma.blogPost.findMany({
         where,
+        include: { author: { select: { name: true } } },
         orderBy:
           params.orderBy === 'createdAt'
             ? { createdAt: 'desc' }
@@ -38,15 +45,31 @@ export class PrismaBlogPostRepository implements BlogPostRepository {
       this.prisma.blogPost.count({ where }),
     ]);
 
-    return { items, total, page: params.page, pageSize: params.pageSize };
+    return {
+      items: items.map((row) => ({
+        ...row,
+        authorName: row.author?.name ?? null,
+      })),
+      total,
+      page: params.page,
+      pageSize: params.pageSize,
+    };
   }
 
-  findById(id: string): Promise<BlogPost | null> {
-    return this.prisma.blogPost.findUnique({ where: { id } });
+  async findById(id: string): Promise<BlogPost | null> {
+    const row = await this.prisma.blogPost.findUnique({
+      where: { id },
+      include: { author: { select: { name: true } } },
+    });
+    return row ? { ...row, authorName: row.author?.name ?? null } : null;
   }
 
-  findBySlug(slug: string): Promise<BlogPost | null> {
-    return this.prisma.blogPost.findUnique({ where: { slug } });
+  async findBySlug(slug: string): Promise<BlogPost | null> {
+    const row = await this.prisma.blogPost.findUnique({
+      where: { slug },
+      include: { author: { select: { name: true } } },
+    });
+    return row ? { ...row, authorName: row.author?.name ?? null } : null;
   }
 
   async existsSlug(slug: string, excludeId?: string): Promise<boolean> {

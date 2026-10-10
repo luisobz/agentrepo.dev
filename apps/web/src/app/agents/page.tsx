@@ -7,12 +7,11 @@ import { formatPrice } from '../../lib/format-price';
 import { formatDate } from '../../lib/public-content';
 import { getPublishedAgents, hasPlayground } from '../../lib/agents';
 
-export const dynamic = 'force-dynamic';
 
 export const metadata: Metadata = {
   title: 'Agents | AgentRepo.dev',
   description:
-    'AI agent definitions with full file trees, ready to explore and reuse.',
+    'Agent projects with repositories, installation documentation and configuration.',
 };
 
 export default async function AgentsPage() {

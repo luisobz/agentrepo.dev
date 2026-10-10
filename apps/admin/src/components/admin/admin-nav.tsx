@@ -6,13 +6,22 @@ import { usePathname } from 'next/navigation';
 import { useT } from '../../lib/i18n/use-t';
 import type { AdminDictionaryKey } from '../../lib/i18n/dictionary';
 
-const NAV_ITEMS: { href: string; labelKey: AdminDictionaryKey; exact: boolean }[] = [
+const NAV_ITEMS: {
+  href: string;
+  labelKey: AdminDictionaryKey;
+  exact: boolean;
+}[] = [
   { href: '/admin', labelKey: 'nav.dashboard', exact: true },
+  { href: '/admin/review', labelKey: 'nav.review', exact: false },
   { href: '/admin/skills', labelKey: 'nav.skills', exact: false },
   { href: '/admin/agents', labelKey: 'nav.agents', exact: false },
   { href: '/admin/blog', labelKey: 'nav.blog', exact: false },
   { href: '/admin/contacts', labelKey: 'nav.contacts', exact: false },
-  { href: '/admin/playground-tokens', labelKey: 'nav.playgroundTokens', exact: false },
+  {
+    href: '/admin/playground-tokens',
+    labelKey: 'nav.playgroundTokens',
+    exact: false,
+  },
 ];
 
 export function AdminNav() {
@@ -20,7 +29,7 @@ export function AdminNav() {
   const pathname = usePathname();
 
   return (
-    <nav className="flex flex-col gap-1">
+    <nav className="flex flex-wrap gap-1 md:flex-col">
       {NAV_ITEMS.map((item) => {
         const isActive = item.exact
           ? pathname === item.href

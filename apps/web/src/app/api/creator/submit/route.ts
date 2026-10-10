@@ -1,5 +1,5 @@
 import type { AppRouter } from '@agentrepo/trpc/schemas';
-import { submitAgentSchema, submitSkillSchema } from '@agentrepo/trpc/schemas';
+import { submitAgentSchema, submitSkillSchema, submitBlogSchema } from '@agentrepo/trpc/schemas';
 import { createTRPCClient, httpBatchLink, TRPCClientError } from '@trpc/client';
 import { NextRequest, NextResponse } from 'next/server';
 import superjson from 'superjson';
@@ -39,6 +39,12 @@ export async function POST(request: NextRequest) {
       if (!parsed.success) return NextResponse.json({ error: 'Invalid agent' }, { status: 400 });
       const asset = await client.creator.submitAgent.mutate(parsed.data);
       return NextResponse.json({ id: asset.id, slug: asset.slug, kind: 'agent', status: 'pending_review' }, { status: 201 });
+    }
+    if (typeof body === 'object' && body !== null && 'kind' in body && body.kind === 'blog') {
+      const parsed = submitBlogSchema.safeParse(body);
+      if (!parsed.success) return NextResponse.json({ error: 'Invalid article' }, { status: 400 });
+      const asset = await client.creator.submitBlog.mutate(parsed.data);
+      return NextResponse.json({ id: asset.id, slug: asset.slug, kind: 'blog', status: 'pending_review' }, { status: 201 });
     }
     return NextResponse.json({ error: 'Unknown asset kind' }, { status: 400 });
   } catch (error) {

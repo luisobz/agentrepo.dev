@@ -41,3 +41,9 @@ jobs:
 
       - name: Build (todas las apps y paquetes)
         run: pnpm build
+
+      - name: Install browser for UI checks
+        run: pnpm exec playwright install --with-deps chromium
+
+      - name: Desktop and mobile navigation
+        run: pnpm test:e2e

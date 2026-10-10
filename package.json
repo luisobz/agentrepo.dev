@@ -38,7 +38,8 @@
     "db:seed:encrypt": "nx run database:seed-encrypt",
     "db:seed:decrypt": "nx run database:seed-decrypt",
     "postinstall": "nx run database:generate",
-    "prepare": "husky"
+    "prepare": "husky",
+    "test:e2e": "playwright test"
   },
   "lint-staged": {
     "*.{ts,tsx,js,jsx,mjs,cjs}": "eslint --fix"
@@ -59,6 +60,7 @@
     "@nx/react": "22.7.2",
     "@nx/vite": "22.7.2",
     "@nx/vitest": "22.7.2",
+    "@playwright/test": "1.58.2",
     "@swc-node/register": "~1.11.1",
     "@swc/cli": "^0.8.1",
     "@swc/core": "^1.15.33",

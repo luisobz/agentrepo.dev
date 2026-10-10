@@ -5,17 +5,19 @@ import { creatorRouter } from './creator';
 
 function context(creatorUserId: string | null) {
   const createSkill = vi.fn(async (input: unknown) => input);
+  const createBlog = vi.fn(async (input: unknown) => input);
   const createAgent = vi.fn(async (input: unknown) => input);
   const ctx = {
     isAdmin: false,
     creatorUserId,
     clientIp: crypto.randomUUID(),
     catalog: {
+      blogPosts: { create: { execute: createBlog } },
       skills: { create: { execute: createSkill } },
       agents: { create: { execute: createAgent } },
     },
   } as unknown as TRPCContext;
-  return { caller: creatorRouter.createCaller(ctx), createSkill, createAgent };
+  return { caller: creatorRouter.createCaller(ctx), createSkill, createAgent, createBlog };
 }
 
 describe('creator submissions', () => {
@@ -41,5 +43,20 @@ describe('creator submissions', () => {
       authorId: 'user-123', isPublished: false, isPremium: false,
       fileTree: [{ name: 'README.md', type: 'file', content: '# Hello' }],
     }));
+  });
+});
+
+describe('creator blog moderation', () => {
+  const article = { slug: 'new-article', title: 'My article', excerpt: 'Overview', content: '# Article' };
+  it('requires a verified author for articles too', async () => {
+    const { caller, createBlog } = context(null);
+    await expect(caller.submitBlog(article)).rejects.toMatchObject({ code: 'UNAUTHORIZED' });
+    expect(createBlog).not.toHaveBeenCalled();
+  });
+  it('ignores client attempts to publish or impersonate another author', async () => {
+    const { caller, createBlog } = context('author-one');
+    const payload = { ...article, isPublished: true, authorId: 'another-author' };
+    await caller.submitBlog(payload);
+    expect(createBlog).toHaveBeenCalledWith(expect.objectContaining({ authorId: 'author-one', isPublished: false }));
   });
 });

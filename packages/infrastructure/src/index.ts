@@ -18,3 +18,6 @@ export * from './ai/deepseek/deepseek-coder.service';
 export * from './ai/playground/static-code-validator';
 export * from './email/spacemail/spacemail.service';
 export * from './pdf/react-pdf/pdf-generator.service';
+
+export * from './auth/supabase/supabase-contributor-verifier';
+export * from './persistence/prisma/repositories/prisma-contributor.repository';

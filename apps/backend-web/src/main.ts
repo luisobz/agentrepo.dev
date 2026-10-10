@@ -2,6 +2,7 @@ import './instrument';
 
 import { Logger } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
+import type { NestExpressApplication } from '@nestjs/platform-express';
 import { PrismaService } from '@agentrepo/infrastructure';
 import helmet from 'helmet';
 import { AppModule } from './app/app.module';
@@ -11,7 +12,8 @@ import { BackendEnvironments } from '@agentrepo/config';
 import { buildCreateContext } from './trpc/trpc-context';
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule);
+  const app = await NestFactory.create<NestExpressApplication>(AppModule);
+  app.useBodyParser('json', { limit: '512kb' });
   // LiteSpeed forwards Passenger's BaseURI as part of req.url.
   const baseUri = process.env.NODE_ENV === 'production' ? 'web/api/v1/' : '';
   const globalPrefix = `${baseUri}api`;

@@ -46,3 +46,7 @@ packages/database/src/seeds/prod.seed.data.json
 *.key
 *.p12
 *.pfx
+
+# Browser test artifacts
+/test-results/
+/playwright-report/

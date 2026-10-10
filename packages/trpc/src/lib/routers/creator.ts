@@ -1,10 +1,20 @@
 import { FixedWindowRateLimiter } from '../auth/login-rate-limit';
 import { creatorProcedure, rateLimit, router } from '../trpc';
-import { submitAgentSchema, submitSkillSchema } from '../schemas/creator.schemas';
+import { submitAgentSchema, submitSkillSchema, submitBlogSchema } from '../schemas/creator.schemas';
 
 const submitLimiter = new FixedWindowRateLimiter({ maxAttempts: 10, windowMs: 60 * 60 * 1000 });
 
 export const creatorRouter = router({
+  submitBlog: creatorProcedure
+    .use(rateLimit(submitLimiter, 'submit-blog'))
+    .input(submitBlogSchema)
+    .mutation(({ input, ctx }) => ctx.catalog.blogPosts.create.execute({
+      ...input,
+      excerpt: input.excerpt || null,
+      authorId: ctx.creatorUserId,
+      isPublished: false,
+      headerImageUrl: null,
+    })),
   submitSkill: creatorProcedure
     .use(rateLimit(submitLimiter, 'submit-skill'))
     .input(submitSkillSchema)

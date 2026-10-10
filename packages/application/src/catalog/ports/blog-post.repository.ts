@@ -3,7 +3,7 @@ import { ContentRepository } from './content.repository';
 
 export type CreateBlogPostInput = Omit<
   BlogPost,
-  'id' | 'createdAt' | 'updatedAt'
+  'id' | 'createdAt' | 'updatedAt' | 'authorName'
 >;
 export type UpdateBlogPostInput = Partial<CreateBlogPostInput>;
 

@@ -11,6 +11,9 @@ export interface ListContentParams {
   pageSize: number;
   search?: string;
   publishedOnly?: boolean;
+  /** Private filters; callers must derive authorId from the verified session. */
+  authorId?: string;
+  pendingReviewOnly?: boolean;
   /** Field for descending ordering; defaults to `updatedAt`. */
   orderBy?: ContentOrderField;
 }

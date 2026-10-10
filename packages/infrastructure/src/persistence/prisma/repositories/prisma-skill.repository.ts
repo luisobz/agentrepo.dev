@@ -30,6 +30,8 @@ export class PrismaSkillRepository implements SkillRepository {
   async list(params: ListContentParams): Promise<Paginated<Skill>> {
     const where: Prisma.SkillWhereInput = {
       ...(params.publishedOnly ? { isPublished: true } : {}),
+      ...(params.pendingReviewOnly ? { isPublished: false } : {}),
+      ...(params.authorId ? { authorId: params.authorId } : params.pendingReviewOnly ? { authorId: { not: null } } : {}),
       ...(params.search ? buildSearchFilter(params.search) : {}),
     };
 

@@ -113,16 +113,16 @@ export function Header() {
 
             {/* Navigation links */}
             <nav className="hidden md:flex items-center gap-5 lg:gap-6">
-              <Link href="/skills" className={navLinkClass}>
+              <Link prefetch={true} href="/skills" className={navLinkClass}>
                 {t('nav.skills')}
               </Link>
-              <Link href="/agents" className={navLinkClass}>
+              <Link prefetch={true} href="/agents" className={navLinkClass}>
                 {t('nav.agents')}
               </Link>
-              <Link href="/blog" className={navLinkClass}>
+              <Link prefetch={true} href="/blog" className={navLinkClass}>
                 {t('nav.blog')}
               </Link>
-              <Link href="/playground" className={navLinkClass}>
+              <Link prefetch={true} href="/playground" className={navLinkClass}>
                 {t('nav.playground')}
               </Link>
               <Link
@@ -233,6 +233,7 @@ export function Header() {
         <AvatarSlot id="mobile-menu" className="absolute right-6 top-3" />
         <nav className="flex flex-col gap-4">
           <Link
+            prefetch={mobileMenuOpen}
             href="/skills"
             onClick={() => setMobileMenuOpen(false)}
             className="font-sans text-sm font-semibold text-[var(--color-text-primary)] hover:text-[var(--color-brand-garnet)] py-2 border-b border-[var(--color-border-soft)]/40"
@@ -240,6 +241,7 @@ export function Header() {
             {t('nav.skills')}
           </Link>
           <Link
+            prefetch={mobileMenuOpen}
             href="/agents"
             onClick={() => setMobileMenuOpen(false)}
             className="font-sans text-sm font-semibold text-[var(--color-text-primary)] hover:text-[var(--color-brand-garnet)] py-2 border-b border-[var(--color-border-soft)]/40"
@@ -247,6 +249,7 @@ export function Header() {
             {t('nav.agents')}
           </Link>
           <Link
+            prefetch={mobileMenuOpen}
             href="/blog"
             onClick={() => setMobileMenuOpen(false)}
             className="font-sans text-sm font-semibold text-[var(--color-text-primary)] hover:text-[var(--color-brand-garnet)] py-2 border-b border-[var(--color-border-soft)]/40"
@@ -254,6 +257,7 @@ export function Header() {
             {t('nav.blog')}
           </Link>
           <Link
+            prefetch={mobileMenuOpen}
             href="/playground"
             onClick={() => setMobileMenuOpen(false)}
             className="font-sans text-sm font-semibold text-[var(--color-text-primary)] hover:text-[var(--color-brand-garnet)] py-2 border-b border-[var(--color-border-soft)]/40"
@@ -261,6 +265,7 @@ export function Header() {
             {t('nav.playground')}
           </Link>
           <Link
+            prefetch={mobileMenuOpen}
             href="/portfolio/luisbz"
             onClick={() => setMobileMenuOpen(false)}
             className="font-sans text-sm font-semibold text-[var(--color-text-primary)] hover:text-[var(--color-brand-garnet)] py-2 flex items-center justify-between"
@@ -270,6 +275,7 @@ export function Header() {
           </Link>
 
           <Link
+            prefetch={mobileMenuOpen}
             href="/creator"
             onClick={() => setMobileMenuOpen(false)}
             className="mt-2 w-full flex items-center justify-center font-sans font-medium text-sm py-3 bg-[var(--color-brand-garnet)] text-[var(--color-bg-warm-white)] rounded-xl hover:bg-[var(--color-brand-garnet-deep)] shadow-sm"

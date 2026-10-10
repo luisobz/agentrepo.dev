@@ -33,3 +33,5 @@ export * from './playground/use-cases/execute-agent-flow.use-case';
 export * from './playground/use-cases/playground-token.use-cases';
 export * from './playground/use-cases/save-playground-deployment.use-case';
 export * from './playground/playground.use-cases';
+
+export * from './auth/creator-identity';

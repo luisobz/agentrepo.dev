@@ -5,11 +5,14 @@ import {
   createPlaygroundUseCases,
   createPortfolioUseCases,
   SearchCatalog,
+  ResolveCreatorIdentity,
 } from '@agentrepo/application';
 import { BackendEnvironments } from '@agentrepo/config';
 import {
   DeepSeekCoderService,
   InternalWorkflowClient,
+  PrismaContributorRepository,
+  SupabaseContributorVerifier,
   PrismaAdminSessionRepository,
   PrismaAdminUserRepository,
   PrismaAgentRepository,
@@ -41,39 +44,6 @@ function extractBearerToken(authorization: string | undefined): string | undefin
   return authorization.slice(BEARER_PREFIX.length);
 }
 
-interface SupabaseCreatorUser {
-  id: string;
-  email: string;
-  user_metadata?: { full_name?: string; name?: string };
-}
-
-function isCreatorUser(value: unknown): value is SupabaseCreatorUser {
-  if (!value || typeof value !== 'object') return false;
-  const user = value as Record<string, unknown>;
-  return typeof user['id'] === 'string' && typeof user['email'] === 'string';
-}
-
-async function resolveCreatorUserId(token: string, prisma: PrismaService): Promise<string | null> {
-  const response = await fetch(`${BackendEnvironments.NEXT_PUBLIC_SUPABASE_URL}/auth/v1/user`, {
-    headers: {
-      apikey: BackendEnvironments.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY,
-      authorization: `Bearer ${token}`,
-    },
-    signal: AbortSignal.timeout(8_000),
-  }).catch(() => null);
-  if (!response?.ok) return null;
-  const identity: unknown = await response.json().catch(() => null);
-  if (!isCreatorUser(identity)) return null;
-  const metadataName = identity.user_metadata?.full_name ?? identity.user_metadata?.name;
-  const name = (typeof metadataName === 'string' ? metadataName : identity.email.split('@')[0]).trim().slice(0, 120);
-  const user = await prisma.user.upsert({
-    where: { email: identity.email },
-    update: { supabaseId: identity.id },
-    create: { email: identity.email, supabaseId: identity.id, name, provider: 'email' },
-  });
-  return user.id;
-}
-
 /**
  * Composition root for the tRPC layer: wires Prisma repositories into the
  * application use cases and resolves the admin session per request.
@@ -85,6 +55,13 @@ export function buildCreateContext(prisma: PrismaService) {
     blogPostRepository: new PrismaBlogPostRepository(prisma),
     skillVersionRepository: new PrismaSkillVersionRepository(prisma),
     agentVersionRepository: new PrismaAgentVersionRepository(prisma),
+  });
+  const creatorIdentity = new ResolveCreatorIdentity({
+    contributors: new PrismaContributorRepository(prisma),
+    sessions: new SupabaseContributorVerifier({
+      url: BackendEnvironments.NEXT_PUBLIC_SUPABASE_URL,
+      publishableKey: BackendEnvironments.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY,
+    }),
   });
   const globalSearch = new SearchCatalog(new PrismaGlobalSearchRepository(prisma));
   const portfolioLogger = new Logger('ContactWorkflow');
@@ -136,7 +113,7 @@ export function buildCreateContext(prisma: PrismaService) {
       BackendEnvironments.AUTH_SECRET
     );
     const creatorUserId = token && !isAdmin
-      ? await resolveCreatorUserId(token, prisma)
+      ? await creatorIdentity.execute(token)
       : null;
 
     return {

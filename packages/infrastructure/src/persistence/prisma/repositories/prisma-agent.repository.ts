@@ -25,6 +25,8 @@ export class PrismaAgentRepository implements AgentRepository {
   async list(params: ListContentParams): Promise<Paginated<Agent>> {
     const where: Prisma.AgentWhereInput = {
       ...(params.publishedOnly ? { isPublished: true } : {}),
+      ...(params.pendingReviewOnly ? { isPublished: false } : {}),
+      ...(params.authorId ? { authorId: params.authorId } : params.pendingReviewOnly ? { authorId: { not: null } } : {}),
       ...(params.search
         ? {
             OR: [

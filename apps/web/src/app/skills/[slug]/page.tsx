@@ -12,7 +12,6 @@ import {
   getSkillVersions,
 } from '../../../lib/skills';
 
-export const dynamic = 'force-dynamic';
 
 interface SkillPageProps {
   params: Promise<{ slug: string }>;

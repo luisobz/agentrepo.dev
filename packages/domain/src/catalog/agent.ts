@@ -1,6 +1,7 @@
 import { FileTree } from './file-tree';
 
 export interface Agent {
+  repositoryUrl?: string | null;
   id: string;
   authorId?: string | null;
   authorName?: string | null;

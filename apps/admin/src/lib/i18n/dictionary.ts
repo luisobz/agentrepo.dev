@@ -1,6 +1,45 @@
 import type { Dictionary } from '@agentrepo/ui';
 
 export const adminDictionary = {
+  'review.heading': {
+    en: 'Contributor proposals',
+    es: 'Propuestas de colaboradores',
+  },
+  'review.info': {
+    en: 'Content remains private until you authorise publication. Review the content and links before approving.',
+    es: 'El contenido permanece privado hasta que autorices su publicación. Revisa el contenido y los enlaces antes de aprobar.',
+  },
+  'review.error': {
+    en: 'Could not publish. The proposal remains pending.',
+    es: 'No se pudo publicar. La propuesta sigue pendiente.',
+  },
+  'review.loading': {
+    en: 'Loading proposals\u2026',
+    es: 'Cargando propuestas…',
+  },
+  'review.empty': {
+    en: 'No pending proposals.',
+    es: 'No hay propuestas pendientes.',
+  },
+  'review.author': { en: 'Author', es: 'Autoría' },
+  'review.contributor': { en: 'Contributor', es: 'Colaborador' },
+  'review.edit': { en: 'Review and edit', es: 'Revisar y editar' },
+  'review.approve': {
+    en: 'Authorise publication',
+    es: 'Autorizar publicación',
+  },
+  'review.publishing': { en: 'Publishing\u2026', es: 'Publicando…' },
+  'review.all': { en: 'View all proposals', es: 'Ver todas las propuestas' },
+  'review.loadError': {
+    en: 'Could not load all proposals. Reload the page.',
+    es: 'No se pudieron cargar todas las propuestas. Recarga la página.',
+  },
+  'review.confirm': {
+    en: 'Publish this proposal with the indicated authorship?',
+    es: '¿Publicar esta propuesta con la autoría indicada?',
+  },
+
+  'nav.review': { en: 'Review submissions', es: 'Revisar propuestas' },
   'nav.dashboard': { en: 'Dashboard', es: 'Panel' },
   'nav.skills': { en: 'Skills', es: 'Skills' },
   'nav.agents': { en: 'Agents', es: 'Agentes' },
@@ -36,7 +75,10 @@ export const adminDictionary = {
   'common.cancel': { en: 'Cancel', es: 'Cancelar' },
 
   'login.title': { en: 'Admin access', es: 'Acceso de administración' },
-  'login.password': { en: 'Admin password', es: 'Contraseña de administración' },
+  'login.password': {
+    en: 'Admin password',
+    es: 'Contraseña de administración',
+  },
   'login.submit': { en: 'Sign in', es: 'Entrar' },
   'login.signingIn': { en: 'Signing in…', es: 'Entrando…' },
 } satisfies Dictionary<string>;

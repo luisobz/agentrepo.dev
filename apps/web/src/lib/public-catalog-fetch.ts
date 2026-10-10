@@ -28,9 +28,7 @@ export function publicCatalogFetch(
     init?.credentials !== 'include' &&
     procedures.length > 0 &&
     procedures.every((name) => PUBLIC_READS.has(name));
-  const options: RequestInit & {
-    next?: { revalidate: number; tags: string[] };
-  } = {
+  const options: RequestInit = {
     ...init,
     cache: publicRead ? 'force-cache' : 'no-store',
     ...(publicRead

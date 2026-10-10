@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { skillTypeSchema, slugSchema } from './catalog.schemas';
+import { skillTypeSchema, slugSchema, repositoryUrlSchema } from './catalog.schemas';
 
 export const submitSkillSchema = z.object({
   slug: slugSchema,
@@ -14,4 +14,12 @@ export const submitAgentSchema = z.object({
   title: z.string().trim().min(1).max(200),
   shortDescription: z.string().trim().min(1).max(300),
   readmeContent: z.string().trim().min(1).max(100_000),
+  repositoryUrl: repositoryUrlSchema.nullable().default(null),
+});
+
+export const submitBlogSchema = z.object({
+  slug: slugSchema,
+  title: z.string().trim().min(1).max(200),
+  excerpt: z.string().trim().max(500).default(''),
+  content: z.string().trim().min(1).max(100_000),
 });

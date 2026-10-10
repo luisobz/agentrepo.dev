@@ -1,5 +1,5 @@
 import { getServerT } from '../../lib/i18n/server';
-import Link from 'next/link';
+import { ContributorLogin } from '../../components/creator/contributor-login';
 import type { Metadata } from 'next';
 import { CreatorSession } from '../../components/creator/creator-session';
 import { CreatorForm } from '../../components/creator/creator-form';
@@ -39,18 +39,7 @@ export default async function CreatorPage() {
           <CreatorForm authorName={authorName} />
         </>
       ) : (
-        <div className="rounded-2xl border border-[var(--color-border-soft)] bg-[var(--color-bg-surface)] p-6">
-          <h2 className="text-xl font-semibold">{t('creator.access')}</h2>
-          <p className="mt-2 text-sm text-[var(--color-text-secondary)]">
-            {t('creator.accessInfo')}
-          </p>
-          <Link
-            href="/auth/login?next=/creator"
-            className="mt-5 inline-flex rounded-full bg-[var(--color-brand-garnet)] px-5 py-2.5 text-sm font-semibold text-white"
-          >
-            {t('creator.accessLink')}
-          </Link>
-        </div>
+        <ContributorLogin />
       )}
     </div>
   );

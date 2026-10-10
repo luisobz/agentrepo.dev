@@ -1,6 +1,8 @@
 import type { Dictionary } from '@agentrepo/ui';
 
 export const webDictionary = {
+  'creator.useEmail': { en: 'Use email instead', es: 'Usar correo electrónico' },
+  'creator.hideEmail': { en: 'Hide email access', es: 'Ocultar acceso por correo' },
   'creator.githubPending': { en: 'GitHub sign-in is being configured. You can register with email below.', es: 'Estamos terminando de configurar GitHub. Puedes registrarte con tu correo aquí abajo.' },
   'creator.signout': { en: 'Sign out', es: 'Cerrar sesión' },
   'creator.signin': { en: 'Sign in', es: 'Entrar' },
@@ -9,7 +11,7 @@ export const webDictionary = {
     en: 'Sign in to submit skills, agent projects and articles under your name.',
     es: 'Accede para proponer skills, proyectos de agentes y artículos con tu autoría.',
   },
-  'creator.github': { en: 'Continue with GitHub', es: 'Continuar con GitHub' },
+  'creator.github': { en: 'Connect with GitHub', es: 'Connect with GitHub' },
   'creator.connecting': { en: 'Connecting…', es: 'Conectando…' },
   'creator.authInfo': {
     en: 'Sign in as a contributor. Proposals are reviewed before publication. You can also use email.',

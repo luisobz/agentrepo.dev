@@ -14,13 +14,12 @@ test('Creator opens the contribution flow and requires authentication', async ({
   await expect(
     page.getByRole('heading', { name: 'Sign in to contribute' }),
   ).toBeVisible();
-  await page
-    .getByRole('link', { name: 'Sign in with GitHub or create an account' })
-    .click();
-  await expect(page).toHaveURL(/\/auth\/login\?next=/);
   await expect(
-    page.getByRole('button', { name: 'Continue with GitHub' }),
+    page.getByRole('button', { name: 'Connect with GitHub' }),
   ).toBeVisible();
+  await expect(page).toHaveURL(/\/creator$/);
+  await expect(page.locator('input[type=password]')).toHaveCount(0);
+  await page.getByRole('button', { name: 'Use email instead' }).click();
   await expect(page.locator('input[type=password]')).toBeVisible();
 });
 

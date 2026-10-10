@@ -5,6 +5,8 @@ app="$1"
 destination="$2"
 
 mkdir -p "$destination/apps/$app/.next" "$destination/node_modules"
+# Runtime fetch caches must not leak between standalone validation runs.
+rm -rf -- "$destination/apps/$app/.next/cache"
 rsync -a "apps/$app/.next/standalone/" "$destination/"
 rsync -a "apps/$app/.next/static/" "$destination/apps/$app/.next/static/"
 rsync -a "apps/$app/public/" "$destination/apps/$app/public/"

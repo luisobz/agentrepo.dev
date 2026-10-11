@@ -129,6 +129,77 @@ export const webDictionary = {
   'nav.skills': { en: 'Skills', es: 'Skills' },
   'nav.agents': { en: 'Agents', es: 'Agents' },
   'nav.blog': { en: 'Blog', es: 'Blog' },
+  'nav.cli': { en: 'CLI', es: 'CLI' },
+  'footer.secondary': { en: 'More from AgentRepo', es: 'Más de AgentRepo' },
+  'cli.title': {
+    en: 'Skills, pinned to your project.',
+    es: 'Skills fijadas a tu proyecto.',
+  },
+  'cli.intro': {
+    en: 'Install the exact skills your project needs. Choose your coding tool and keep every installation reproducible with agent.json.',
+    es: 'Instala las skills exactas que necesita tu proyecto. Elige tu herramienta y mantén cada instalación reproducible con agent.json.',
+  },
+  'cli.install': { en: '1. Install the CLI', es: '1. Instala el CLI' },
+  'cli.installInfo': {
+    en: 'Run in your project with Node.js 24+ and pnpm. This installs CLI 0.1.0 from the verified GitHub release as a development dependency.',
+    es: 'Ejecuta en tu proyecto con Node.js 24+ y pnpm. Instala el CLI 0.1.0 desde la release de GitHub como dependencia de desarrollo.',
+  },
+  'cli.release': { en: 'Release & checksums', es: 'Release y checksums' },
+  'cli.manifest': { en: '2. Declare your skills', es: '2. Declara tus skills' },
+  'cli.manifestInfo': {
+    en: 'init creates agent.json without overwriting an existing file. Add published skill slugs and exact versions. The names below are illustrative; replace them with skills available in the catalogue.',
+    es: 'init crea agent.json sin sobrescribir uno existente. Añade slugs publicados y versiones exactas. Los nombres del ejemplo son ilustrativos: sustitúyelos por skills disponibles en el catálogo.',
+  },
+  'cli.fields': {
+    en: 'schemaVersion is 1. skills maps each published slug to an exact major.minor.patch version. Ranges and latest are rejected. An optional registry must be HTTPS; the default is AgentRepo.',
+    es: 'schemaVersion es 1. skills relaciona cada slug publicado con una versión exacta major.minor.patch. No se admiten rangos ni latest. registry es opcional y debe ser HTTPS; por defecto se usa AgentRepo.',
+  },
+  'cli.run': {
+    en: '3. Choose your tool and install',
+    es: '3. Elige tu herramienta e instala',
+  },
+  'cli.runInfo': {
+    en: 'The installer asks which tool you use. Press Enter for the portable fallback, or pass --target. Noninteractive terminals use the fallback automatically.',
+    es: 'El instalador pregunta qué herramienta utilizas. Pulsa Enter para el fallback portátil o usa --target. Las terminales no interactivas usan el fallback automáticamente.',
+  },
+  'cli.target': { en: 'Target', es: 'Target' },
+  'cli.folder': { en: 'Project folder', es: 'Carpeta del proyecto' },
+  'cli.fallback': { en: 'Portable fallback', es: 'Fallback portátil' },
+  'cli.lock': { en: '4. Verify and reproduce', es: '4. Verifica y reproduce' },
+  'cli.lockInfo': {
+    en: 'Commit agent.json and agent-lock.json. Ignore .agentrepo/, which stores local installation state. verify checks content and permissions; frozen installs require the existing lock and never rewrite it.',
+    es: 'Guarda agent.json y agent-lock.json en Git. Ignora .agentrepo/, que contiene el estado local. verify comprueba contenido y permisos; una instalación frozen exige el lock existente y no lo reescribe.',
+  },
+  'cli.snapshots': {
+    en: 'Fixed versions. Read-only snapshots.',
+    es: 'Versiones fijas. Snapshots de solo lectura.',
+  },
+  'cli.snapshotInfo': {
+    en: 'Each skill is a SKILL.md snapshot with SHA-256 integrity pinned in agent-lock.json. On POSIX systems the file and its directory block ordinary writes. To customize, publish a new version or slug; to upgrade, change agent.json and install again.',
+    es: 'Cada skill es un snapshot SKILL.md con integridad SHA-256 fijada en agent-lock.json. En sistemas POSIX, el archivo y su carpeta bloquean escrituras ordinarias. Para personalizar, publica una versión o slug nuevos; para actualizar, cambia agent.json e instala de nuevo.',
+  },
+  'cli.restore': {
+    en: 'install restores altered managed snapshots. If a server changes an already locked version, installation stops and preserves the previous files. The CLI never executes downloaded skill content.',
+    es: 'install restaura snapshots gestionados alterados. Si el servidor cambia una versión ya fijada, la instalación se detiene y conserva los archivos anteriores. El CLI no ejecuta el contenido descargado.',
+  },
+  'cli.limits': {
+    en: 'Read-only permissions are not a security boundary against an owner who changes permissions, root or a compromised machine. Windows permissions differ. Hashes are not publisher signatures, and verification is not continuous: run verify before use. Review new skills before trusting their instructions.',
+    es: 'Solo lectura no es una barrera frente al propietario que cambie permisos, root o un equipo comprometido. Los permisos de Windows difieren. Los hashes no son firmas del editor y la verificación no es continua: ejecuta verify antes de usar las skills. Revisa las instrucciones de skills nuevas antes de confiar en ellas.',
+  },
+  'cli.docs': {
+    en: 'Full CLI documentation',
+    es: 'Documentación completa del CLI',
+  },
+  'cli.copy': { en: 'Copy', es: 'Copiar' },
+  'cli.copied': { en: 'Copied', es: 'Copiado' },
+  'cli.copyFailed': {
+    en: 'Select and copy manually',
+    es: 'Selecciona y copia manualmente',
+  },
+  'cli.scope': {
+    en: 'The CLI installs catalogue skills. Agent project guides are documentation, not installers for upstream agent runtimes.',
+    es: 'El CLI instala skills del catálogo. Las guías de proyectos de agentes son documentación, no instaladores de sus runtimes.',
+  },
   'nav.playground': { en: 'Playground', es: 'Playground' },
   'nav.portfolio': { en: 'Portfolio', es: 'Portfolio' },
   'nav.search': { en: 'Search', es: 'Buscar' },

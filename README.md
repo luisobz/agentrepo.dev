@@ -66,6 +66,7 @@ graph TD
 *   `trpc`: Enrutadores compartidos y esquemas de validación para una comunicación segura tipo-a-tipo.
 *   `ui`: Sistema de diseño modular y componentes interactivos reutilizables con Tailwind CSS.
 *   `config`: Tokens de configuración compartidos del monorepo.
+*   `cli`: [Instalador de skills](packages/cli/README.md) con `agent.json`, versiones exactas y snapshots de solo lectura.
 
 ---
 

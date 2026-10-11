@@ -1,0 +1,25 @@
+{
+  "name": "@agentrepo/cli",
+  "version": "0.1.0",
+  "description": "Install project-pinned AgentRepo skills for your coding tools",
+  "type": "module",
+  "bin": {
+    "agentrepo": "./bin/agentrepo.mjs"
+  },
+  "files": [
+    "bin",
+    "src",
+    "agent.schema.json",
+    "README.md",
+    "LICENSE"
+  ],
+  "engines": {
+    "node": ">=24"
+  },
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/luisobz/agentrepo.dev.git",
+    "directory": "packages/cli"
+  }
+}

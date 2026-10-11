@@ -1,0 +1,24 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "AgentRepo project manifest",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schemaVersion", "skills"],
+  "properties": {
+    "$schema": { "type": "string" },
+    "schemaVersion": { "const": 1 },
+    "registry": { "type": "string", "format": "uri", "pattern": "^https://" },
+    "skills": {
+      "type": "object",
+      "maxProperties": 100,
+      "propertyNames": {
+        "maxLength": 120,
+        "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+      },
+      "additionalProperties": {
+        "type": "string",
+        "pattern": "^(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)$"
+      }
+    }
+  }
+}

@@ -1,0 +1,22 @@
+{
+  "name": "cli",
+  "projectType": "library",
+  "sourceRoot": "packages/cli/src",
+  "tags": ["scope:shared"],
+  "targets": {
+    "build": {
+      "executor": "nx:run-commands",
+      "options": { "command": "node --check packages/cli/bin/agentrepo.mjs" }
+    },
+    "test": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "vitest run --config packages/cli/vitest.config.mts"
+      }
+    },
+    "lint": {
+      "executor": "nx:run-commands",
+      "options": { "command": "eslint packages/cli" }
+    }
+  }
+}

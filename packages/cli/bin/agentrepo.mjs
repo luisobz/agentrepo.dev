@@ -5,6 +5,8 @@ import { join } from 'node:path';
 import { InstallerError } from '../src/errors.mjs';
 import { runCommand } from '../src/commands.mjs';
 import { runInteractive } from '../src/interactive.mjs';
+import { chooseTarget } from '../src/prompt.mjs';
+import { readJson } from '../src/filesystem.mjs';
 const HELP = `AgentRepo CLI 0.2.0
 
   agentrepo                Abre el asistente interactivo
@@ -66,10 +68,21 @@ async function main() {
     );
     return;
   }
+  let target = values.target;
+  if (
+    !target &&
+    !['verify', 'reset'].includes(command) &&
+    process.stdin.isTTY &&
+    process.stdout.isTTY &&
+    !values.yes
+  ) {
+    const manifest = await readJson(root, 'agent.json', true);
+    if (!manifest?.target) target = await chooseTarget();
+  }
   const result = await runCommand({
     root,
     command,
-    target: values.target,
+    target,
     frozen: values['frozen-lockfile'],
     hard: values.hard,
   });

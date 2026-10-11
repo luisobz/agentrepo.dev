@@ -1,0 +1,30 @@
+name: Supabase database availability
+
+on:
+  schedule:
+    - cron: '43 */6 * * *'
+  workflow_dispatch:
+
+concurrency:
+  group: agentrepo-database-operations
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    name: Check ${{ matrix.target }} database
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    strategy:
+      fail-fast: false
+      matrix:
+        target: [production, preproduction]
+    steps:
+      - uses: actions/checkout@v4
+      - name: Query database in read-only mode
+        env:
+          DATABASE_URL: ${{ matrix.target == 'production' && secrets.PROD_MIGRATION_DATABASE_URL || secrets.PRE_MIGRATION_DATABASE_URL }}
+          PROJECT_REF: ${{ matrix.target == 'production' && vars.PROD_PROJECT_REF || vars.PRE_PROJECT_REF }}
+        run: bash scripts/db/check-availability.sh

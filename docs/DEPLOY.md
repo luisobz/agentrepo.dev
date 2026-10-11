@@ -189,3 +189,23 @@ CI y la puerta de verificación del despliegue ejecutan las pruebas desktop/móv
 El ensayo reinicia únicamente el esquema público del proyecto de preproducción validado antes de restaurar la copia. Esto permite repetirlo aunque el ensayo anterior añadiera relaciones que aún no existen en producción. Los cuatro despliegues exigen tanto ensayo como migración correctos; una migración omitida nunca habilita la publicación. `python3 tests/deployment/check-gates.py` comprueba estos escenarios en CI.
 
 Passenger termina HTTPS antes de enviar peticiones a Next.js. `WEB_APP_URL` y `ADMIN_APP_URL` deben contener los dominios públicos HTTPS correspondientes: se usan para validar Origin y construir redirecciones y callbacks, sin confiar en cabeceras Forwarded del cliente.
+
+## Disponibilidad y actividad de Supabase
+
+`database-availability.yml` consulta producción y preproducción cada seis horas
+(00:43, 06:43, 12:43 y 18:43 UTC). También admite ejecución manual desde Actions.
+Comprueba conexión, TLS con certificado verificado e historial de migraciones.
+Las consultas son de solo lectura, con timeout y tres intentos; no inserta datos
+ni cambia el esquema. Usa los secretos de mantenimiento ya existentes, sin
+exponer credenciales en argumentos o logs. Un error deja el Action en rojo;
+revisa las notificaciones de workflows de GitHub para recibir los fallos.
+
+Es actividad periódica real de base de datos para reducir el riesgo de pausa en
+Free, no una garantía de disponibilidad. Supabase considera el uso durante siete
+días y recomienda unas pocas consultas diarias. El plan de pago elimina la pausa
+por inactividad. Esta tarea no reactiva proyectos pausados ni cambia el plan.
+GitHub puede retrasar tareas programadas y desactivarlas en repositorios públicos
+tras 60 días sin actividad; hay que comprobar periódicamente sus ejecuciones.
+
+Fuentes: https://supabase.com/docs/guides/platform/free-project-pausing y
+https://docs.github.com/en/actions/reference/workflows-and-actions/events-that-trigger-workflows#schedule

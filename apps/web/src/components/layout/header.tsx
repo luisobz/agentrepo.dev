@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { AvatarSlot, useAvatar } from '@agentrepo/avatar';
 import { cn } from '@agentrepo/ui';
-import { Menu, X, ArrowUpRight, Search } from 'lucide-react';
+import { Menu, X, Search } from 'lucide-react';
 import { useT } from '../../lib/i18n/use-t';
 import { LocaleSwitcher } from './locale-switcher';
 import { AdminLink } from './admin-link';
@@ -123,15 +123,8 @@ export function Header() {
               <Link prefetch={true} href="/blog" className={navLinkClass}>
                 {t('nav.blog')}
               </Link>
-              <Link prefetch={true} href="/playground" className={navLinkClass}>
-                {t('nav.playground')}
-              </Link>
-              <Link
-                href="/portfolio/luisbz"
-                className={cn(navLinkClass, 'inline-flex items-center gap-0.5')}
-              >
-                {t('nav.portfolio')}
-                <ArrowUpRight className="w-3.5 h-3.5 opacity-60" />
+              <Link prefetch={true} href="/cli" className={navLinkClass}>
+                {t('nav.cli')}
               </Link>
             </nav>
 
@@ -269,20 +262,11 @@ export function Header() {
           </Link>
           <Link
             prefetch={mobileMenuOpen}
-            href="/playground"
+            href="/cli"
             onClick={() => setMobileMenuOpen(false)}
             className="font-sans text-sm font-semibold text-[var(--color-text-primary)] hover:text-[var(--color-brand-garnet)] py-2 border-b border-[var(--color-border-soft)]/40"
           >
-            {t('nav.playground')}
-          </Link>
-          <Link
-            prefetch={mobileMenuOpen}
-            href="/portfolio/luisbz"
-            onClick={() => setMobileMenuOpen(false)}
-            className="font-sans text-sm font-semibold text-[var(--color-text-primary)] hover:text-[var(--color-brand-garnet)] py-2 flex items-center justify-between"
-          >
-            <span>{t('nav.portfolio')}</span>
-            <ArrowUpRight className="w-4 h-4 opacity-60" />
+            {t('nav.cli')}
           </Link>
 
           <Link

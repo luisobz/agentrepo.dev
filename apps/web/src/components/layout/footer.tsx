@@ -27,7 +27,7 @@ export function Footer() {
         // breathing room above the warm-white chrome.
         onDark
           ? 'mt-0 border-white/10 bg-[#14110f]'
-          : 'mt-12 border-[var(--color-border-soft)] bg-[var(--color-bg-warm-white)]/60'
+          : 'mt-12 border-[var(--color-border-soft)] bg-[var(--color-bg-warm-white)]/60',
       )}
     >
       <div className="mx-auto flex w-full max-w-7xl flex-col items-center gap-6 px-6 py-10 sm:flex-row sm:justify-between">
@@ -37,7 +37,7 @@ export function Footer() {
             <p
               className={cn(
                 'font-mono text-sm font-semibold',
-                onDark && 'text-[#fdf8ef]'
+                onDark && 'text-[#fdf8ef]',
               )}
             >
               agentrepo
@@ -46,7 +46,7 @@ export function Footer() {
             <p
               className={cn(
                 'text-xs',
-                onDark ? 'text-[#8d8273]' : 'text-[var(--color-text-muted)]'
+                onDark ? 'text-[#8d8273]' : 'text-[var(--color-text-muted)]',
               )}
             >
               {t('footer.tagline')}
@@ -55,8 +55,8 @@ export function Footer() {
         </div>
         <nav
           className={cn(
-            'flex items-center gap-6 font-sans text-xs font-semibold uppercase tracking-wider',
-            onDark ? 'text-[#cfc6b8]' : 'text-[var(--color-text-secondary)]'
+            'flex flex-wrap justify-center items-center gap-6 font-sans text-xs font-semibold uppercase tracking-wider',
+            onDark ? 'text-[#cfc6b8]' : 'text-[var(--color-text-secondary)]',
           )}
         >
           <Link
@@ -77,8 +77,36 @@ export function Footer() {
           >
             {t('nav.blog')}
           </Link>
+          <Link
+            href="/cli"
+            className="transition-colors hover:text-[var(--color-brand-garnet)]"
+          >
+            {t('nav.cli')}
+          </Link>
         </nav>
       </div>
+      <nav
+        aria-label={t('footer.secondary')}
+        className={cn(
+          'mx-auto flex max-w-7xl flex-wrap justify-center gap-x-6 gap-y-2 border-t px-6 py-4 text-xs sm:justify-end',
+          onDark
+            ? 'border-white/10 text-[#8d8273]'
+            : 'border-[var(--color-border-soft)]/60 text-[var(--color-text-muted)]',
+        )}
+      >
+        <Link
+          href="/playground"
+          className="inline-flex min-h-8 items-center hover:underline"
+        >
+          {t('nav.playground')}
+        </Link>
+        <Link
+          href="/portfolio/luisbz"
+          className="inline-flex min-h-8 items-center hover:underline"
+        >
+          {t('nav.portfolio')}
+        </Link>
+      </nav>
     </footer>
   );
 }

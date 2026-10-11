@@ -25,3 +25,11 @@ editor; submitted links follow the usual admin review process. Project agents
 with an upstream repository display the readable guide before a collapsible
 files/downloads section. Initial editorial guides and metadata live in
 `content/agents/`; their version numbers describe the AgentRepo guide, not upstream.
+
+## CLI guide and navigation
+
+`/cli` documents the released CLI tarball, project `agent.json`, tool selection,
+lockfiles, read-only snapshots and integrity limits in English and Spanish.
+Commands and manifests have copy buttons. Skills, Agents, Blog and CLI form the
+main navigation; Playground and Portfolio live only in a secondary footer row.
+The CLI package version and release URL are pinned explicitly in the guide.

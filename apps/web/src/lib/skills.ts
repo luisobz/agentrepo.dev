@@ -7,8 +7,10 @@ export type Skill = RouterOutputs['skills']['bySlug'];
 export type SkillVersionDetail = RouterOutputs['skills']['byVersion'];
 export type SkillVersionSummary = RouterOutputs['skills']['versions'][number];
 
-export function getPublishedSkills(): Promise<Skill[]> {
-  return fetchAllPages((input) => serverTrpc.skills.list.query(input));
+export function getPublishedSkills(): Promise<
+  RouterOutputs['skills']['catalog']['items']
+> {
+  return fetchAllPages((input) => serverTrpc.skills.catalog.query(input));
 }
 
 /** Deduplicated per request so the page and its metadata share one fetch. */
@@ -22,7 +24,7 @@ export const getPublishedSkillBySlug = cache(
       }
       throw error;
     }
-  }
+  },
 );
 
 export const getSkillVersions = cache(
@@ -35,7 +37,7 @@ export const getSkillVersions = cache(
       }
       throw error;
     }
-  }
+  },
 );
 
 export const getSkillVersion = cache(
@@ -48,5 +50,5 @@ export const getSkillVersion = cache(
       }
       throw error;
     }
-  }
+  },
 );

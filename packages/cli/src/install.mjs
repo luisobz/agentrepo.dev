@@ -148,7 +148,20 @@ async function planSkillFiles(root, directory, previous, prepared) {
   return { changes, repaired };
 }
 async function installLocked(options, root) {
-  const manifest = parseManifest(await readJson(root, 'agent.json'));
+  const original = await readJson(
+    root,
+    'agent.json',
+    Boolean(options.manifest),
+  );
+  const originalHash = original
+    ? manifestIntegrity(parseManifest(original))
+    : null;
+  if (
+    options.expectedManifest !== undefined &&
+    options.expectedManifest !== originalHash
+  )
+    throw new InstallerError('agent.json cambió durante la operación.');
+  const manifest = parseManifest(options.manifest ?? original);
   const lock = validateLock(await readJson(root, 'agent-lock.json', true));
   const manifestHash = manifestIntegrity(manifest);
   if (
@@ -173,7 +186,7 @@ async function installLocked(options, root) {
       targets: {},
     },
   );
-  const target = options.target ?? 'agents';
+  const target = options.target ?? manifest.target ?? 'agents';
   const directory = targetDirectory(target);
   // Codex and the portable fallback share one physical destination and ownership.
   const stateTarget = target === 'codex' ? 'agents' : target;
@@ -188,12 +201,15 @@ async function installLocked(options, root) {
     prepared,
   );
   if (
-    manifestIntegrity(parseManifest(await readJson(root, 'agent.json'))) !==
-    manifestHash
+    JSON.stringify(
+      await readJson(root, 'agent.json', Boolean(options.manifest)),
+    ) !== JSON.stringify(original)
   )
     throw new InstallerError(
       'agent.json cambió durante la instalación; vuelve a intentarlo.',
     );
+  if (options.manifest)
+    changes.push({ path: 'agent.json', content: json(manifest) });
   const nextLock = {
     schemaVersion: 1,
     registry: manifest.registry,
@@ -248,8 +264,8 @@ export async function installSkills(options) {
 /** Read-only verification against the pinned public snapshot and local lock. */
 export async function verifyInstalledSkills(options) {
   const root = await realpath(options.root);
-  const directory = targetDirectory(options.target);
   const manifest = parseManifest(await readJson(root, 'agent.json'));
+  const directory = targetDirectory(options.target ?? manifest.target);
   const lock = validateLock(await readJson(root, 'agent-lock.json', true));
   if (
     !lock ||

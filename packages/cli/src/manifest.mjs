@@ -22,7 +22,9 @@ export function parseManifest(value) {
   if (
     Object.keys(value).some(
       (key) =>
-        !['schemaVersion', 'skills', 'registry', '$schema'].includes(key),
+        !['schemaVersion', 'skills', 'registry', '$schema', 'target'].includes(
+          key,
+        ),
     )
   )
     throw new InstallerError('agent.json contiene propiedades desconocidas.');
@@ -63,14 +65,21 @@ export function parseManifest(value) {
     throw new InstallerError(
       'Registry debe ser una URL HTTPS sin credenciales, query ni fragmento.',
     );
+  if (value.target !== undefined) targetDirectory(value.target);
   return {
+    ...(value.target ? { target: value.target } : {}),
     schemaVersion: 1,
     registry: url.toString().replace(/\/$/, ''),
     skills,
   };
 }
 export function manifestIntegrity(manifest) {
-  return integrity(JSON.stringify(manifest));
+  const portable = {
+    schemaVersion: manifest.schemaVersion,
+    registry: manifest.registry,
+    skills: manifest.skills,
+  };
+  return integrity(JSON.stringify(portable));
 }
 export function targetDirectory(target = 'agents') {
   if (!Object.hasOwn(TARGETS, target))

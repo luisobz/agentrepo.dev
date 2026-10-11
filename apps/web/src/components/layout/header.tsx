@@ -8,10 +8,11 @@ import { cn } from '@agentrepo/ui';
 import { Menu, X, Search } from 'lucide-react';
 import { useT } from '../../lib/i18n/use-t';
 import { LocaleSwitcher } from './locale-switcher';
-import { AdminLink } from './admin-link';
+import { AdminLink, useAdminAccess } from './admin-link';
 
 export function Header() {
   const t = useT();
+  const isAdmin = useAdminAccess();
   const pathname = usePathname();
   const [isScrolled, setIsScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -131,6 +132,7 @@ export function Header() {
             {/* CTA/Actions */}
             <div className="flex items-center gap-3">
               <AdminLink
+                isAdmin={isAdmin}
                 className={cn(
                   navLinkClass,
                   'hidden md:inline-flex items-center gap-1',
@@ -233,6 +235,7 @@ export function Header() {
         <AvatarSlot id="mobile-menu" className="absolute right-6 top-3" />
         <nav className="flex flex-col gap-4">
           <AdminLink
+            isAdmin={isAdmin}
             onClick={() => setMobileMenuOpen(false)}
             className="flex items-center gap-2 py-2 font-sans text-sm font-semibold text-[var(--color-brand-garnet)] border-b border-[var(--color-border-soft)]/40"
           />

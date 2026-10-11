@@ -1,3 +1,4 @@
+import { skillSummary } from './catalog-summary';
 import { redactPremiumSkill } from '@agentrepo/domain';
 import {
   adminListSchema,
@@ -16,6 +17,18 @@ import { adminProcedure, publicProcedure, router } from '../trpc';
 import { toVersionSummary } from './version-dto';
 
 export const skillsRouter = router({
+  catalog: publicProcedure
+    .input(paginationSchema)
+    .query(async ({ input, ctx }) => {
+      const page = await ctx.catalog.skills.list.execute({
+        ...input,
+        publishedOnly: true,
+      });
+      return {
+        ...page,
+        items: page.items.map((item) => skillSummary(redactPremiumSkill(item))),
+      };
+    }),
   list: publicProcedure
     .input(paginationSchema)
     .query(async ({ input, ctx }) => {
@@ -30,8 +43,8 @@ export const skillsRouter = router({
     .input(slugInputSchema)
     .query(async ({ input, ctx }) =>
       redactPremiumSkill(
-        await ctx.catalog.skills.getPublishedBySlug.execute(input.slug)
-      )
+        await ctx.catalog.skills.getPublishedBySlug.execute(input.slug),
+      ),
     ),
 
   search: publicProcedure
@@ -46,7 +59,7 @@ export const skillsRouter = router({
     .input(slugInputSchema)
     .query(async ({ input, ctx }) => {
       const entries = await ctx.catalog.skillVersions.listPublished.execute(
-        input.slug
+        input.slug,
       );
       return entries.map(toVersionSummary);
     }),
@@ -67,7 +80,7 @@ export const skillsRouter = router({
   recordDownload: publicProcedure
     .input(recordDownloadSchema)
     .mutation(({ input, ctx }) =>
-      ctx.catalog.skillVersions.recordDownload.execute(input)
+      ctx.catalog.skillVersions.recordDownload.execute(input),
     ),
 
   admin: router({
@@ -89,13 +102,15 @@ export const skillsRouter = router({
 
     delete: adminProcedure
       .input(idInputSchema)
-      .mutation(({ input, ctx }) => ctx.catalog.skills.remove.execute(input.id)),
+      .mutation(({ input, ctx }) =>
+        ctx.catalog.skills.remove.execute(input.id),
+      ),
 
     versions: adminProcedure
       .input(idInputSchema)
       .query(async ({ input, ctx }) => {
         const entries = await ctx.catalog.skillVersions.listForAdmin.execute(
-          input.id
+          input.id,
         );
         return entries.map(toVersionSummary);
       }),
@@ -108,7 +123,7 @@ export const skillsRouter = router({
           assetId: input.id,
           version: input.version,
           changelog: input.changelog,
-        })
+        }),
       ),
 
     /** Retags latest (npm dist-tag style) to a previously published version. */
@@ -118,7 +133,7 @@ export const skillsRouter = router({
         ctx.catalog.skillVersions.setLatest.execute({
           assetId: input.id,
           versionId: input.versionId,
-        })
+        }),
       ),
   }),
 });

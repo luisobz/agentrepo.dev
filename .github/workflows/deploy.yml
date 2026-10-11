@@ -160,8 +160,8 @@ jobs:
   # ---------------------------------------------------------------- WEB
   web:
     # !cancelled(): el job corre aunque migrate se haya saltado (dispatch selectivo)
-    if: ${{ !cancelled() && needs.verify.result == 'success' && needs.rehearse-migrations.result == 'success' && needs.migrate.result == 'success' && (github.event_name != 'workflow_dispatch' || inputs.only == 'all' || inputs.only == 'web') }}
-    needs: [verify, rehearse-migrations, migrate]
+    if: ${{ !cancelled() && needs.verify.result == 'success' && needs.rehearse-migrations.result == 'success' && needs.migrate.result == 'success' && (needs.backend-web.result == 'success' || (github.event_name == 'workflow_dispatch' && inputs.only == 'web' && needs.backend-web.result == 'skipped')) && (github.event_name != 'workflow_dispatch' || inputs.only == 'all' || inputs.only == 'web') }}
+    needs: [verify, rehearse-migrations, migrate, backend-web]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4

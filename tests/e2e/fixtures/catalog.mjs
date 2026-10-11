@@ -37,6 +37,19 @@ const shared = {
 };
 function read(path) {
   if (path.endsWith('.versions')) return [];
+  if (path === 'agents.catalog')
+    return {
+      items: [
+        {
+          ...shared,
+          shortDescription: 'An editorial project guide',
+          hasPlayground: true,
+        },
+      ],
+      total: 1,
+      page: 1,
+      pageSize: 100,
+    };
   if (path === 'agents.bySlug')
     return {
       ...shared,
@@ -77,6 +90,17 @@ createServer((request, response) => {
     result: {
       data: {
         json: read(path),
+        ...(path === 'agents.catalog'
+          ? {
+              meta: {
+                values: {
+                  'items.0.createdAt': ['Date'],
+                  'items.0.updatedAt': ['Date'],
+                },
+                v: 1,
+              },
+            }
+          : {}),
         ...(path.endsWith('bySlug') || path.endsWith('getPostBySlug')
           ? {
               meta: {

@@ -1,5 +1,5 @@
 import { afterEach, expect, it, vi } from 'vitest';
-import { fetchPublishedSkill } from '../src/registry.mjs';
+import { fetchPublishedSkill, fetchLatestVersion } from '../src/registry.mjs';
 afterEach(() => vi.unstubAllGlobals());
 it('requests the exact published version and preserves split Unicode bytes', async () => {
   const payload = {
@@ -45,4 +45,27 @@ it('rejects HTTP errors and invalid catalogue envelopes', async () => {
   await expect(
     fetchPublishedSkill('https://example.com', 'example', '1.0.0'),
   ).rejects.toThrow(/inválida/);
+});
+
+it('latest resolves the published head to a concrete version and rejects floating responses', async () => {
+  vi.stubGlobal(
+    'fetch',
+    async () =>
+      new Response(
+        JSON.stringify({ result: { data: { json: { version: '2.1.0' } } } }),
+      ),
+  );
+  expect(await fetchLatestVersion('https://example.com', 'example')).toBe(
+    '2.1.0',
+  );
+  vi.stubGlobal(
+    'fetch',
+    async () =>
+      new Response(
+        JSON.stringify({ result: { data: { json: { version: 'latest' } } } }),
+      ),
+  );
+  await expect(
+    fetchLatestVersion('https://example.com', 'example'),
+  ).rejects.toThrow(/latest inválida/);
 });

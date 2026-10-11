@@ -7,51 +7,75 @@ Nunca ejecuta el contenido descargado.
 
 ## Uso
 
-El paquete se distribuye como `agentrepo-cli-0.1.0.tgz` en las releases de GitHub,
-acompañado de `SHA256SUMS`. No requiere dependencias en tiempo de ejecución.
-Después de descargar y comprobar el checksum del paquete:
+Instala una vez y ejecuta `agentrepo` dentro de tu proyecto:
 
 ```sh
-pnpm --package=/ruta/agentrepo-cli-0.1.0.tgz dlx agentrepo init
-pnpm --package=/ruta/agentrepo-cli-0.1.0.tgz dlx agentrepo install
-pnpm --package=/ruta/agentrepo-cli-0.1.0.tgz dlx agentrepo verify
+pnpm add -g https://github.com/luisobz/agentrepo.dev/releases/download/v0.4.0/agentrepo-cli-0.2.0.tgz
+agentrepo
 ```
 
-`init` crea un manifiesto vacío sin sobrescribir uno existente. Añade las skills
-publicadas que necesites y sus versiones exactas:
+Requiere Node.js 24+ y pnpm. Si pnpm pide configurar el PATH global, ejecuta
+`pnpm setup` y abre otra terminal. El asistente permite instalar, añadir skills,
+verificar, restaurar snapshots y elegir herramienta. Crea `agent.json` y recuerda
+el target. Enter selecciona `.agents/skills`. Sin TTY muestra ayuda sin modificar
+el proyecto.
+
+Comandos directos:
+
+```sh
+agentrepo skill2@latest
+agentrepo verify
+agentrepo install
+agentrepo reset --hard
+```
+
+`skill2` es ilustrativo: utiliza un slug publicado. También admite `skill2@1.0.0`.
+`latest` se resuelve una vez y se guarda como versión exacta. Una adición fallida
+no modifica el manifiesto ni los snapshots anteriores.
 
 ```json
 {
   "schemaVersion": 1,
-  "skills": {
-    "code-review": "1.0.0"
-  }
+  "target": "claude",
+  "skills": { "code-review": "1.0.0" }
 }
 ```
 
-`code-review` es un ejemplo de formato, no una promesa de disponibilidad en el
-catálogo. No se admiten `latest`, rangos o resolución automática de versiones.
-El registry predeterminado es `https://agentrepo.dev/web/api/v1`; un registry
-alternativo debe ser HTTPS, sin credenciales, query ni fragmento.
+Los slugs del ejemplo no garantizan disponibilidad. `skills` requiere versiones
+exactas; los comandos resuelven `latest`. `target` es opcional, con fallback
+`.agents/skills`. `registry` es opcional y predetermina
+`https://agentrepo.dev/web/api/v1`; alternativas deben ser HTTPS sin credenciales,
+query ni fragmento.
 
-Durante `install` y `verify` se pregunta la herramienta en terminales interactivas.
-Enter, `--yes` o una terminal no interactiva seleccionan `.agents/skills`.
-También puedes elegir explícitamente `--target`:
+| Target         | Carpeta del proyecto |
+| -------------- | -------------------- |
+| agents / codex | `.agents/skills`     |
+| claude         | `.claude/skills`     |
+| cursor         | `.cursor/skills`     |
+| copilot        | `.github/skills`     |
 
-| Target              | Carpeta del proyecto |
-| ------------------- | -------------------- |
-| `agents` (fallback) | `.agents/skills`     |
-| `codex`             | `.agents/skills`     |
-| `claude`            | `.claude/skills`     |
-| `cursor`            | `.cursor/skills`     |
-| `copilot`           | `.github/skills`     |
-
-Rutas basadas en documentación oficial de [Codex](https://developers.openai.com/blog/skills-agents-sdk),
+Rutas documentadas por [Codex](https://developers.openai.com/blog/skills-agents-sdk),
 [Claude Code](https://code.claude.com/docs/en/skills), [Cursor](https://cursor.com/docs/skills)
 y [GitHub Copilot](https://docs.github.com/en/copilot/how-tos/copilot-on-github/customize-copilot/customize-cloud-agent/add-skills).
-La ejecución del paquete usa [pnpm dlx](https://pnpm.io/10.x/cli/dlx).
-Puedes repetir la instalación para otras herramientas; Codex y el fallback
-comparten destino y propiedad. `--cwd /ruta/proyecto` cambia el proyecto.
+
+`reset --hard` exige un lock compatible y restaura los snapshots gestionados y
+los permisos de solo lectura. No actualiza versiones, no borra código ni archivos
+ajenos y sigue rechazando symlinks o mutaciones remotas. Si se forzaron permisos
+para añadir archivos ajenos dentro de una skill, muévelos fuera antes de
+restaurar: nunca se eliminan silenciosamente.
+
+<details>
+<summary>Opciones avanzadas y CI</summary>
+
+Se conservan `init`, `--cwd`, `--target`, `--yes` y `--frozen-lockfile` para
+compatibilidad y automatización. Un target explícito al instalar se recuerda.
+El lock es portable entre herramientas.
+
+```sh
+agentrepo install --frozen-lockfile
+```
+
+</details>
 
 ## Snapshots fijos de solo lectura
 

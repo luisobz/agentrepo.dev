@@ -351,3 +351,34 @@ describe('domain error mapping', () => {
     );
   });
 });
+
+it('public catalogue uses summaries while detail bodies remain on existing endpoints', async () => {
+  const catalog = buildCatalogStub();
+  catalog.agents.list.execute = vi
+    .fn()
+    .mockResolvedValue({
+      items: [
+        {
+          slug: 'example',
+          isPremium: false,
+          fileTree: [],
+          readmeContent: 'large body',
+          previewContent: 'preview',
+        },
+      ],
+      total: 1,
+      page: 1,
+      pageSize: 20,
+    });
+  const caller = appRouter.createCaller(buildContext({ catalog }));
+  const page = await caller.agents.catalog({ page: 1, pageSize: 20 });
+  expect(page.items[0]).toMatchObject({
+    slug: 'example',
+    hasPlayground: false,
+  });
+  expect(page.items[0]).not.toHaveProperty('fileTree');
+  expect(page.items[0]).not.toHaveProperty('readmeContent');
+  expect(catalog.agents.list.execute).toHaveBeenCalledWith(
+    expect.objectContaining({ publishedOnly: true }),
+  );
+});

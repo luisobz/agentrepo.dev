@@ -5,8 +5,10 @@ import { serverTrpc } from './trpc-server';
 
 export type BlogPost = RouterOutputs['blog']['getPostBySlug'];
 
-export function getPublishedPosts(): Promise<BlogPost[]> {
-  return fetchAllPages((input) => serverTrpc.blog.getPosts.query(input));
+export function getPublishedPosts(): Promise<
+  RouterOutputs['blog']['catalog']['items']
+> {
+  return fetchAllPages((input) => serverTrpc.blog.catalog.query(input));
 }
 
 /** Deduplicated per request so the page and its metadata share one fetch. */
@@ -20,5 +22,5 @@ export const getPublishedPostBySlug = cache(
       }
       throw error;
     }
-  }
+  },
 );

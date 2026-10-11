@@ -5,9 +5,17 @@
   "additionalProperties": false,
   "required": ["schemaVersion", "skills"],
   "properties": {
-    "$schema": { "type": "string" },
-    "schemaVersion": { "const": 1 },
-    "registry": { "type": "string", "format": "uri", "pattern": "^https://" },
+    "$schema": {
+      "type": "string"
+    },
+    "schemaVersion": {
+      "const": 1
+    },
+    "registry": {
+      "type": "string",
+      "format": "uri",
+      "pattern": "^https://"
+    },
     "skills": {
       "type": "object",
       "maxProperties": 100,
@@ -19,6 +27,10 @@
         "type": "string",
         "pattern": "^(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)$"
       }
+    },
+    "target": {
+      "type": "string",
+      "enum": ["agents", "codex", "claude", "cursor", "copilot"]
     }
   }
 }

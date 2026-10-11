@@ -20,50 +20,58 @@ interface LatestEntry {
 
 const FEED_SIZE = 6;
 
-async function fetchLatest(locale: Awaited<ReturnType<typeof getServerLocale>>): Promise<LatestEntry[]> {
+async function fetchLatest(
+  locale: Awaited<ReturnType<typeof getServerLocale>>,
+): Promise<LatestEntry[]> {
   const [skills, agents, posts] = await Promise.all([
-    serverTrpc.skills.list.query({ page: 1, pageSize: FEED_SIZE }),
-    serverTrpc.agents.list.query({ page: 1, pageSize: FEED_SIZE }),
-    serverTrpc.blog.getPosts.query({ page: 1, pageSize: FEED_SIZE }),
+    serverTrpc.skills.catalog.query({ page: 1, pageSize: FEED_SIZE }),
+    serverTrpc.agents.catalog.query({ page: 1, pageSize: FEED_SIZE }),
+    serverTrpc.blog.catalog.query({ page: 1, pageSize: FEED_SIZE }),
   ]);
 
   const entries: LatestEntry[] = [
-    ...skills.items.map((skill): LatestEntry => ({
-      id: skill.id,
-      kind: 'skill',
-      title: skill.title,
-      description: skill.description,
-      href: `/skills/${skill.slug}`,
-      createdAt: skill.createdAt,
-      imageUrl: skill.headerImageUrl,
-      skillType: skill.type,
-      premiumPrice:
-        skill.isPremium && skill.priceCents != null
-          ? formatPrice(skill.priceCents, skill.currency, locale)
-          : undefined,
-    })),
-    ...agents.items.map((agent): LatestEntry => ({
-      id: agent.id,
-      kind: 'agent',
-      title: agent.title,
-      description: agent.shortDescription,
-      href: `/agents/${agent.slug}`,
-      createdAt: agent.createdAt,
-      imageUrl: agent.headerImageUrl,
-      premiumPrice:
-        agent.isPremium && agent.priceCents != null
-          ? formatPrice(agent.priceCents, agent.currency, locale)
-          : undefined,
-    })),
-    ...posts.items.map((post): LatestEntry => ({
-      id: post.id,
-      kind: 'blog',
-      title: post.title,
-      description: post.excerpt,
-      href: `/blog/${post.slug}`,
-      createdAt: post.createdAt,
-      imageUrl: post.headerImageUrl,
-    })),
+    ...skills.items.map(
+      (skill): LatestEntry => ({
+        id: skill.id,
+        kind: 'skill',
+        title: skill.title,
+        description: skill.description,
+        href: `/skills/${skill.slug}`,
+        createdAt: skill.createdAt,
+        imageUrl: skill.headerImageUrl,
+        skillType: skill.type,
+        premiumPrice:
+          skill.isPremium && skill.priceCents != null
+            ? formatPrice(skill.priceCents, skill.currency, locale)
+            : undefined,
+      }),
+    ),
+    ...agents.items.map(
+      (agent): LatestEntry => ({
+        id: agent.id,
+        kind: 'agent',
+        title: agent.title,
+        description: agent.shortDescription,
+        href: `/agents/${agent.slug}`,
+        createdAt: agent.createdAt,
+        imageUrl: agent.headerImageUrl,
+        premiumPrice:
+          agent.isPremium && agent.priceCents != null
+            ? formatPrice(agent.priceCents, agent.currency, locale)
+            : undefined,
+      }),
+    ),
+    ...posts.items.map(
+      (post): LatestEntry => ({
+        id: post.id,
+        kind: 'blog',
+        title: post.title,
+        description: post.excerpt,
+        href: `/blog/${post.slug}`,
+        createdAt: post.createdAt,
+        imageUrl: post.headerImageUrl,
+      }),
+    ),
   ];
 
   return entries
@@ -79,7 +87,10 @@ export async function LatestSection() {
   return (
     <section aria-labelledby="latest-heading" className="pb-8">
       <div className="mb-6 flex items-baseline justify-between">
-        <h2 id="latest-heading" className="text-2xl font-semibold tracking-tight">
+        <h2
+          id="latest-heading"
+          className="text-2xl font-semibold tracking-tight"
+        >
           {t('latest.title')}
         </h2>
         <p className="font-mono text-xs text-[var(--color-text-muted)]">

@@ -8,8 +8,10 @@ export type Agent = RouterOutputs['agents']['bySlug'];
 export type AgentVersionDetail = RouterOutputs['agents']['byVersion'];
 export type AgentVersionSummary = RouterOutputs['agents']['versions'][number];
 
-export function getPublishedAgents(): Promise<Agent[]> {
-  return fetchAllPages((input) => serverTrpc.agents.list.query(input));
+export function getPublishedAgents(): Promise<
+  RouterOutputs['agents']['catalog']['items']
+> {
+  return fetchAllPages((input) => serverTrpc.agents.catalog.query(input));
 }
 
 /** Deduplicated per request so the page and its metadata share one fetch. */
@@ -23,7 +25,7 @@ export const getPublishedAgentBySlug = cache(
       }
       throw error;
     }
-  }
+  },
 );
 
 export const getAgentVersions = cache(
@@ -36,7 +38,7 @@ export const getAgentVersions = cache(
       }
       throw error;
     }
-  }
+  },
 );
 
 export const getAgentVersion = cache(
@@ -49,7 +51,7 @@ export const getAgentVersion = cache(
       }
       throw error;
     }
-  }
+  },
 );
 
 const PLAYGROUND_NAMES = new Set(['demo', 'playground', 'examples']);
@@ -59,7 +61,9 @@ function nodeIndicatesPlayground(node: FileTreeNode): boolean {
   if (PLAYGROUND_NAMES.has(baseName)) {
     return true;
   }
-  return node.type === 'directory' && node.children.some(nodeIndicatesPlayground);
+  return (
+    node.type === 'directory' && node.children.some(nodeIndicatesPlayground)
+  );
 }
 
 /**
@@ -72,8 +76,7 @@ export function hasPlayground(fileTree: FileTree): boolean {
 
 export function countFiles(fileTree: FileTree): number {
   return fileTree.reduce(
-    (sum, node) =>
-      sum + (node.type === 'file' ? 1 : countFiles(node.children)),
-    0
+    (sum, node) => sum + (node.type === 'file' ? 1 : countFiles(node.children)),
+    0,
   );
 }

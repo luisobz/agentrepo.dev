@@ -7,10 +7,10 @@ import { runCommand } from '../src/commands.mjs';
 import { runInteractive } from '../src/interactive.mjs';
 import { chooseTarget } from '../src/prompt.mjs';
 import { readJson } from '../src/filesystem.mjs';
-const HELP = `AgentRepo CLI 0.2.0
+const HELP = `AgentRepo CLI 0.2.1
 
   agentrepo                Abre el asistente interactivo
-  agentrepo skill2@latest   Añade una skill y fija la versión resuelta
+  agentrepo skill2          Añade una skill y fija la versión resuelta
   agentrepo verify          Verifica snapshots e integridad
   agentrepo install         Instala las skills del proyecto
   agentrepo reset --hard    Restaura snapshots según el lock; no borra tu código
@@ -34,7 +34,7 @@ async function main() {
     },
   });
   if (values.version) {
-    console.log('0.2.0');
+    console.log('0.2.1');
     return;
   }
   if (values.help) {

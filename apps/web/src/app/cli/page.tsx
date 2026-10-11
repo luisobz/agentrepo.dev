@@ -7,9 +7,10 @@ export const metadata: Metadata = {
   description:
     'Install pinned skill snapshots with pnpm and agent.json. Choose your tool, verify integrity and reproduce installations.',
 };
-const RELEASE = 'https://github.com/luisobz/agentrepo.dev/releases/tag/v0.4.0';
+const RELEASE =
+  'https://github.com/luisobz/agentrepo.dev/releases/tag/cli-v0.2.1';
 const PACKAGE =
-  'https://github.com/luisobz/agentrepo.dev/releases/download/v0.4.0/agentrepo-cli-0.2.0.tgz';
+  'https://github.com/luisobz/agentrepo.dev/releases/download/cli-v0.2.1/agentrepo-cli-0.2.1.tgz';
 const MANIFEST = JSON.stringify(
   {
     schemaVersion: 1,
@@ -33,7 +34,7 @@ export default async function CliPage() {
     <div className="mx-auto w-full min-w-0 max-w-4xl px-4 pb-20 sm:px-6">
       <header className="mb-10 mt-6">
         <p className="font-mono text-xs font-semibold uppercase tracking-widest text-[var(--color-brand-garnet)]">
-          AgentRepo CLI · 0.2.0
+          AgentRepo CLI · 0.2.1
         </p>
         <h1 className="mt-4 text-4xl font-semibold tracking-tight sm:text-5xl">
           {t('cli.title')}
@@ -50,10 +51,11 @@ export default async function CliPage() {
           <p className="leading-relaxed text-[var(--color-text-secondary)]">
             {t('cli.installInfo')}
           </p>
-          <CodeBlock
-            label="Terminal"
-            code={`pnpm add -g ${PACKAGE}\nagentrepo`}
-          />
+          <CodeBlock label={t('cli.install')} code={`pnpm add -g ${PACKAGE}`} />
+          <p className="leading-relaxed text-[var(--color-text-secondary)]">
+            {t('cli.launchInfo')}
+          </p>
+          <CodeBlock label="Terminal" code="agentrepo" />
           <a
             href={RELEASE}
             className="inline-flex min-h-10 items-center text-sm font-medium text-[var(--color-brand-garnet)] underline underline-offset-4"
@@ -82,7 +84,12 @@ export default async function CliPage() {
           </p>
           <CodeBlock
             label="Commands"
-            code="agentrepo skill2@latest\nagentrepo verify\nagentrepo install\nagentrepo reset --hard"
+            code={[
+              'agentrepo skill2',
+              'agentrepo verify',
+              'agentrepo install',
+              'agentrepo reset --hard',
+            ].join('\n')}
           />
           <div className="overflow-x-auto rounded-xl border border-[var(--color-border-soft)]">
             <table className="w-full text-left text-sm">
@@ -131,9 +138,6 @@ export default async function CliPage() {
           </h2>
           <p className="leading-relaxed text-[var(--color-text-secondary)]">
             {t('cli.snapshotInfo')}
-          </p>
-          <p className="leading-relaxed text-[var(--color-text-secondary)]">
-            {t('cli.restore')}
           </p>
           <p className="text-sm leading-relaxed text-[var(--color-text-muted)]">
             {t('cli.limits')}

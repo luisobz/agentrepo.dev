@@ -26,7 +26,7 @@ export async function runCommand(options) {
       /^([a-z0-9]+(?:-[a-z0-9]+)*)(?:@(latest|(?:0|[1-9]\d*)\.(?:0|[1-9]\d*)\.(?:0|[1-9]\d*)))?$/,
     );
     if (!match || match[1].length > 120)
-      throw new InstallerError('Utiliza agentrepo skill@latest o skill@1.0.0.');
+      throw new InstallerError('Utiliza agentrepo skill o skill@1.0.0.');
     const [, slug, requested = 'latest'] = match;
     const version =
       requested === 'latest'

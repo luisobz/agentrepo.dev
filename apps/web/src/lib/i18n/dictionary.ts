@@ -136,13 +136,17 @@ export const webDictionary = {
     es: 'Skills fijadas a tu proyecto.',
   },
   'cli.intro': {
-    en: 'Install the exact skills your project needs. Choose your coding tool and keep every installation reproducible with agent.json.',
-    es: 'Instala las skills exactas que necesita tu proyecto. Elige tu herramienta y mantén cada instalación reproducible con agent.json.',
+    en: 'Add skills to your project with an interactive CLI.',
+    es: 'Añade skills a tu proyecto con un CLI interactivo.',
   },
   'cli.install': { en: '1. Install the CLI', es: '1. Instala el CLI' },
   'cli.installInfo': {
-    en: 'Install once with Node.js 24+ and pnpm. Then run agentrepo inside your project to open the assistant. If pnpm asks to configure its global PATH, run pnpm setup and reopen your terminal.',
-    es: 'Instala una vez con Node.js 24+ y pnpm. Después ejecuta agentrepo dentro de tu proyecto para abrir el asistente. Si pnpm pide configurar su PATH global, ejecuta pnpm setup y abre de nuevo la terminal.',
+    en: 'Requires Node.js 24+ and pnpm. Install once. If pnpm requests a global PATH, run pnpm setup and reopen your terminal.',
+    es: 'Requiere Node.js 24+ y pnpm. Instálalo una vez. Si pnpm pide configurar el PATH global, ejecuta pnpm setup y abre otra terminal.',
+  },
+  'cli.launchInfo': {
+    en: 'Inside your project, open the menu to choose your tool and add skills:',
+    es: 'Dentro de tu proyecto, abre el menú para elegir herramienta y añadir skills:',
   },
   'cli.release': { en: 'Release & checksums', es: 'Release y checksums' },
   'cli.manifest': {
@@ -150,44 +154,44 @@ export const webDictionary = {
     es: 'La configuración de tu proyecto',
   },
   'cli.manifestInfo': {
-    en: 'The assistant creates agent.json, remembers your tool and manages skill versions. You can also edit it directly. These names are illustrative; use skills published in the catalogue.',
-    es: 'El asistente crea agent.json, recuerda tu herramienta y gestiona las versiones. También puedes editarlo directamente. Los nombres son ilustrativos: utiliza skills publicadas en el catálogo.',
+    en: 'agent.json records your tool and the skills installed in this project. The CLI creates and updates it for you. Example:',
+    es: 'agent.json guarda tu herramienta y las skills instaladas en este proyecto. El CLI lo crea y actualiza por ti. Ejemplo:',
   },
   'cli.fields': {
-    en: 'schemaVersion is 1. target remembers your tool; the fallback is .agents/skills. skills contains exact versions. @latest resolves the published version once and pins it here.',
-    es: 'schemaVersion es 1. target recuerda tu herramienta; el fallback es .agents/skills. skills contiene versiones exactas. @latest resuelve la versión publicada una vez y la fija aquí.',
+    en: 'target chooses the installation folder; skills maps each skill name to its version. These names are examples. Without a target, the CLI uses .agents/skills.',
+    es: 'target elige la carpeta de instalación; skills relaciona cada nombre con su versión. Los nombres son ejemplos. Sin target se usa .agents/skills.',
   },
   'cli.run': {
     en: 'Short commands, when you need them',
     es: 'Comandos cortos, cuando los necesites',
   },
   'cli.runInfo': {
-    en: 'agentrepo opens the menu to install, add skills, verify, restore snapshots or change your tool. These commands also work directly; your tool is remembered. skill2 is illustrative. reset --hard restores locked snapshots without deleting your project files.',
-    es: 'agentrepo abre el menú para instalar, añadir skills, verificar, restaurar snapshots o cambiar de herramienta. Estos comandos también funcionan directamente; tu herramienta queda recordada. skill2 es ilustrativo. reset --hard restaura snapshots fijados sin borrar archivos del proyecto.',
+    en: 'Use a published skill name instead of skill2. Its latest version is selected automatically; @latest is optional. For a specific version, use skill2@1.0.0.',
+    es: 'Sustituye skill2 por el nombre de una skill publicada. Se elige la última versión automáticamente; @latest es opcional. Para una versión concreta, usa skill2@1.0.0.',
   },
   'cli.target': { en: 'Target', es: 'Target' },
   'cli.folder': { en: 'Project folder', es: 'Carpeta del proyecto' },
   'cli.fallback': { en: 'Portable fallback', es: 'Fallback portátil' },
   'cli.lock': { en: 'Reproducible by default', es: 'Reproducible por defecto' },
   'cli.lockInfo': {
-    en: 'Commit agent.json and agent-lock.json. Ignore .agentrepo/, which stores local state. install respects pinned versions and verify checks content and permissions.',
-    es: 'Guarda agent.json y agent-lock.json en Git. Ignora .agentrepo/, que contiene el estado local. install respeta las versiones fijadas y verify comprueba contenido y permisos.',
+    en: 'Commit agent.json and agent-lock.json to keep the same versions across installations. Add .agentrepo/ to .gitignore.',
+    es: 'Guarda agent.json y agent-lock.json en Git para repetir la instalación con las mismas versiones. Añade .agentrepo/ a .gitignore.',
   },
   'cli.snapshots': {
-    en: 'Fixed versions. Read-only snapshots.',
-    es: 'Versiones fijas. Snapshots de solo lectura.',
+    en: 'Read-only skills',
+    es: 'Skills de solo lectura',
   },
   'cli.snapshotInfo': {
-    en: 'Each skill is a SKILL.md snapshot with SHA-256 integrity pinned in agent-lock.json. On POSIX systems the file and its directory block ordinary writes. To customize, publish a new version or slug; to upgrade, change agent.json and install again.',
-    es: 'Cada skill es un snapshot SKILL.md con integridad SHA-256 fijada en agent-lock.json. En sistemas POSIX, el archivo y su carpeta bloquean escrituras ordinarias. Para personalizar, publica una versión o slug nuevos; para actualizar, cambia agent.json e instala de nuevo.',
+    en: 'Skills are installed read-only and checked against SHA-256 hashes. verify detects changes; reset --hard restores them without deleting your project files.',
+    es: 'Las skills se instalan en modo solo lectura y se comprueban con hashes SHA-256. verify detecta cambios; reset --hard las restaura sin borrar archivos del proyecto.',
   },
   'cli.restore': {
     en: 'install restores altered managed snapshots. If a server changes an already locked version, installation stops and preserves the previous files. The CLI never executes downloaded skill content.',
     es: 'install restaura snapshots gestionados alterados. Si el servidor cambia una versión ya fijada, la instalación se detiene y conserva los archivos anteriores. El CLI no ejecuta el contenido descargado.',
   },
   'cli.limits': {
-    en: 'Read-only permissions are not a security boundary against an owner who changes permissions, root or a compromised machine. Windows permissions differ. Hashes are not publisher signatures, and verification is not continuous: run verify before use. Review new skills before trusting their instructions.',
-    es: 'Solo lectura no es una barrera frente al propietario que cambie permisos, root o un equipo comprometido. Los permisos de Windows difieren. Los hashes no son firmas del editor y la verificación no es continua: ejecuta verify antes de usar las skills. Revisa las instrucciones de skills nuevas antes de confiar en ellas.',
+    en: 'Read-only permissions do not prevent changes by the owner or root. Hashes check integrity, not authorship. Review new skills before use.',
+    es: 'Los permisos de solo lectura no impiden cambios del propietario o root. Los hashes comprueban integridad, no autoría. Revisa las skills nuevas antes de usarlas.',
   },
   'cli.docs': {
     en: 'Full CLI documentation',

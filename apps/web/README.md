@@ -45,4 +45,6 @@ existing user/role checks. See Supabase SSR auth-method documentation.
 Public pages use anonymous cached `*.catalog` summary endpoints, excluding
 snapshot bodies and file trees; detail APIs remain compatible. Catalogue SQL
 reads run list/count concurrently, with no changes to write transactions.
-The CLI guide documents global CLI 0.2.0 and the interactive entry point.
+The CLI guide documents global CLI 0.2.1 and the interactive entry point.
+
+CLI releases use their own cli-vX.Y.Z tags and workflow; platform releases do not package the CLI.

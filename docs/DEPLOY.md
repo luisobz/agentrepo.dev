@@ -3,6 +3,13 @@
 Guía del pipeline de despliegue (`.github/workflows/deploy.yml`) y de la
 configuración necesaria en el hosting.
 
+## Releases del CLI
+
+El CLI se publica mediante `.github/workflows/release-cli.yml` con tags
+`cli-vX.Y.Z`, coincidentes con `packages/cli/package.json`. Ese flujo valida,
+prueba y empaqueta el CLI sin desplegar servicios. Los tags `vX.Y.Z` siguen
+publicando la plataforma y ya no adjuntan paquetes del CLI.
+
 ## Modelo de hosting
 
 - Todo lo que cuelga del docroot `agentrepo.dev/` del hosting es **público**.

@@ -418,16 +418,6 @@ jobs:
       contents: write
     steps:
       - uses: actions/checkout@v4
-      - uses: pnpm/action-setup@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: ${{ env.NODE_VERSION }}
-      - name: Package project skill installer
-        run: |
-          mkdir -p "$RUNNER_TEMP/cli"
-          pnpm --dir packages/cli pack --pack-destination "$RUNNER_TEMP/cli"
-          cd "$RUNNER_TEMP/cli"
-          sha256sum ./*.tgz > SHA256SUMS
       - name: Publish GitHub release
         env:
           GH_TOKEN: ${{ github.token }}
@@ -441,12 +431,3 @@ jobs:
             --verify-tag \
             --generate-notes
           fi
-          for asset in "$RUNNER_TEMP/cli/"*.tgz "$RUNNER_TEMP/cli/SHA256SUMS"; do
-            name=$(basename "$asset")
-            if gh release view "$GITHUB_REF_NAME" --repo "$GITHUB_REPOSITORY" --json assets \
-              --jq '.assets[].name' | grep -Fxq "$name"; then
-              echo "Asset $name already exists; keeping immutable release artifact"
-            else
-              gh release upload "$GITHUB_REF_NAME" "$asset" --repo "$GITHUB_REPOSITORY"
-            fi
-          done

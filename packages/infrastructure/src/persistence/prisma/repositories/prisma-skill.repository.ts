@@ -48,7 +48,7 @@ export class PrismaSkillRepository implements SkillRepository {
       ...(params.search ? buildSearchFilter(params.search) : {}),
     };
 
-    const [rows, total] = await this.prisma.$transaction([
+    const [rows, total] = await Promise.all([
       this.prisma.skill.findMany({
         where,
         include: { author: { select: { name: true } } },

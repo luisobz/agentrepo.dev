@@ -5,8 +5,7 @@ import { Play } from 'lucide-react';
 import { getServerLocale, getServerT } from '../../lib/i18n/server';
 import { formatPrice } from '../../lib/format-price';
 import { formatDate } from '../../lib/public-content';
-import { getPublishedAgents, hasPlayground } from '../../lib/agents';
-
+import { getPublishedAgents } from '../../lib/agents';
 
 export const metadata: Metadata = {
   title: 'Agents | AgentRepo.dev',
@@ -49,33 +48,34 @@ export default async function AgentsPage() {
                 className="h-28 w-full"
               />
               <div className="flex flex-1 flex-col p-6">
-              <div className="flex flex-wrap items-center gap-3">
-                <span className="font-mono text-xs text-[var(--color-text-muted)]">
-                  v{agent.version}
-                </span>
-                {hasPlayground(agent.fileTree) && (
-                  <span className="inline-flex items-center gap-1 rounded-full bg-[var(--color-brand-garnet-ghost)] px-2.5 py-0.5 text-xs font-medium text-[var(--color-brand-garnet)]">
-                    <Play className="h-3 w-3" /> {t('common.demoIncluded')}
+                <div className="flex flex-wrap items-center gap-3">
+                  <span className="font-mono text-xs text-[var(--color-text-muted)]">
+                    v{agent.version}
                   </span>
-                )}
-                {agent.isPremium && agent.priceCents != null && (
-                  <span className="rounded-full bg-[var(--color-brand-garnet-ghost)] px-2.5 py-0.5 text-xs font-medium text-[var(--color-brand-garnet)]">
-                    {t('premium.badge')} · {formatPrice(agent.priceCents, agent.currency, locale)}
-                  </span>
-                )}
-              </div>
-              <h2 className="mt-3 text-lg font-semibold leading-snug text-[var(--color-text-primary)] transition-colors group-hover:text-[var(--color-brand-garnet)]">
-                {agent.title}
-              </h2>
-              <p className="mt-2 line-clamp-3 text-sm leading-relaxed text-[var(--color-text-secondary)]">
-                {agent.shortDescription}
-              </p>
-              <time
-                dateTime={agent.updatedAt.toISOString()}
-                className="mt-auto pt-4 font-mono text-xs text-[var(--color-text-muted)]"
-              >
-                {t('common.updated')} {formatDate(agent.updatedAt)}
-              </time>
+                  {agent.hasPlayground && (
+                    <span className="inline-flex items-center gap-1 rounded-full bg-[var(--color-brand-garnet-ghost)] px-2.5 py-0.5 text-xs font-medium text-[var(--color-brand-garnet)]">
+                      <Play className="h-3 w-3" /> {t('common.demoIncluded')}
+                    </span>
+                  )}
+                  {agent.isPremium && agent.priceCents != null && (
+                    <span className="rounded-full bg-[var(--color-brand-garnet-ghost)] px-2.5 py-0.5 text-xs font-medium text-[var(--color-brand-garnet)]">
+                      {t('premium.badge')} ·{' '}
+                      {formatPrice(agent.priceCents, agent.currency, locale)}
+                    </span>
+                  )}
+                </div>
+                <h2 className="mt-3 text-lg font-semibold leading-snug text-[var(--color-text-primary)] transition-colors group-hover:text-[var(--color-brand-garnet)]">
+                  {agent.title}
+                </h2>
+                <p className="mt-2 line-clamp-3 text-sm leading-relaxed text-[var(--color-text-secondary)]">
+                  {agent.shortDescription}
+                </p>
+                <time
+                  dateTime={agent.updatedAt.toISOString()}
+                  className="mt-auto pt-4 font-mono text-xs text-[var(--color-text-muted)]"
+                >
+                  {t('common.updated')} {formatDate(agent.updatedAt)}
+                </time>
               </div>
             </Link>
           ))}

@@ -15,16 +15,18 @@ export async function chooseTarget({
   input = process.stdin,
   output = process.stdout,
   yes = false,
+  ask,
 } = {}) {
-  if (yes || !input.isTTY || !output.isTTY) return 'agents';
-  const prompt = createInterface({ input, output });
+  if (!ask && (yes || !input.isTTY || !output.isTTY)) return 'agents';
+  const prompt = ask ? null : createInterface({ input, output });
+  const question = ask ?? ((text) => prompt.question(text));
   try {
     output.write('¿Qué herramienta utilizas en este proyecto?\n');
     TOOL_CHOICES.forEach((tool, index) =>
       output.write(`  ${index + 1}. ${tool.label} → ${tool.path}\n`),
     );
     for (let attempt = 0; attempt < 3; attempt++) {
-      const answer = (await prompt.question('Elige una opción [1]: ')).trim();
+      const answer = (await question('Elige una opción [1]: ')).trim();
       if (answer === '') return 'agents';
       const tool = TOOL_CHOICES.find(
         (choice, index) =>
@@ -35,6 +37,6 @@ export async function chooseTarget({
     }
     throw new InstallerError('No se eligió una herramienta válida.');
   } finally {
-    prompt.close();
+    prompt?.close();
   }
 }

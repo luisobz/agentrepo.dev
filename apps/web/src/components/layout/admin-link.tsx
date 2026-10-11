@@ -1,19 +1,10 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { usePathname } from 'next/navigation';
 import { ShieldCheck } from 'lucide-react';
 import { useT } from '../../lib/i18n/use-t';
 
-export function AdminLink({
-  className,
-  onClick,
-}: {
-  className?: string;
-  onClick?: () => void;
-}) {
-  const t = useT();
-  const pathname = usePathname();
+export function useAdminAccess(): boolean {
   const [isAdmin, setIsAdmin] = useState(false);
   useEffect(() => {
     const controller = new AbortController();
@@ -47,7 +38,20 @@ export function AdminLink({
       window.removeEventListener('focus', check);
       window.removeEventListener('auth-session-changed', check);
     };
-  }, [pathname]);
+  }, []);
+  return isAdmin;
+}
+
+export function AdminLink({
+  className,
+  onClick,
+  isAdmin,
+}: {
+  className?: string;
+  onClick?: () => void;
+  isAdmin: boolean;
+}) {
+  const t = useT();
 
   if (!isAdmin) return null;
   return (

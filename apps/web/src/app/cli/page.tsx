@@ -7,12 +7,13 @@ export const metadata: Metadata = {
   description:
     'Install pinned skill snapshots with pnpm and agent.json. Choose your tool, verify integrity and reproduce installations.',
 };
-const RELEASE = 'https://github.com/luisobz/agentrepo.dev/releases/tag/v0.3.1';
+const RELEASE = 'https://github.com/luisobz/agentrepo.dev/releases/tag/v0.4.0';
 const PACKAGE =
-  'https://github.com/luisobz/agentrepo.dev/releases/download/v0.3.1/agentrepo-cli-0.1.0.tgz';
+  'https://github.com/luisobz/agentrepo.dev/releases/download/v0.4.0/agentrepo-cli-0.2.0.tgz';
 const MANIFEST = JSON.stringify(
   {
     schemaVersion: 1,
+    target: 'claude',
     skills: { 'code-review': '1.0.0', 'project-planning': '2.1.0' },
   },
   null,
@@ -32,7 +33,7 @@ export default async function CliPage() {
     <div className="mx-auto w-full min-w-0 max-w-4xl px-4 pb-20 sm:px-6">
       <header className="mb-10 mt-6">
         <p className="font-mono text-xs font-semibold uppercase tracking-widest text-[var(--color-brand-garnet)]">
-          AgentRepo CLI · 0.1.0
+          AgentRepo CLI · 0.2.0
         </p>
         <h1 className="mt-4 text-4xl font-semibold tracking-tight sm:text-5xl">
           {t('cli.title')}
@@ -51,7 +52,7 @@ export default async function CliPage() {
           </p>
           <CodeBlock
             label="Terminal"
-            code={`pnpm add -D ${PACKAGE}\npnpm exec agentrepo init`}
+            code={`pnpm add -g ${PACKAGE}\nagentrepo`}
           />
           <a
             href={RELEASE}
@@ -79,7 +80,10 @@ export default async function CliPage() {
           <p className="leading-relaxed text-[var(--color-text-secondary)]">
             {t('cli.runInfo')}
           </p>
-          <CodeBlock label="Install" code="pnpm exec agentrepo install" />
+          <CodeBlock
+            label="Commands"
+            code="agentrepo skill2@latest\nagentrepo verify\nagentrepo install\nagentrepo reset --hard"
+          />
           <div className="overflow-x-auto rounded-xl border border-[var(--color-border-soft)]">
             <table className="w-full text-left text-sm">
               <thead className="bg-[var(--color-bg-surface)]">
@@ -108,10 +112,6 @@ export default async function CliPage() {
               </tbody>
             </table>
           </div>
-          <CodeBlock
-            label="Claude Code"
-            code="pnpm exec agentrepo install --target claude"
-          />
         </section>
         <section className="min-w-0 space-y-4" aria-labelledby="cli-lock">
           <h2 id="cli-lock" className="text-2xl font-semibold">
@@ -120,10 +120,6 @@ export default async function CliPage() {
           <p className="leading-relaxed text-[var(--color-text-secondary)]">
             {t('cli.lockInfo')}
           </p>
-          <CodeBlock
-            label="Verify / CI"
-            code="pnpm exec agentrepo verify --target claude\npnpm exec agentrepo install --target claude --frozen-lockfile"
-          />
           <CodeBlock label=".gitignore" code=".agentrepo/" />
         </section>
         <section

@@ -58,7 +58,7 @@ export class PrismaAgentRepository implements AgentRepository {
         : {}),
     };
 
-    const [rows, total] = await this.prisma.$transaction([
+    const [rows, total] = await Promise.all([
       this.prisma.agent.findMany({
         where,
         include: { author: { select: { name: true } } },

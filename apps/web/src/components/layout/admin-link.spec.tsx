@@ -2,7 +2,16 @@ import '@testing-library/jest-dom/vitest';
 import { cleanup, render, screen, waitFor, act } from '@testing-library/react';
 import { afterEach, expect, it, vi } from 'vitest';
 import { LocaleProvider } from '@agentrepo/ui';
-import { AdminLink } from './admin-link';
+import { AdminLink, useAdminAccess } from './admin-link';
+function AccessLinks() {
+  const isAdmin = useAdminAccess();
+  return (
+    <>
+      <AdminLink isAdmin={isAdmin} />
+      <AdminLink isAdmin={isAdmin} />
+    </>
+  );
+}
 vi.mock('next/navigation', () => ({ usePathname: () => '/' }));
 afterEach(() => {
   cleanup();
@@ -17,15 +26,15 @@ it.each([false, true])(
     vi.stubGlobal('fetch', fetcher);
     render(
       <LocaleProvider>
-        <AdminLink />
+        <AccessLinks />
       </LocaleProvider>,
     );
-    await waitFor(() => expect(fetcher).toHaveBeenCalled());
+    await waitFor(() => expect(fetcher).toHaveBeenCalledOnce());
     if (isAdmin)
       expect(
-        await screen.findByRole('link', { name: 'Admin panel' }),
+        (await screen.findAllByRole('link', { name: 'Admin panel' }))[0],
       ).toHaveAttribute('href', 'https://admin.agentrepo.dev/api/auth/sso');
-    else expect(screen.queryByRole('link')).not.toBeInTheDocument();
+    else expect(screen.queryAllByRole('link')).toHaveLength(0);
   },
 );
 it('removes the link after sign-out without a page navigation', async () => {
@@ -35,10 +44,10 @@ it('removes the link after sign-out without a page navigation', async () => {
   vi.stubGlobal('fetch', fetcher);
   render(
     <LocaleProvider>
-      <AdminLink />
+      <AccessLinks />
     </LocaleProvider>,
   );
-  await screen.findByRole('link');
+  await screen.findAllByRole('link');
   fetcher.mockResolvedValue({
     ok: true,
     json: async () => ({ isAdmin: false }),
@@ -46,7 +55,5 @@ it('removes the link after sign-out without a page navigation', async () => {
   await act(async () => {
     window.dispatchEvent(new Event('auth-session-changed'));
   });
-  await waitFor(() =>
-    expect(screen.queryByRole('link')).not.toBeInTheDocument(),
-  );
+  await waitFor(() => expect(screen.queryAllByRole('link')).toHaveLength(0));
 });

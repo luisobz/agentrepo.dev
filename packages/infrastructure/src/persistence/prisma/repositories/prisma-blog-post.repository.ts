@@ -31,7 +31,7 @@ export class PrismaBlogPostRepository implements BlogPostRepository {
         : {}),
     };
 
-    const [items, total] = await this.prisma.$transaction([
+    const [items, total] = await Promise.all([
       this.prisma.blogPost.findMany({
         where,
         include: { author: { select: { name: true } } },

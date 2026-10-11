@@ -109,3 +109,31 @@ for (const isAdmin of [false, true]) {
     ).toBe(true);
   });
 }
+
+test('admin visibility is checked once across both menus and client navigation', async ({
+  page,
+  isMobile,
+}) => {
+  let checks = 0;
+  await page.route('**/auth/admin-access', (route) => {
+    checks++;
+    return route.fulfill({ json: { isAdmin: true } });
+  });
+  await page.goto('/cli');
+  await expect(
+    page.locator('a[href="https://admin.agentrepo.dev/api/auth/sso"]'),
+  ).toHaveCount(2);
+  expect(checks).toBe(1);
+  if (isMobile) await page.getByRole('button', { name: 'Open menu' }).click();
+  const nav = isMobile
+    ? page.locator('#mobile-navigation nav')
+    : page.locator('header nav');
+  await nav.getByRole('link', { name: 'Agents', exact: true }).click();
+  await expect(
+    page.getByRole('heading', { name: 'Agents', exact: true }),
+  ).toBeVisible();
+  await expect(
+    page.getByRole('link', { name: /Linked project/ }),
+  ).toBeVisible();
+  expect(checks).toBe(1);
+});

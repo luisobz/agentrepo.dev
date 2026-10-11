@@ -33,3 +33,16 @@ lockfiles, read-only snapshots and integrity limits in English and Spanish.
 Commands and manifests have copy buttons. Skills, Agents, Blog and CLI form the
 main navigation; Playground and Portfolio live only in a secondary footer row.
 The CLI package version and release URL are pinned explicitly in the guide.
+
+## Public navigation performance
+
+The header shares one admin-access check across desktop/mobile and retains it
+across client navigation. Login/logout and window focus revalidate visibility;
+privileged API operations still authorize server-side independently.
+Middleware skips anonymous auth and uses signature-verified getClaims for
+session refresh and display metadata. Creator and protected APIs keep their
+existing user/role checks. See Supabase SSR auth-method documentation.
+Public pages use anonymous cached `*.catalog` summary endpoints, excluding
+snapshot bodies and file trees; detail APIs remain compatible. Catalogue SQL
+reads run list/count concurrently, with no changes to write transactions.
+The CLI guide documents global CLI 0.2.0 and the interactive entry point.

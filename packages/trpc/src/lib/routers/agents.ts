@@ -1,3 +1,4 @@
+import { agentSummary } from './catalog-summary';
 import { redactPremiumAgent } from '@agentrepo/domain';
 import {
   adminListSchema,
@@ -15,6 +16,18 @@ import { adminProcedure, publicProcedure, router } from '../trpc';
 import { toVersionSummary } from './version-dto';
 
 export const agentsRouter = router({
+  catalog: publicProcedure
+    .input(paginationSchema)
+    .query(async ({ input, ctx }) => {
+      const page = await ctx.catalog.agents.list.execute({
+        ...input,
+        publishedOnly: true,
+      });
+      return {
+        ...page,
+        items: page.items.map((item) => agentSummary(redactPremiumAgent(item))),
+      };
+    }),
   list: publicProcedure
     .input(paginationSchema)
     .query(async ({ input, ctx }) => {
@@ -29,8 +42,8 @@ export const agentsRouter = router({
     .input(slugInputSchema)
     .query(async ({ input, ctx }) =>
       redactPremiumAgent(
-        await ctx.catalog.agents.getPublishedBySlug.execute(input.slug)
-      )
+        await ctx.catalog.agents.getPublishedBySlug.execute(input.slug),
+      ),
     ),
 
   /** Version history with download stats (metadata only, npm-style). */
@@ -38,7 +51,7 @@ export const agentsRouter = router({
     .input(slugInputSchema)
     .query(async ({ input, ctx }) => {
       const entries = await ctx.catalog.agentVersions.listPublished.execute(
-        input.slug
+        input.slug,
       );
       return entries.map(toVersionSummary);
     }),
@@ -59,7 +72,7 @@ export const agentsRouter = router({
   recordDownload: publicProcedure
     .input(recordDownloadSchema)
     .mutation(({ input, ctx }) =>
-      ctx.catalog.agentVersions.recordDownload.execute(input)
+      ctx.catalog.agentVersions.recordDownload.execute(input),
     ),
 
   admin: router({
@@ -81,13 +94,15 @@ export const agentsRouter = router({
 
     delete: adminProcedure
       .input(idInputSchema)
-      .mutation(({ input, ctx }) => ctx.catalog.agents.remove.execute(input.id)),
+      .mutation(({ input, ctx }) =>
+        ctx.catalog.agents.remove.execute(input.id),
+      ),
 
     versions: adminProcedure
       .input(idInputSchema)
       .query(async ({ input, ctx }) => {
         const entries = await ctx.catalog.agentVersions.listForAdmin.execute(
-          input.id
+          input.id,
         );
         return entries.map(toVersionSummary);
       }),
@@ -100,7 +115,7 @@ export const agentsRouter = router({
           assetId: input.id,
           version: input.version,
           changelog: input.changelog,
-        })
+        }),
       ),
 
     /** Retags latest (npm dist-tag style) to a previously published version. */
@@ -110,7 +125,7 @@ export const agentsRouter = router({
         ctx.catalog.agentVersions.setLatest.execute({
           assetId: input.id,
           versionId: input.versionId,
-        })
+        }),
       ),
   }),
 });

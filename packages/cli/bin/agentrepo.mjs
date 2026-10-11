@@ -2,27 +2,21 @@
 import { parseArgs } from 'node:util';
 import { realpath, writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
-import { installSkills, verifyInstalledSkills } from '../src/install.mjs';
 import { InstallerError } from '../src/errors.mjs';
-import { chooseTarget } from '../src/prompt.mjs';
-const HELP = `AgentRepo CLI 0.1.0
+import { runCommand } from '../src/commands.mjs';
+import { runInteractive } from '../src/interactive.mjs';
+const HELP = `AgentRepo CLI 0.2.0
 
-  agentrepo init                         Crea agent.json sin sobrescribirlo
-  agentrepo install                      Instala snapshots de solo lectura
-  agentrepo verify                       Verifica integridad y permisos
-  agentrepo install --target claude       Selecciona una herramienta sin preguntar
-  agentrepo install --frozen-lockfile     Exige un lockfile compatible
+  agentrepo                Abre el asistente interactivo
+  agentrepo skill2@latest   Añade una skill y fija la versión resuelta
+  agentrepo verify          Verifica snapshots e integridad
+  agentrepo install         Instala las skills del proyecto
+  agentrepo reset --hard    Restaura snapshots según el lock; no borra tu código
 
-Opciones:
-  --cwd <ruta>       Raíz del proyecto (directorio actual por defecto)
-  --target <nombre>  agents, codex, claude, cursor o copilot
-  --yes             Usa .agents/skills sin preguntar
-  --help            Muestra esta ayuda
-  --version         Muestra la versión del instalador
-
-Sin terminal interactivo se utiliza .agents/skills. No se ejecutan scripts
-ni instrucciones de las skills instaladas. Añade .agentrepo/ al .gitignore
-y conserva agent.json y agent-lock.json en el control de versiones.
+La herramienta se recuerda en agent.json. Fallback: .agents/skills.
+Opciones avanzadas: --cwd <ruta>, --target <herramienta>, --frozen-lockfile,
+--yes, --help y --version. Sin terminal interactivo, el comando sin argumentos
+muestra esta ayuda. Añade .agentrepo/ a .gitignore y guarda agent.json y su lock.
 `;
 async function main() {
   const { values, positionals } = parseArgs({
@@ -31,23 +25,30 @@ async function main() {
       cwd: { type: 'string' },
       target: { type: 'string' },
       yes: { type: 'boolean' },
+      hard: { type: 'boolean' },
       'frozen-lockfile': { type: 'boolean' },
       help: { type: 'boolean' },
       version: { type: 'boolean' },
     },
   });
   if (values.version) {
-    console.log('0.1.0');
+    console.log('0.2.0');
     return;
   }
-  if (values.help || positionals.length === 0) {
+  if (values.help) {
     console.log(HELP);
     return;
   }
-  if (positionals.length !== 1)
-    throw new InstallerError('Utiliza init, install o verify. Consulta --help.');
-  const command = positionals[0];
   const root = await realpath(values.cwd ?? process.cwd());
+  if (positionals.length === 0) {
+    if (process.stdin.isTTY && process.stdout.isTTY && !values.yes)
+      await runInteractive({ root });
+    else console.log(HELP);
+    return;
+  }
+  if (positionals.length !== 1)
+    throw new InstallerError('Utiliza un único comando. Consulta --help.');
+  const command = positionals[0];
   if (command === 'init') {
     try {
       await writeFile(
@@ -61,35 +62,22 @@ async function main() {
       throw error;
     }
     console.log(
-      'Creado agent.json. Declara skills como { "mi-skill": "1.0.0" } y ejecuta install.',
+      'Creado agent.json. Ejecuta agentrepo para configurar las skills.',
     );
     return;
   }
-  if (!['install', 'verify'].includes(command))
-    throw new InstallerError(
-      'Comando desconocido. Utiliza init, install o verify.',
-    );
-  const target = values.target ?? (await chooseTarget({ yes: values.yes }));
-  if (command === 'verify') {
-    const result = await verifyInstalledSkills({ root, target });
-    console.log(
-      `Verificados ${result.verified.length} snapshots en ${result.directory}.`,
-    );
-    return;
-  }
-  const result = await installSkills({
+  const result = await runCommand({
     root,
-    target,
+    command,
+    target: values.target,
     frozen: values['frozen-lockfile'],
+    hard: values.hard,
   });
   console.log(
-    `Instaladas ${result.installed.length} skills en ${result.directory}.`,
+    `✓ ${(result.installed ?? result.verified).length} skills en ${result.directory}.`,
   );
-  if (result.repaired.length)
-    console.log(
-      `Restaurados snapshots alterados: ${result.repaired.join(', ')}.`,
-    );
-  result.installed.forEach((slug) => console.log(`  ✓ ${slug}`));
+  if (result.repaired?.length)
+    console.log(`Restaurados snapshots: ${result.repaired.join(', ')}.`);
 }
 try {
   await main();
@@ -97,7 +85,7 @@ try {
   console.error(
     error instanceof InstallerError || error.code?.startsWith('ERR_PARSE_ARGS')
       ? error.message
-      : 'No se pudo completar la operación. Comprueba el acceso al proyecto y al catálogo.',
+      : 'No se pudo completar la operación. Comprueba el proyecto y el catálogo.',
   );
   process.exitCode = 1;
 }

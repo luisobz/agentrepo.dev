@@ -1,8 +1,8 @@
 import { InstallerError } from './errors.mjs';
 import { record } from './manifest.mjs';
-export async function fetchPublishedSkill(registry, slug, version) {
-  const url = new URL(`${registry}/api/trpc/skills.byVersion`);
-  url.searchParams.set('input', JSON.stringify({ json: { slug, version } }));
+async function fetchPayload(registry, procedure, input, slug, version) {
+  const url = new URL(`${registry}/api/trpc/${procedure}`);
+  url.searchParams.set('input', JSON.stringify({ json: input }));
   let response;
   try {
     response = await fetch(url, {
@@ -10,7 +10,7 @@ export async function fetchPublishedSkill(registry, slug, version) {
       signal: AbortSignal.timeout(15_000),
       headers: {
         accept: 'application/json',
-        'user-agent': 'AgentRepo-CLI/0.1.0',
+        'user-agent': 'AgentRepo-CLI/0.2.0',
       },
     });
   } catch {
@@ -43,4 +43,29 @@ export async function fetchPublishedSkill(registry, slug, version) {
   if (!record(payload))
     throw new InstallerError(`${slug}: respuesta del catálogo inválida.`);
   return payload;
+}
+
+export function fetchPublishedSkill(registry, slug, version) {
+  return fetchPayload(
+    registry,
+    'skills.byVersion',
+    { slug, version },
+    slug,
+    version,
+  );
+}
+export async function fetchLatestVersion(registry, slug) {
+  const payload = await fetchPayload(
+    registry,
+    'skills.bySlug',
+    { slug },
+    slug,
+    'latest',
+  );
+  if (
+    typeof payload.version !== 'string' ||
+    !/^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)$/.test(payload.version)
+  )
+    throw new InstallerError(`${slug}: versión latest inválida.`);
+  return payload.version;
 }

@@ -1,4 +1,7 @@
 const PUBLIC_READS = new Set([
+  'agents.catalog',
+  'skills.catalog',
+  'blog.catalog',
   'skills.list',
   'skills.bySlug',
   'skills.versions',

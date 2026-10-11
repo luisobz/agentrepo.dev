@@ -22,9 +22,12 @@ test('main navigation promotes CLI and secondary links stay in the footer', asyn
   ).toBeVisible();
   await expect(page.locator('main')).toContainText('agent.json');
   await expect(page.locator('main')).toContainText(
-    'v0.3.1/agentrepo-cli-0.1.0.tgz',
+    'v0.4.0/agentrepo-cli-0.2.0.tgz',
   );
-  await expect(page.locator('main')).toContainText('--frozen-lockfile');
+  await expect(page.locator('main')).toContainText('agentrepo skill2@latest');
+  await expect(page.locator('main')).toContainText('agentrepo reset --hard');
+  await expect(page.locator('main')).not.toContainText('--target');
+  await expect(page.locator('main')).not.toContainText('--frozen-lockfile');
   await expect(
     page
       .locator('footer')
@@ -64,6 +67,7 @@ test('CLI guide is localized and copies the manifest', async ({
     JSON.parse(await page.evaluate(() => navigator.clipboard.readText())),
   ).toEqual({
     schemaVersion: 1,
+    target: 'claude',
     skills: { 'code-review': '1.0.0', 'project-planning': '2.1.0' },
   });
 });

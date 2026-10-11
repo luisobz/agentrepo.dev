@@ -63,3 +63,33 @@ export function readUserInfoCookie(): PublicUserInfo | null {
     return null;
   }
 }
+
+/** Claims are signature-verified by Supabase; metadata here is display-only. */
+export function publicUserInfoFromClaims(
+  claims: unknown,
+): PublicUserInfo | null {
+  if (
+    typeof claims !== 'object' ||
+    claims === null ||
+    !('sub' in claims) ||
+    typeof claims.sub !== 'string'
+  )
+    return null;
+  const metadata =
+    'user_metadata' in claims &&
+    typeof claims.user_metadata === 'object' &&
+    claims.user_metadata !== null
+      ? claims.user_metadata
+      : {};
+  const name =
+    'full_name' in metadata && typeof metadata.full_name === 'string'
+      ? metadata.full_name
+      : 'name' in metadata && typeof metadata.name === 'string'
+        ? metadata.name
+        : null;
+  const avatarUrl =
+    'avatar_url' in metadata && typeof metadata.avatar_url === 'string'
+      ? metadata.avatar_url
+      : null;
+  return { userId: claims.sub, name, avatarUrl };
+}

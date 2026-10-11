@@ -22,9 +22,9 @@ test('main navigation promotes CLI and secondary links stay in the footer', asyn
   ).toBeVisible();
   await expect(page.locator('main')).toContainText('agent.json');
   await expect(page.locator('main')).toContainText(
-    'v0.4.0/agentrepo-cli-0.2.0.tgz',
+    'cli-v0.2.1/agentrepo-cli-0.2.1.tgz',
   );
-  await expect(page.locator('main')).toContainText('agentrepo skill2@latest');
+  await expect(page.locator('main')).toContainText('agentrepo skill2');
   await expect(page.locator('main')).toContainText('agentrepo reset --hard');
   await expect(page.locator('main')).not.toContainText('--target');
   await expect(page.locator('main')).not.toContainText('--frozen-lockfile');
@@ -70,4 +70,27 @@ test('CLI guide is localized and copies the manifest', async ({
     target: 'claude',
     skills: { 'code-review': '1.0.0', 'project-planning': '2.1.0' },
   });
+});
+
+test('CLI commands have real line breaks and install and launch copy separately', async ({
+  page,
+  context,
+}) => {
+  await context.grantPermissions(['clipboard-read', 'clipboard-write']);
+  await page.goto('/cli');
+  const install = page.locator('pre').filter({ hasText: 'pnpm add -g' });
+  await expect(install).not.toContainText('\\n');
+  expect(await install.textContent()).not.toContain('\n');
+  await expect(
+    page.locator('pre').filter({ hasText: /^agentrepo$/ }),
+  ).toHaveCount(1);
+  const commands =
+    'agentrepo skill2\nagentrepo verify\nagentrepo install\nagentrepo reset --hard';
+  await expect(page.locator('pre[aria-label="Commands"]')).toHaveText(commands);
+  await page
+    .getByRole('button', { name: 'Copy Commands', exact: true })
+    .click();
+  expect(await page.evaluate(() => navigator.clipboard.readText())).toBe(
+    commands,
+  );
 });

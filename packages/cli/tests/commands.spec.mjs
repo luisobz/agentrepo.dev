@@ -16,23 +16,26 @@ async function project() {
   roots.push(root);
   return root;
 }
-it('resolves latest once, pins it and remembers the selected tool', async () => {
-  const root = await project();
-  await runCommand({
-    root,
-    command: 'example@latest',
-    target: 'claude',
-    fetchSkill,
-    fetchLatest: async () => '2.1.0',
-  });
-  expect(
-    JSON.parse(await readFile(join(root, 'agent.json'), 'utf8')),
-  ).toMatchObject({ skills: { example: '2.1.0' }, target: 'claude' });
-  await runCommand({ root, command: 'verify', fetchSkill });
-  expect(
-    await readFile(join(root, '.claude/skills/example/SKILL.md'), 'utf8'),
-  ).toContain('Reviewed');
-});
+it.each(['example', 'example@latest'])(
+  'resolves %s once, pins it and remembers the selected tool',
+  async (command) => {
+    const root = await project();
+    await runCommand({
+      root,
+      command,
+      target: 'claude',
+      fetchSkill,
+      fetchLatest: async () => '2.1.0',
+    });
+    expect(
+      JSON.parse(await readFile(join(root, 'agent.json'), 'utf8')),
+    ).toMatchObject({ skills: { example: '2.1.0' }, target: 'claude' });
+    await runCommand({ root, command: 'verify', fetchSkill });
+    expect(
+      await readFile(join(root, '.claude/skills/example/SKILL.md'), 'utf8'),
+    ).toContain('Reviewed');
+  },
+);
 it('failed additions leave the old manifest and snapshots intact', async () => {
   const root = await project();
   await runCommand({ root, command: 'example@1.0.0', fetchSkill });

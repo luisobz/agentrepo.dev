@@ -1,0 +1,55 @@
+name: Release CLI
+
+on:
+  push:
+    tags: ['cli-v*']
+
+concurrency:
+  group: cli-release-${{ github.ref }}
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  package:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    env:
+      NODE_VERSION: '24'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: pnpm
+      - name: Validate CLI version
+        run: |
+          node --input-type=module <<'JS'
+          import { readFileSync } from 'node:fs';
+          const { version } = JSON.parse(readFileSync('packages/cli/package.json', 'utf8'));
+          if (!/^\d+\.\d+\.\d+$/.test(version) || process.env.GITHUB_REF_NAME !== `cli-v${version}`) {
+            console.error('CLI tag must match packages/cli/package.json');
+            process.exit(1);
+          }
+          JS
+      - run: pnpm install --frozen-lockfile --ignore-scripts
+      - name: Check CLI
+        run: pnpm nx run cli:lint && pnpm nx run cli:test
+      - name: Package and check executable
+        run: |
+          mkdir -p "$RUNNER_TEMP/cli"
+          pnpm --dir packages/cli pack --pack-destination "$RUNNER_TEMP/cli"
+          version=$(node -p "require('./packages/cli/package.json').version")
+          pnpm --config.confirmModulesPurge=false dlx "$RUNNER_TEMP/cli/agentrepo-cli-$version.tgz" --version | grep -Fx "$version"
+          cd "$RUNNER_TEMP/cli"
+          sha256sum ./*.tgz > SHA256SUMS
+      - name: Publish independent CLI release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release create "$GITHUB_REF_NAME" "$RUNNER_TEMP/cli/"*.tgz "$RUNNER_TEMP/cli/SHA256SUMS" \
+            --repo "$GITHUB_REPOSITORY" --verify-tag --latest=false \
+            --title "AgentRepo CLI ${GITHUB_REF_NAME#cli-v}" --generate-notes

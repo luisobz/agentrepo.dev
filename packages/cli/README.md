@@ -10,7 +10,12 @@ Nunca ejecuta el contenido descargado.
 Instala una vez y ejecuta `agentrepo` dentro de tu proyecto:
 
 ```sh
-pnpm add -g https://github.com/luisobz/agentrepo.dev/releases/download/v0.4.0/agentrepo-cli-0.2.0.tgz
+pnpm add -g https://github.com/luisobz/agentrepo.dev/releases/download/cli-v0.2.1/agentrepo-cli-0.2.1.tgz
+```
+
+Dentro de tu proyecto:
+
+```sh
 agentrepo
 ```
 
@@ -23,14 +28,14 @@ el proyecto.
 Comandos directos:
 
 ```sh
-agentrepo skill2@latest
+agentrepo skill2
 agentrepo verify
 agentrepo install
 agentrepo reset --hard
 ```
 
 `skill2` es ilustrativo: utiliza un slug publicado. También admite `skill2@1.0.0`.
-`latest` se resuelve una vez y se guarda como versión exacta. Una adición fallida
+Sin sufijo se elige la última versión y se guarda como versión exacta; `@latest` es opcional. Una adición fallida
 no modifica el manifiesto ni los snapshots anteriores.
 
 ```json
@@ -127,3 +132,9 @@ pnpm exec nx test cli
 pnpm exec nx lint cli
 pnpm --dir packages/cli pack --pack-destination /tmp/agentrepo-cli-package
 ```
+
+## Publicación independiente
+
+El CLI usa tags `cli-vX.Y.Z` y el workflow `Release CLI`. La versión del tag debe
+coincidir con packages/cli/package.json. Este flujo prueba y empaqueta el CLI sin
+desplegar la web ni los backends; los tags `vX.Y.Z` son releases de la plataforma.

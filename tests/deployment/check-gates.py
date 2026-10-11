@@ -23,3 +23,12 @@ for name in ('web', 'admin', 'backend-web', 'backend-ai'):
         needs.backend_web.result = 'skipped'
         assert eval(expression, {'__builtins__': {}}, {'needs': needs, 'github': NS(event_name='workflow_dispatch'), 'inputs': NS(only='web')}), 'explicit web-only redeploy must remain available'
 print('Deployment gates: all four applications fail closed for failed or skipped prerequisites')
+
+cli_workflow = Path('.github/workflows/release-cli.yml').read_text()
+assert "tags: ['cli-v*']" in cli_workflow, 'CLI needs its own tag namespace'
+assert 'process.env.GITHUB_REF_NAME !== `cli-v${version}`' in cli_workflow, 'CLI release must validate tag/package version'
+assert 'pnpm nx run cli:lint && pnpm nx run cli:test' in cli_workflow, 'CLI release must run its checks'
+assert '--verify-tag --latest=false' in cli_workflow, 'CLI releases must not replace the latest platform release'
+assert 'SSH_' not in cli_workflow and 'migrate' not in cli_workflow, 'CLI publication must not deploy services'
+assert 'packages/cli' not in workflow, 'Platform deployment must not package CLI releases'
+print('CLI release: independent tags, version validation, tests and no service deployment')

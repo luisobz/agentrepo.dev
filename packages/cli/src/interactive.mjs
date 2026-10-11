@@ -34,9 +34,7 @@ export async function runInteractive({
           target = await chooseTarget({ input, output, ask });
         let command = 'install';
         if (action === '2') {
-          command = (
-            await ask('Skill (nombre@latest o nombre@1.0.0): ')
-          ).trim();
+          command = (await ask('Skill (nombre o nombre@1.0.0): ')).trim();
           if (!command) continue;
         }
         if (action === '3') command = 'verify';

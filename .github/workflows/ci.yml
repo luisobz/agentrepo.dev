@@ -35,7 +35,9 @@ jobs:
           cache: pnpm
 
       - name: Check deployment safety gates
-        run: python3 tests/deployment/check-gates.py
+        run: |
+          python3 tests/deployment/check-gates.py
+          python3 tests/deployment/check-availability.py
 
       - run: pnpm install --frozen-lockfile
 

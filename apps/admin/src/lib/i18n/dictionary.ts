@@ -48,6 +48,10 @@ export const adminDictionary = {
   'nav.playgroundTokens': { en: 'Playground tokens', es: 'Tokens playground' },
   'nav.signOut': { en: 'Sign out', es: 'Cerrar sesión' },
   'nav.adminPanel': { en: 'Admin panel', es: 'Panel de administración' },
+  'nav.viewWebsite': { en: 'View website', es: 'Ver web' },
+  'nav.navigation': { en: 'Administration', es: 'Administración' },
+  'nav.openNavigation': { en: 'Open navigation', es: 'Abrir navegación' },
+  'nav.closeNavigation': { en: 'Close navigation', es: 'Cerrar navegación' },
 
   'dashboard.title': { en: 'Dashboard', es: 'Panel' },
   'dashboard.subtitle': {

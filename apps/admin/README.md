@@ -47,3 +47,11 @@ It clears the nonce, disables caching and referrers, and falls back to login on
 failure. Provider tokens never cross domains in plaintext or shared cookies.
 Logging out of the public site does not revoke an already established separate
 admin session; the panel's existing logout remains authoritative for that session.
+
+## Responsive navigation
+
+Mobile uses a sticky compact header with the current section, a persistent View
+website link and an accessible menu toggle. The menu closes on navigation or
+Escape (restoring toggle focus). Desktop keeps a sticky sidebar with icon labels,
+active-page semantics, website access and language/session controls. Returning to
+the public site preserves both existing sessions.

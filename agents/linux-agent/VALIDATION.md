@@ -1,4 +1,4 @@
-# Validation · 0.1.0 candidate
+# Validation · 0.1.1 candidate
 
 The source and distribution contain generic examples with empty credentials.
 An automated publication check rejects private deployment identifiers, common

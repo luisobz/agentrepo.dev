@@ -1,4 +1,4 @@
-# Linux Agent · 0.1.0
+# Linux Agent · 0.1.1
 
 Administra un servidor por Telegram con sesiones de agente, mantenimiento de
 paquetes, servicios y alarmas. Núcleo genérico para Debian/Ubuntu con systemd,
@@ -136,6 +136,6 @@ privada; no borres backups automáticamente.
 - [systemd.exec](https://www.freedesktop.org/software/systemd/man/latest/systemd.exec.html)
 
 AGPL-3.0-only, igual que el repositorio que distribuye este kit. No incluye software
-ni credenciales del proveedor. Estado: candidato 0.1.0; pruebas automatizadas y
+ni credenciales del proveedor. Estado: candidato 0.1.1; pruebas automatizadas y
 ensayo aislado documentados en VALIDATION.md. No se ha instalado en el servidor de
 origen ni en un servidor de producción como parte de esta publicación.

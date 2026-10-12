@@ -17,7 +17,7 @@ class RPC:
         self.lock, self.events = threading.Lock(), queue.Queue()
         threading.Thread(target=self.receive, daemon=True).start()
         try:
-            self.call('initialize', dict(clientInfo=dict(name='linux-agent', version='0.1.0'),
+            self.call('initialize', dict(clientInfo=dict(name='linux-agent', version='0.1.1'),
                                          capabilities=dict(experimentalApi=True)))
             self.write(dict(method='initialized'))
         except Exception:

@@ -1,6 +1,0 @@
-[Unit]
-Description=Remove the expired Linux Agent sudo rule
-[Timer]
-OnActiveSec=15min
-AccuracySec=1s
-Unit=linux-agent-root-disable.service

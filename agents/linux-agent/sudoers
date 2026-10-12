@@ -1,4 +1,0 @@
-Defaults:linux-agent timestamp_timeout=0
-# No arguments: requests are parsed and validated from stdin by immutable code.
-linux-agent ALL=(linux-agent-bot) NOPASSWD: /opt/linux-agent/bin/relay ""
-linux-agent-bot ALL=(root) NOPASSWD: /opt/linux-agent/bin/control ""

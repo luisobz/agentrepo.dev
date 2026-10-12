@@ -113,6 +113,8 @@ class Bridge:
             params, method = event.get('params', {}), event.get('method')
             identifier = params.get('threadId')
             if identifier not in self.threads:
+                if 'id' in event and method:
+                    self.rpc.write(dict(id=event['id'], error=dict(code=-32601, message='Unknown session; not approved')))
                 continue
             if method == 'item/completed' and params.get('item', {}).get('type') == 'agentMessage':
                 item = params['item']

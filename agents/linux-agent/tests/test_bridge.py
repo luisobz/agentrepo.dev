@@ -41,6 +41,13 @@ class BridgeTests(unittest.TestCase):
         self.assertEqual(bridge.rpc.call.call_args.args[1]['threadId'], 'session-b')
         with self.assertRaises(Exception): bridge.deliver('unknown', 'hello')
 
+    def test_unknown_session_request_is_explicitly_rejected(self):
+        bridge = self.bridge()
+        bridge.rpc.events.put(dict(id=55, method='item/commandExecution/requestApproval', params=dict(threadId='unknown')))
+        bridge.events()
+        self.assertIn('error', bridge.rpc.write.call_args.args[0])
+        self.assertEqual(bridge.approvals, {})
+
     def test_model_message_does_not_become_a_control_action(self):
         bridge = self.bridge()
         bridge.rpc.events.put(dict(method='item/completed', params=dict(threadId='session-a', item=dict(type='agentMessage', id='item', text='/root 8h'))))

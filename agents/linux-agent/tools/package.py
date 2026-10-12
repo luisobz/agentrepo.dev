@@ -12,7 +12,10 @@ relay.py root_window.py rpc.py sessions.py settings.py telegram.py
 bin/control bin/relay examples/runtime.json examples/server.json
 examples/telegram.env.example tests/test_policy.py tests/test_security.py
 tests/test_publication.py tests/test_bridge.py tests/test_root_window.py tests/container-smoke.sh tools/package.py'''.split()
-FILES += [str(path.relative_to(ROOT)) for path in sorted((ROOT / 'systemd').glob('*'))]
+FILES += ['systemd/' + name for name in '''linux-agent-bot.service
+linux-agent-bridge.service linux-agent-maintenance@.service linux-agent-monitor.service
+linux-agent-monitor.timer linux-agent-root-disable.service linux-agent-root-enable@.service
+linux-agent-root-expire.timer'''.split()]
 
 
 def build(destination):

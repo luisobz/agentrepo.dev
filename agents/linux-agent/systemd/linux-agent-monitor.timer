@@ -1,0 +1,9 @@
+[Unit]
+Description=Sample Linux Agent monitoring each minute
+[Timer]
+OnBootSec=2min
+OnUnitActiveSec=1min
+AccuracySec=5s
+Unit=linux-agent-monitor.service
+[Install]
+WantedBy=timers.target

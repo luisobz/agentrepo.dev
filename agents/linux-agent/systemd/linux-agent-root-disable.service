@@ -1,0 +1,10 @@
+[Unit]
+Description=Close Linux Agent root window on boot or revocation
+Before=linux-agent-bot.service linux-agent-bridge.service
+[Service]
+Type=oneshot
+ExecStart=/usr/bin/python3 -Es /opt/linux-agent/root_window.py disable
+PrivateTmp=true
+ProtectHome=true
+[Install]
+WantedBy=multi-user.target

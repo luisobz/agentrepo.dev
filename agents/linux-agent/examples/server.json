@@ -1,0 +1,8 @@
+{
+  "services": [],
+  "mounts": ["/"],
+  "thresholds": {"ram": 90, "load": 1.5, "disk": 85, "inodes": 85},
+  "alert_seconds": 300,
+  "clear_seconds": 300,
+  "monitor_agent": true
+}

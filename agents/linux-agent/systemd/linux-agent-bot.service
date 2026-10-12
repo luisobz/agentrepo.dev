@@ -1,0 +1,24 @@
+[Unit]
+Description=Linux Agent human Telegram control plane
+After=network-online.target linux-agent-root-disable.service
+Wants=network-online.target
+Requires=linux-agent-root-disable.service
+[Service]
+User=linux-agent-bot
+Group=linux-agent-bot
+WorkingDirectory=/opt/linux-agent
+ExecStart=/usr/bin/python3 -Es /opt/linux-agent/bot.py
+StateDirectory=linux-agent-bot
+StateDirectoryMode=0700
+UMask=0077
+Restart=always
+RestartSec=5
+PrivateTmp=true
+ProtectHome=true
+ProtectSystem=full
+ProtectKernelTunables=true
+ProtectKernelModules=true
+ProtectControlGroups=true
+RestrictAddressFamilies=AF_UNIX AF_INET AF_INET6
+[Install]
+WantedBy=multi-user.target

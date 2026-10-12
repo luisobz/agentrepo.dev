@@ -1,0 +1,8 @@
+[Unit]
+Description=Owner-confirmed Linux Agent maintenance (%i)
+[Service]
+Type=oneshot
+ExecStart=/usr/bin/python3 -Es /opt/linux-agent/maintenance.py %i
+UMask=0027
+# Never kill dpkg solely because a root lease or short bot request expired.
+TimeoutStartSec=infinity

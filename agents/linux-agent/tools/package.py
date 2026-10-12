@@ -20,7 +20,7 @@ linux-agent-root-expire.timer'''.split()]
 
 def build(destination):
     version = (ROOT / 'VERSION').read_text().strip()
-    if version != '0.1.0':
+    if version != '0.1.1':
         raise ValueError('Review manifest and validation before changing version')
     destination.mkdir(parents=True, exist_ok=True)
     target = destination / f'linux-agent-{version}.tar.gz'

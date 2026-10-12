@@ -1,0 +1,7 @@
+[Unit]
+Description=Explicit temporary Linux Agent root window (%i seconds)
+[Service]
+Type=oneshot
+ExecStart=/usr/bin/python3 -Es /opt/linux-agent/root_window.py enable %i
+PrivateTmp=true
+ProtectHome=true

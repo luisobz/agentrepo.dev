@@ -1,0 +1,3 @@
+#!/bin/sh
+cd /
+exec /usr/bin/env -i PATH=/usr/sbin:/usr/bin:/sbin:/bin /usr/bin/python3 -Es /opt/linux-agent/relay.py

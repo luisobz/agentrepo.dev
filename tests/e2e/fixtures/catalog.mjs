@@ -67,7 +67,8 @@ function read(path) {
       ...shared,
       type: 'prompt',
       description: 'A linked skill',
-      content: '# Linked skill',
+      content:
+        '---\nname: linked-project\ndescription: Skill metadata\n---\n\n# Linked skill\n\nUse **clear language**.\n\n---\n\nKeep this separator.',
     };
   if (path === 'blog.getPostBySlug')
     return {

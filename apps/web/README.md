@@ -48,3 +48,9 @@ reads run list/count concurrently, with no changes to write transactions.
 The CLI guide documents global CLI 0.2.1 and the interactive entry point.
 
 CLI releases use their own cli-vX.Y.Z tags and workflow; platform releases do not package the CLI.
+
+## Skill documents
+
+The rendered skill view recognises YAML frontmatter as metadata. Raw, Copy and
+Download preserve the complete original document, including frontmatter. Other
+Markdown viewers retain their existing rendering behaviour.

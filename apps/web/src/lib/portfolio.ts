@@ -67,8 +67,8 @@ const LUISBZ: LocalizedPortfolioProfile = {
   slug: 'luisbz',
   name: 'Luis Ballester Zafra',
   role: {
-    en: 'Senior Full-Stack Engineer & Tech Lead · AI Platform Builder',
-    es: 'Ingeniero Full-Stack Senior y Tech Lead · Creador de Plataformas de IA',
+    en: 'Head of Engineering · Full-Stack & Cloud',
+    es: 'Head of Engineering · Full-Stack y Cloud',
   },
   headline: {
     en: 'Valencia, Spain · 8+ years shipping products',
@@ -78,8 +78,8 @@ const LUISBZ: LocalizedPortfolioProfile = {
   linkedinUrl: 'https://linkedin.com/in/luisbz/',
   manifesto: [
     {
-      en: 'Senior Full-Stack Engineer & Tech Lead with 8+ years building scalable digital products from scratch. The past 2 years focused on AI platforms, agentic workflows and LLM orchestration: RAG pipelines, automated content generation and AI-powered lead intelligence.',
-      es: 'Ingeniero Full-Stack Senior y Tech Lead con más de 8 años construyendo productos digitales escalables desde cero. Los últimos 2 años centrado en plataformas de IA, flujos agénticos y orquestación de LLM: pipelines RAG, generación automática de contenido e inteligencia de leads impulsada por IA.',
+      en: 'Head of Engineering at ClickDefense, with 8+ years building digital products. I combine product engineering and technical leadership with cloud infrastructure, security and automation. My background includes AI platforms, agentic workflows and LLM orchestration.',
+      es: 'Head of Engineering en ClickDefense, con más de 8 años construyendo productos digitales. Combino desarrollo de producto y liderazgo técnico con infraestructura cloud, seguridad y automatización. Mi trayectoria incluye plataformas de IA, flujos agénticos y orquestación de LLM.',
     },
     {
       en: 'I seek complex problems and full product ownership — and I enjoy making teams faster: internal tools, reusable libraries, NPM packages, scaffolding templates and AI utilities. Direct teams, high standards, genuine commitment.',
@@ -87,6 +87,15 @@ const LUISBZ: LocalizedPortfolioProfile = {
     },
   ],
   experience: [
+    {
+      period: 'Jul 2026 — Present',
+      role: { en: 'Head of Engineering', es: 'Head of Engineering' },
+      company: 'ClickDefense',
+      achievement: {
+        en: 'Product development and cross-functional ownership of cloud infrastructure, security and technical process automation. Designed and automated AWS and Azure infrastructure with Terraform and Ansible for staging, production and internal company needs. Centralised secrets management, short-lived certificate access and federated deployment authentication. Standardised CI/CD pipelines and implemented self-hosted runners. Analysed and optimised AWS and Azure costs through service optimisation and resource removal or replacement. Improved application and API performance, security and observability through retries, fallbacks and query optimisation. Research and development in fingerprinting and signal analysis for automated traffic detection. Technical coordination, documentation, knowledge transfer and task delegation. Technologies: AWS, Azure, Terraform, Ansible, GitHub Actions, OpenBao, Microsoft 365, Entra ID, Intune, Next.js, React, MongoDB, Traefik and nginx.',
+        es: 'Desarrollo de producto y responsabilidad transversal sobre infraestructura cloud, seguridad y automatización de procesos técnicos. Diseño y automatización de infraestructura en AWS y Azure con Terraform y Ansible para staging, producción y necesidades internas de la empresa. Gestión centralizada de secretos, acceso mediante certificados de corta duración y autenticación federada para despliegues. Estandarización de CI/CD e implementación de runners propios. Análisis y optimización de costes en AWS y Azure mediante optimización de servicios y retirada o cambio de recursos. Mejoras de rendimiento, seguridad y observabilidad en aplicaciones y APIs con reintentos, fallbacks y optimización de consultas. Investigación y desarrollo de fingerprinting y análisis de señales para detectar tráfico automatizado. Coordinación técnica, documentación, transferencia de conocimiento y distribución del trabajo. Tecnologías: AWS, Azure, Terraform, Ansible, GitHub Actions, OpenBao, Microsoft 365, Entra ID, Intune, Next.js, React, MongoDB, Traefik y nginx.',
+      },
+    },
     {
       period: 'Mar 2022 — May 2026',
       role: {
@@ -171,8 +180,11 @@ const LUISBZ: LocalizedPortfolioProfile = {
         'Java (Spring Boot)',
         'Python (Django)',
         'PostgreSQL · MongoDB · Redis',
-        'AWS (Cognito, Lambda, S3, EC2)',
-        'GCP · Terraform · Docker',
+        'AWS · Azure · GCP',
+        'Terraform · Ansible · Docker',
+        'GitHub Actions · self-hosted runners',
+        'OpenBao · Microsoft 365 · Entra ID · Intune',
+        'Traefik · nginx',
       ],
     },
     {
@@ -186,7 +198,7 @@ const LUISBZ: LocalizedPortfolioProfile = {
         es: 'Interfaces con intención, del design system a los flujos OAuth.',
       },
       technologies: [
-        'React',
+        'React · Next.js',
         'Vue.js',
         'TypeScript',
         'Refine.dev',
@@ -202,7 +214,7 @@ const PROFILES: Record<string, LocalizedPortfolioProfile> = {
 };
 
 export function getPortfolioProfile(
-  slug: string
+  slug: string,
 ): LocalizedPortfolioProfile | null {
   return PROFILES[slug] ?? null;
 }
@@ -210,7 +222,7 @@ export function getPortfolioProfile(
 /** Flattens a localized profile down to plain strings for the active locale. */
 export function resolvePortfolioProfile(
   profile: LocalizedPortfolioProfile,
-  locale: Locale
+  locale: Locale,
 ): PortfolioProfile {
   return {
     slug: profile.slug,

@@ -82,7 +82,10 @@ export function SkillContentViewer({
     <section className="rounded-[12px] border border-[var(--color-border-soft)] bg-[var(--color-bg-warm-white)] shadow-[var(--shadow-xs)]">
       <div className="flex flex-wrap items-center justify-between gap-2 border-b border-[var(--color-border-soft)] px-4 pt-2">
         <div role="tablist" className="flex">
-          <TabButton isActive={tab === 'rendered'} onClick={() => setTab('rendered')}>
+          <TabButton
+            isActive={tab === 'rendered'}
+            onClick={() => setTab('rendered')}
+          >
             Rendered
           </TabButton>
           <TabButton isActive={tab === 'raw'} onClick={() => setTab('raw')}>
@@ -116,7 +119,7 @@ export function SkillContentViewer({
 
       {tab === 'rendered' ? (
         <div className="p-6 sm:p-8">
-          <MarkdownContent content={content} />
+          <MarkdownContent content={content} hideFrontmatter />
         </div>
       ) : (
         <pre className="overflow-x-auto rounded-b-[12px] bg-[var(--color-console-bg)] p-6 font-mono text-sm leading-relaxed text-[var(--color-text-primary)]">

@@ -1,5 +1,6 @@
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
+import remarkFrontmatter from 'remark-frontmatter';
 import { cn } from '../../lib/utils';
 
 const PROSE_CLASSES =
@@ -8,13 +9,24 @@ const PROSE_CLASSES =
 export interface MarkdownContentProps {
   content: string;
   className?: string;
+  hideFrontmatter?: boolean;
 }
 
 /** GFM Markdown (tables, lists, links) themed with the design tokens. */
-export function MarkdownContent({ content, className }: MarkdownContentProps) {
+export function MarkdownContent({
+  content,
+  className,
+  hideFrontmatter = false,
+}: MarkdownContentProps) {
   return (
     <div className={cn(PROSE_CLASSES, className)}>
-      <ReactMarkdown remarkPlugins={[remarkGfm]}>{content}</ReactMarkdown>
+      <ReactMarkdown
+        remarkPlugins={
+          hideFrontmatter ? [remarkGfm, remarkFrontmatter] : [remarkGfm]
+        }
+      >
+        {content}
+      </ReactMarkdown>
     </div>
   );
 }

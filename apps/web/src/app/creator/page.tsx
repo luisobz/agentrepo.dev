@@ -1,3 +1,4 @@
+import Link from 'next/link';
 import { getServerT } from '../../lib/i18n/server';
 import { ContributorLogin } from '../../components/creator/contributor-login';
 import type { Metadata } from 'next';
@@ -33,6 +34,18 @@ export default async function CreatorPage() {
           {t('creator.pageInfo')}
         </p>
       </header>
+      <aside className="mb-8 rounded-xl border border-[var(--color-border-soft)] bg-[var(--color-bg-surface)] p-4 text-sm text-[var(--color-text-secondary)]">
+        <p>
+          {t('creator.writerRecommendation')}{' '}
+          <Link
+            href="/skills/writer"
+            className="font-semibold text-[var(--color-brand-garnet)] underline underline-offset-4"
+          >
+            Writer
+          </Link>
+          {t('creator.writerBenefit')}
+        </p>
+      </aside>
       {user ? (
         <>
           <CreatorSession authorName={authorName} />

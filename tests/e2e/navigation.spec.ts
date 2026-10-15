@@ -137,3 +137,13 @@ test('admin visibility is checked once across both menus and client navigation',
   ).toBeVisible();
   expect(checks).toBe(1);
 });
+
+test('creators can open Writer before preparing a contribution', async ({
+  page,
+}) => {
+  await page.goto('/creator');
+  const writer = page.getByRole('link', { name: 'Writer', exact: true });
+  await expect(writer).toHaveAttribute('href', '/skills/writer');
+  await writer.click();
+  await expect(page).toHaveURL(/\/skills\/writer$/);
+});

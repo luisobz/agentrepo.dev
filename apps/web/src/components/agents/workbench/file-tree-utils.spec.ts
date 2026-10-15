@@ -5,6 +5,7 @@ import {
   flattenFiles,
   isMarkdownFile,
   parentDirsOf,
+  sortFileTree,
 } from './file-tree-utils';
 
 const tree: FileTree = [
@@ -44,7 +45,7 @@ describe('findInitialFilePath', () => {
 
   it('returns null for trees without files', () => {
     expect(
-      findInitialFilePath([{ name: 'empty', type: 'directory', children: [] }])
+      findInitialFilePath([{ name: 'empty', type: 'directory', children: [] }]),
     ).toBeNull();
   });
 });
@@ -64,5 +65,38 @@ describe('isMarkdownFile', () => {
     expect(isMarkdownFile('README.md')).toBe(true);
     expect(isMarkdownFile('notes.MDX')).toBe(true);
     expect(isMarkdownFile('index.ts')).toBe(false);
+  });
+});
+
+describe('sortFileTree', () => {
+  it('sorts folders first, then groups files by extension and natural name without mutation', () => {
+    const input: FileTree = [
+      { name: 'z.py', type: 'file', content: '' },
+      { name: 'README.md', type: 'file', content: '' },
+      {
+        name: 'b',
+        type: 'directory',
+        children: [
+          { name: 'z.md', type: 'file', content: '' },
+          { name: 'a', type: 'directory', children: [] },
+        ],
+      },
+      { name: 'file10.py', type: 'file', content: '' },
+      { name: 'file2.py', type: 'file', content: '' },
+      { name: 'a', type: 'directory', children: [] },
+    ];
+    const sorted = sortFileTree(input);
+    expect(sorted.map((node) => node.name)).toEqual([
+      'a',
+      'b',
+      'README.md',
+      'file2.py',
+      'file10.py',
+      'z.py',
+    ]);
+    expect(sorted[1].type === 'directory' && sorted[1].children[0].name).toBe(
+      'a',
+    );
+    expect(input[0].name).toBe('z.py');
   });
 });

@@ -24,7 +24,7 @@ export function flattenFiles(tree: FileTree, parentPath = ''): FileEntry[] {
 export function findInitialFilePath(tree: FileTree): string | null {
   const readme = tree.find(
     (node): node is FileTreeNode & { type: 'file' } =>
-      node.type === 'file' && node.name.toLowerCase() === 'readme.md'
+      node.type === 'file' && node.name.toLowerCase() === 'readme.md',
   );
   if (readme) {
     return readme.name;
@@ -40,4 +40,30 @@ export function parentDirsOf(path: string): string[] {
 
 export function isMarkdownFile(name: string): boolean {
   return /\.(md|mdx|markdown)$/i.test(name);
+}
+
+/** Folders first; files grouped by extension, with natural ordering within a type. */
+export function sortFileTree(tree: FileTree): FileTree {
+  const compare = new Intl.Collator('en', {
+    numeric: true,
+    sensitivity: 'base',
+  }).compare;
+  const extension = (name: string) =>
+    name.includes('.') ? (name.split('.').at(-1)?.toLowerCase() ?? '') : '';
+  return tree
+    .map((node) =>
+      node.type === 'directory'
+        ? { ...node, children: sortFileTree(node.children) }
+        : node,
+    )
+    .sort((a, b) =>
+      a.type !== b.type
+        ? a.type === 'directory'
+          ? -1
+          : 1
+        : a.type === 'file' && b.type === 'file'
+          ? compare(extension(a.name), extension(b.name)) ||
+            compare(a.name, b.name)
+          : compare(a.name, b.name),
+    );
 }

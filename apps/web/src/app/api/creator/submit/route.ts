@@ -1,3 +1,7 @@
+import {
+  readLimitedJson,
+  RequestBodyError,
+} from '../../../../lib/limited-json';
 import { hasTrustedOrigin } from '../../../../lib/request-origin';
 import type { AppRouter } from '@agentrepo/trpc/schemas';
 import {
@@ -35,17 +39,24 @@ export async function POST(request: NextRequest) {
   if (!session)
     return NextResponse.json({ error: 'Session expired' }, { status: 401 });
 
-  const raw = await request.text();
-  if (raw.length > 200_000)
-    return NextResponse.json(
-      { error: 'Submission too large' },
-      { status: 413 },
-    );
+  if (
+    request.headers.get('content-type')?.split(';')[0].trim() !==
+    'application/json'
+  )
+    return NextResponse.json({ error: 'JSON required' }, { status: 415 });
   let body: unknown;
   try {
-    body = JSON.parse(raw);
-  } catch {
-    return NextResponse.json({ error: 'Invalid JSON' }, { status: 400 });
+    body = await readLimitedJson(request);
+  } catch (error) {
+    return NextResponse.json(
+      {
+        error:
+          error instanceof RequestBodyError
+            ? error.message
+            : 'Invalid request body',
+      },
+      { status: error instanceof RequestBodyError ? error.status : 400 },
+    );
   }
   const client = createTRPCClient<AppRouter>({
     links: [
@@ -86,7 +97,10 @@ export async function POST(request: NextRequest) {
     ) {
       const parsed = submitAgentSchema.safeParse(body);
       if (!parsed.success)
-        return NextResponse.json({ error: 'Invalid agent' }, { status: 400 });
+        return NextResponse.json(
+          { error: parsed.error.issues[0]?.message ?? 'Invalid agent' },
+          { status: 400 },
+        );
       const asset = await client.creator.submitAgent.mutate(parsed.data);
       return NextResponse.json(
         {
@@ -120,6 +134,14 @@ export async function POST(request: NextRequest) {
     }
     return NextResponse.json({ error: 'Unknown asset kind' }, { status: 400 });
   } catch (error) {
+    if (
+      error instanceof TRPCClientError &&
+      error.data?.code === 'TOO_MANY_REQUESTS'
+    )
+      return NextResponse.json(
+        { error: 'Draft limit reached; try again later' },
+        { status: 429 },
+      );
     if (error instanceof TRPCClientError && error.data?.code === 'CONFLICT') {
       return NextResponse.json(
         { error: 'That slug is already in use' },

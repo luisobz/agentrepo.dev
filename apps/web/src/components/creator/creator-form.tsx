@@ -3,7 +3,20 @@
 import { RelatedLinksEditor, type ContentRelatedLink } from '@agentrepo/ui';
 import { useT } from '../../lib/i18n/use-t';
 
-import { useState, type ChangeEvent, type FormEvent } from 'react';
+import {
+  useState,
+  useRef,
+  useMemo,
+  type ChangeEvent,
+  type FormEvent,
+} from 'react';
+
+import {
+  type AgentSourceFile,
+  validateAgentFiles,
+  InvalidAgentFilesError,
+} from '@agentrepo/trpc/schemas';
+import { readAgentUpload } from './read-agent-upload';
 
 type AssetKind = 'skill' | 'agent' | 'blog';
 
@@ -30,6 +43,17 @@ export function CreatorForm({ authorName }: { authorName: string }) {
   const [skillType, setSkillType] = useState<
     'prompt' | 'system' | 'config' | 'template'
   >('prompt');
+  const [files, setFiles] = useState<AgentSourceFile[]>([]);
+  const [reading, setReading] = useState(false);
+  const uploadSequence = useRef(0);
+  const uploadBytes = useMemo(
+    () =>
+      files.reduce(
+        (total, file) => total + new TextEncoder().encode(file.content).length,
+        0,
+      ),
+    [files],
+  );
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [submitted, setSubmitted] = useState(false);
@@ -40,14 +64,45 @@ export function CreatorForm({ authorName }: { authorName: string }) {
   };
 
   const handleFile = async (event: ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (!file) return;
-    if (file.size > 100_000) {
-      setError(t('creator.fileSize'));
-      return;
-    }
-    setContent(await file.text());
+    const selection = Array.from(event.target.files ?? []);
+    event.target.value = '';
+    if (!selection.length) return;
+    const sequence = ++uploadSequence.current;
+    setReading(true);
     setError(null);
+    try {
+      if (kind === 'agent') {
+        const imported = await readAgentUpload(selection);
+        if (sequence !== uploadSequence.current) return;
+        setFiles(imported);
+        const readme = imported.find(
+          (file) => file.path.toLowerCase() === 'readme.md',
+        );
+        if (readme) setContent(readme.content);
+      } else {
+        const file = selection[0];
+        if (
+          selection.length !== 1 ||
+          !/\.(md|txt)$/i.test(file.name) ||
+          file.size > 100_000
+        )
+          throw new InvalidAgentFilesError(t('creator.fileSize'));
+        const text = new TextDecoder('utf-8', { fatal: true }).decode(
+          await file.arrayBuffer(),
+        );
+        if (validateAgentFiles([{ path: 'content.md', content: text }]))
+          throw new InvalidAgentFilesError(t('creator.fileSize'));
+        if (sequence !== uploadSequence.current) return;
+        setContent(text);
+      }
+    } catch (error) {
+      if (sequence === uploadSequence.current)
+        setError(
+          error instanceof Error ? error.message : t('creator.saveFailed'),
+        );
+    } finally {
+      if (sequence === uploadSequence.current) setReading(false);
+    }
   };
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
@@ -65,6 +120,7 @@ export function CreatorForm({ authorName }: { authorName: string }) {
               slug,
               shortDescription: description,
               readmeContent: content,
+              files,
               repositoryUrl: repositoryUrl || null,
             };
     try {
@@ -103,6 +159,7 @@ export function CreatorForm({ authorName }: { authorName: string }) {
             setSlug('');
             setDescription('');
             setContent('');
+            setFiles([]);
             setRepositoryUrl('');
             setSlugEdited(false);
           }}
@@ -134,7 +191,13 @@ export function CreatorForm({ authorName }: { authorName: string }) {
                 name="kind"
                 value={option}
                 checked={kind === option}
-                onChange={() => setKind(option)}
+                onChange={() => {
+                  uploadSequence.current++;
+                  setKind(option);
+                  setFiles([]);
+                  setReading(false);
+                  setError(null);
+                }}
                 className="mr-2"
               />
               {option === 'skill'
@@ -236,14 +299,51 @@ export function CreatorForm({ authorName }: { authorName: string }) {
         />
       </label>
       <label className="block text-sm font-medium">
-        {t('creator.upload')}
+        {kind === 'agent' ? t('creator.uploadAgent') : t('creator.upload')}
         <input
           type="file"
-          accept=".md,.txt,text/markdown,text/plain"
+          accept={
+            kind === 'agent' ? undefined : '.md,.txt,text/markdown,text/plain'
+          }
+          multiple={kind === 'agent'}
+          disabled={reading || busy}
           onChange={handleFile}
           className="mt-2 block w-full text-sm"
         />
       </label>
+      {kind === 'agent' && (
+        <div className="space-y-2 text-xs text-[var(--color-text-muted)]">
+          <p>{t('creator.packageHelp')}</p>
+          {reading && <p role="status">{t('creator.readingFiles')}</p>}
+          {files.length > 0 && (
+            <>
+              <div className="flex items-center justify-between gap-3">
+                <span>
+                  {files.length} {t('creator.files')} ·{' '}
+                  {Math.ceil(uploadBytes / 1000)} KB
+                </span>
+                <button
+                  type="button"
+                  onClick={() => setFiles([])}
+                  className="underline"
+                >
+                  {t('creator.clearFiles')}
+                </button>
+              </div>
+              <ul
+                aria-label={t('creator.packageFiles')}
+                className="max-h-40 overflow-y-auto rounded-lg border border-[var(--color-border-soft)] p-3 font-mono"
+              >
+                {files.map((file) => (
+                  <li key={file.path} className="break-all">
+                    {file.path}
+                  </li>
+                ))}
+              </ul>
+            </>
+          )}
+        </div>
+      )}
       <p className="text-xs text-[var(--color-text-muted)]">
         {t('creator.pendingHelp')}
       </p>
@@ -254,7 +354,7 @@ export function CreatorForm({ authorName }: { authorName: string }) {
       ) : null}
       <button
         type="submit"
-        disabled={busy}
+        disabled={busy || reading}
         className="rounded-full bg-[var(--color-brand-garnet)] px-6 py-3 text-sm font-semibold text-white disabled:opacity-50"
       >
         {busy ? t('creator.saving') : t('creator.submit')}

@@ -8,6 +8,8 @@ import {
 } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { LocaleProvider } from '@agentrepo/ui';
+import { readAgentUpload } from './read-agent-upload';
+vi.mock('./read-agent-upload', () => ({ readAgentUpload: vi.fn() }));
 import { CreatorForm } from './creator-form';
 
 afterEach(() => {
@@ -118,4 +120,72 @@ it('preserves labelled references in a contribution', async () => {
   expect(JSON.parse(fetcher.mock.calls[0][1].body).relatedLinks).toEqual([
     { kind: 'x', label: 'Creator on X', url: 'https://x.com/creator' },
   ]);
+});
+
+it('previews imported agent sources, fills README and submits the full package for review', async () => {
+  const files = [
+    { path: 'README.md', content: '# Imported agent' },
+    { path: 'src/main.py', content: 'print(1)' },
+  ];
+  vi.mocked(readAgentUpload).mockResolvedValue(files);
+  const fetch = vi.fn().mockResolvedValue({ ok: true });
+  vi.stubGlobal('fetch', fetch);
+  render(
+    <LocaleProvider>
+      <CreatorForm authorName="Contributor" />
+    </LocaleProvider>,
+  );
+  fireEvent.click(screen.getByRole('radio', { name: 'Agent' }));
+  fireEvent.change(screen.getByLabelText('Upload source files or a ZIP'), {
+    target: { files: [new File(['zip'], 'agent.zip')] },
+  });
+  await waitFor(() =>
+    expect(
+      screen.getByRole('list', { name: 'Source package files' }),
+    ).toHaveTextContent('src/main.py'),
+  );
+  expect(screen.getByRole('textbox', { name: /Markdown\)/ })).toHaveValue(
+    '# Imported agent',
+  );
+  fireEvent.change(screen.getByLabelText('Title'), {
+    target: { value: 'Imported agent' },
+  });
+  fireEvent.change(screen.getByLabelText('Description'), {
+    target: { value: 'Documented source package' },
+  });
+  fireEvent.click(
+    screen.getByRole('button', { name: 'Submit draft for review' }),
+  );
+  await waitFor(() => expect(fetch).toHaveBeenCalled());
+  expect(JSON.parse(fetch.mock.calls[0][1].body).files).toEqual(files);
+});
+
+it('keeps an existing source package when a later ZIP is rejected', async () => {
+  vi.mocked(readAgentUpload)
+    .mockResolvedValueOnce([{ path: 'main.py', content: 'print(1)' }])
+    .mockRejectedValueOnce(new Error('Unsafe file path'));
+  render(
+    <LocaleProvider>
+      <CreatorForm authorName="Contributor" />
+    </LocaleProvider>,
+  );
+  fireEvent.click(screen.getByRole('radio', { name: 'Agent' }));
+  const input = screen.getByLabelText('Upload source files or a ZIP');
+  fireEvent.change(input, {
+    target: { files: [new File(['zip'], 'good.zip')] },
+  });
+  await waitFor(() =>
+    expect(
+      screen.getByRole('list', { name: 'Source package files' }),
+    ).toHaveTextContent('main.py'),
+  );
+  fireEvent.change(input, {
+    target: { files: [new File(['zip'], 'bad.zip')] },
+  });
+  await waitFor(() =>
+    expect(screen.getByRole('alert')).toHaveTextContent('Unsafe file path'),
+  );
+  expect(
+    screen.getByRole('list', { name: 'Source package files' }),
+  ).toHaveTextContent('main.py');
 });

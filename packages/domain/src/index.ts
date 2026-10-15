@@ -13,3 +13,4 @@ export * from './portfolio/contact-request';
 export * from './playground/playground-token';
 
 export * from './catalog/related-link';
+export * from './catalog/agent-files';

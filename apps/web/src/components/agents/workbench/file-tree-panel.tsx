@@ -1,8 +1,18 @@
 'use client';
 
 import type { FileTree, FileTreeNode } from '@agentrepo/trpc/schemas';
-import { ChevronDown, ChevronRight, FileText, Folder, FolderOpen } from 'lucide-react';
-import { joinPath } from './file-tree-utils';
+import {
+  ChevronDown,
+  ChevronRight,
+  FileText,
+  FileCode2,
+  FileJson,
+  FileCog,
+  Folder,
+  FolderOpen,
+} from 'lucide-react';
+import { useMemo } from 'react';
+import { joinPath, sortFileTree } from './file-tree-utils';
 import { useWorkbench } from './workbench-context';
 
 function TreeNode({
@@ -20,6 +30,36 @@ function TreeNode({
 
   if (node.type === 'file') {
     const isActive = state.activePath === path;
+    const extension = node.name.split('.').at(-1)?.toLowerCase();
+    const FileIcon =
+      extension === 'json'
+        ? FileJson
+        : [
+              'py',
+              'sh',
+              'js',
+              'mjs',
+              'cjs',
+              'ts',
+              'tsx',
+              'jsx',
+              'html',
+              'css',
+              'sql',
+            ].includes(extension ?? '')
+          ? FileCode2
+          : [
+                'yaml',
+                'yml',
+                'toml',
+                'ini',
+                'conf',
+                'cfg',
+                'service',
+                'timer',
+              ].includes(extension ?? '')
+            ? FileCog
+            : FileText;
     return (
       <li>
         <button
@@ -32,7 +72,7 @@ function TreeNode({
               : 'text-[var(--color-text-secondary)] hover:bg-[var(--color-bg-surface)] hover:text-[var(--color-text-primary)]'
           }`}
         >
-          <FileText className="h-3.5 w-3.5 shrink-0" />
+          <FileIcon className="h-3.5 w-3.5 shrink-0" />
           <span className="truncate">{node.name}</span>
         </button>
       </li>
@@ -73,10 +113,11 @@ function TreeNode({
 }
 
 export function FileTreePanel({ tree }: { tree: FileTree }) {
+  const sorted = useMemo(() => sortFileTree(tree), [tree]);
   return (
     <nav aria-label="Agent files" className="p-2">
       <ul>
-        {tree.map((node) => (
+        {sorted.map((node) => (
           <TreeNode key={node.name} node={node} parentPath="" depth={0} />
         ))}
       </ul>

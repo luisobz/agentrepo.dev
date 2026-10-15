@@ -95,3 +95,35 @@ test('the header remains a visible fallback on mobile catalogue pages', async ({
   await expect(page.getByTestId('avatar-sprite')).toBeVisible();
   await expect.poll(() => distanceToSlot(page, 'header')).toBeLessThan(4);
 });
+
+test('Spanish search is localized and its avatar message leaves instructions clear', async ({
+  page,
+  context,
+}) => {
+  await context.addCookies([
+    { name: 'locale', value: 'es', domain: 'localhost', path: '/' },
+  ]);
+  await page.goto('/');
+  await page.getByRole('button', { name: 'Open search', exact: true }).click();
+  const dialog = page.getByRole('dialog');
+  await expect(
+    dialog.getByPlaceholder('Busca skills, agentes y artículos…'),
+  ).toBeVisible();
+  await expect(
+    dialog.getByText(
+      'Escribe al menos 2 caracteres para buscar en todo el sitio.',
+    ),
+  ).toBeVisible();
+  await expect(dialog.getByText('↑↓ navegar')).toBeVisible();
+  await expect
+    .poll(async () => {
+      const bubble = await page.getByTestId('avatar-bubble').boundingBox();
+      const box = await dialog
+        .getByText(
+          'Escribe al menos 2 caracteres para buscar en todo el sitio.',
+        )
+        .boundingBox();
+      return bubble && box ? bubble.y + bubble.height <= box.y : false;
+    })
+    .toBe(true);
+});

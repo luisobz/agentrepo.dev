@@ -77,7 +77,7 @@ export function CommandPalette() {
 
       // The avatar flies over to the search box and greets the visitor.
       const releaseFocus = focusAvatar('search');
-      say(hintRef.current);
+      say(hintRef.current, { placement: 'top' });
 
       return () => {
         document.documentElement.style.overflow = '';
@@ -151,7 +151,7 @@ export function CommandPalette() {
             ref={inputRef}
             value={query}
             onChange={(event) => setQuery(event.target.value)}
-            placeholder="Search skills, agents and blog posts…"
+            placeholder={t('palette.placeholder')}
             aria-label="Search query"
             className="w-full bg-transparent text-[15px] text-[var(--color-text-primary)] placeholder:text-[var(--color-text-placeholder)] focus:outline-none"
           />
@@ -165,14 +165,13 @@ export function CommandPalette() {
         <div className="max-h-[50vh] overflow-y-auto p-2" role="listbox">
           {!isQueryReady && (
             <p className="px-3 py-8 text-center text-sm text-[var(--color-text-muted)]">
-              Type at least {MIN_QUERY_LENGTH} characters to search the whole
-              site.
+              {t('palette.hint')}
             </p>
           )}
 
           {isQueryReady && !search.isFetching && flatHits.length === 0 && (
             <p className="px-3 py-8 text-center text-sm text-[var(--color-text-muted)]">
-              No results for “{debouncedQuery}”.
+              {t('palette.noResults')} “{debouncedQuery}”.
             </p>
           )}
 
@@ -221,9 +220,9 @@ export function CommandPalette() {
         </div>
 
         <div className="flex items-center gap-4 border-t border-[var(--color-border-soft)] bg-[var(--color-bg-surface)]/60 px-4 py-2 font-mono text-[11px] text-[var(--color-text-muted)]">
-          <span>↑↓ navigate</span>
-          <span>↵ open</span>
-          <span>esc close</span>
+          <span>{t('palette.navigate')}</span>
+          <span>{t('palette.open')}</span>
+          <span>{t('palette.close')}</span>
         </div>
       </div>
     </div>

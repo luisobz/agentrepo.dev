@@ -292,7 +292,7 @@ jobs:
           pnpm exec nx run backend-web:prune
           # El lockfile podado modela workspace_modules/* como importers:
           # el bundle necesita su propio pnpm-workspace.yaml para resolverlos.
-          printf "packages:\n  - 'workspace_modules/@agentrepo/*'\n" > apps/backend-web/dist/pnpm-workspace.yaml
+          node scripts/prepare-backend-bundle.mjs apps/backend-web/dist
           pnpm --dir apps/backend-web/dist install --prod --frozen-lockfile
           # Genera el cliente Prisma DENTRO del bundle (compilador WASM, portable)
           pnpm --dir apps/backend-web/dist/workspace_modules/@agentrepo/database exec prisma generate --schema prisma/schema.prisma
@@ -346,7 +346,7 @@ jobs:
       - name: Empaquetar backend autocontenido (nx prune + deps de producción)
         run: |
           pnpm exec nx run backend-ai:prune
-          printf "packages:\n  - 'workspace_modules/@agentrepo/*'\n" > apps/backend-ai/dist/pnpm-workspace.yaml
+          node scripts/prepare-backend-bundle.mjs apps/backend-ai/dist
           pnpm --dir apps/backend-ai/dist install --prod --frozen-lockfile
           pnpm --dir apps/backend-ai/dist/workspace_modules/@agentrepo/database exec prisma generate --schema prisma/schema.prisma
           node scripts/fix-pruned-workspace-entries.mjs apps/backend-ai/dist

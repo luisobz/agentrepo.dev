@@ -17,3 +17,12 @@ export type {
   AvatarMovement,
   AvatarColors,
 } from './avatar-setup';
+export { AvatarFigure } from './sprite/avatar-figure';
+export type { AvatarFigureProps } from './sprite/avatar-figure';
+export { CLIPS, SPRITE_SHEET, BLINK } from './sprite/avatar-clips';
+export type { ClipName, Pose, SpriteClip } from './sprite/avatar-clips';
+export type {
+  AvatarTravel,
+  AvatarTravelPhase,
+  AvatarSpriteProps,
+} from './components/avatar-sprite';

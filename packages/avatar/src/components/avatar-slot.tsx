@@ -3,6 +3,9 @@
 import { useEffect, useRef } from 'react';
 import { useAvatar, type AvatarSlotId } from './avatar-context';
 
+/** Base footprint of the avatar in px (scale 1). */
+const SLOT_SIZE = 48;
+
 interface AvatarSlotProps {
   id: AvatarSlotId;
   className?: string;
@@ -38,11 +41,22 @@ export function AvatarSlot({
   const reserveSpace = isActive || preserveSpace;
 
   return (
-    <div data-testid={`avatar-slot-${id}`} data-active={isActive} className={className}>
+    <div
+      data-testid={`avatar-slot-${id}`}
+      data-active={isActive}
+      className={className}
+    >
       <div
         ref={boxRef}
         aria-hidden="true"
         className={reserveSpace ? 'size-12' : 'size-0'}
+        // Inline size so the slot works without Tailwind and reserves the
+        // avatar's real footprint at this slot's scale (no overlap with controls).
+        style={{
+          width: reserveSpace ? SLOT_SIZE * scale : 0,
+          height: reserveSpace ? SLOT_SIZE * scale : 0,
+          flexShrink: 0,
+        }}
       />
     </div>
   );

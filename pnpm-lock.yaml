@@ -472,9 +472,6 @@ importers:
 
   packages/avatar:
     dependencies:
-      framer-motion:
-        specifier: ^12.40.0
-        version: 12.42.2(react-dom@19.2.7(react@19.2.7))(react@19.2.7)
       react:
         specifier: ^19.0.0
         version: 19.2.7

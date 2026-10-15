@@ -108,6 +108,14 @@ export const webDictionary = {
     en: 'Propose a skill, agent project or article. Your account is recorded as the author and the administrator reviews each proposal before publication.',
     es: 'Propón una skill, un proyecto de agente o un artículo. Tu cuenta queda registrada como autora y el administrador revisa cada propuesta antes de publicarla.',
   },
+  'creator.writerRecommendation': {
+    en: 'Creating a skill or agent? We recommend',
+    es: '¿Vas a crear una skill o un agente? Recomendamos',
+  },
+  'creator.writerBenefit': {
+    en: ' to write clear instructions and documentation ready to publish.',
+    es: ' para redactar instrucciones claras y documentación lista para publicar.',
+  },
   'creator.access': {
     en: 'Sign in to contribute',
     es: 'Accede para colaborar',

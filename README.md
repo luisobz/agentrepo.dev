@@ -1,140 +1,100 @@
 <p align="center">
-  <img src="docs/assets/banner.png" alt="AgentRepo.dev Banner" width="60%">
+  <a href="https://agentrepo.dev">
+    <img src="docs/assets/brand/banners/readme-banner.jpg" alt="AgentRepo.dev — Discover, learn and build with AI skills and agents" width="100%">
+  </a>
 </p>
 
 <p align="center">
-  <a href="https://github.com/luisobz/agentrepo.dev/blob/main/LICENSE">
-    <img src="https://img.shields.io/github/license/luisobz/agentrepo.dev?style=for-the-badge&color=8B5CF6" alt="License">
-  </a>
-  <img src="https://img.shields.io/badge/node-%3E%3D24-blue?style=for-the-badge&logo=node.js&color=10B981" alt="Node Version">
-  <img src="https://img.shields.io/badge/pnpm-%3E%3D10.33.4-orange?style=for-the-badge&logo=pnpm&color=F59E0B" alt="pnpm Version">
-  <img src="https://img.shields.io/badge/nx-workspace-blueviolet?style=for-the-badge&logo=nx&color=4F46E5" alt="Nx Workspace">
+  <a href="LICENSE"><img src="https://img.shields.io/badge/license-AGPL--3.0-7A2230?style=flat-square" alt="License: AGPL-3.0"></a>
+  <img src="https://img.shields.io/badge/Node.js-%3E%3D24-7A2230?style=flat-square&logo=node.js&logoColor=white" alt="Node.js 24 or later">
+  <img src="https://img.shields.io/badge/pnpm-10.33.4-7A2230?style=flat-square&logo=pnpm&logoColor=white" alt="pnpm 10.33.4">
+  <img src="https://img.shields.io/badge/Nx-workspace-2F5D8A?style=flat-square&logo=nx&logoColor=white" alt="Nx workspace">
+  <a href="https://github.com/luisobz/agentrepo.dev/actions/workflows/ci.yml"><img src="https://github.com/luisobz/agentrepo.dev/actions/workflows/ci.yml/badge.svg" alt="CI status"></a>
 </p>
 
----
+# AgentRepo.dev
 
-# 🤖 AgentRepo.dev
+Catálogo de skills, proyectos de agentes y artículos sobre IA. Explora sus archivos y referencias, descarga versiones publicadas o instala skills en tu proyecto con el CLI.
 
-**AgentRepo.dev** es un hub de código abierto moderno y escalable diseñado para gestionar, versionar y desplegar **Agentes de IA** y **Habilidades (Skills)** reutilizables. 
+**[Web](https://agentrepo.dev) · [Skills](https://agentrepo.dev/skills) · [Agentes](https://agentrepo.dev/agents) · [CLI](https://agentrepo.dev/cli) · [Contribuir](https://agentrepo.dev/creator)**
 
-Construido bajo los principios de **Arquitectura Hexagonal (DDD)**, este monorepo combina la solidez de **NestJS** en el backend, la agilidad de **Next.js** y **tRPC** en el frontend, y la potencia de **DeepSeek** para orquestar flujos de trabajo inteligentes.
+- **Catálogo:** documentación, archivos y enlaces a los proyectos originales, con snapshots versionados.
+- **Creator:** acceso con GitHub o correo para proponer skills, agentes y artículos. Cada propuesta requiere revisión del administrador antes de publicarse.
+- **Paquetes de agentes:** varios archivos de texto o un ZIP, con vista previa y límites de tamaño, rutas y contenido. [Validación de subidas](docs/CREATOR.md).
+- **CLI interactivo:** selección de herramienta, instalación, verificación y restauración de skills. `agent.json` registra la configuración del proyecto.
+- **Panel de administración:** gestión del catálogo y revisión de propuestas, con autorización de administrador independiente del inicio de sesión.
 
----
+## Instalar el CLI
 
-## 🏛️ Estructura del Monorepo
+Requiere Node.js 24+ y pnpm. La versión del CLI se publica de forma independiente de la plataforma.
 
-Este proyecto utiliza **Nx** para gestionar de forma eficiente sus aplicaciones y paquetes:
-
-```mermaid
-graph TD
-    subgraph apps ["Aplicaciones (Frontend & API)"]
-        web["web (Next.js Public Web App)"]
-        admin["admin (Next.js Panel de Control)"]
-        api_web["backend-web (NestJS Main API & tRPC)"]
-        api_ai["backend-ai (NestJS AI Workflows API)"]
-    end
-
-    subgraph shared ["Paquetes Compartidos"]
-        trpc["trpc (Shared Routers & Schemas)"]
-        ui["ui (Shared UI Design System)"]
-        config["config (Global Configurations)"]
-        app["application (Hexagonal Use Cases & Ports)"]
-        domain["domain (Pure Business Logic)"]
-        infra["infrastructure (DB & External Adapters)"]
-    end
-
-    web --> trpc
-    admin --> trpc
-    trpc --> api_web
-    api_web --> app
-    api_ai --> app
-    app --> domain
-    app --> infra
-    infra --> db[("PostgreSQL (Prisma)")]
+```sh
+pnpm add -g https://github.com/luisobz/agentrepo.dev/releases/download/cli-v0.2.1/agentrepo-cli-0.2.1.tgz
 ```
 
-### Aplicaciones (`apps/`)
-*   `web`: Aplicación web pública e interactiva construida en Next.js.
-*   `admin`: Panel de control de Next.js para la administración del catálogo de habilidades y agentes.
-*   `backend-web`: API principal en NestJS que expone el backend y maneja las solicitudes tRPC.
-*   `backend-ai`: API especializada en NestJS enfocada exclusivamente en flujos de trabajo y procesamiento de Inteligencia Artificial.
+Dentro de tu proyecto:
 
-### Paquetes (`packages/`)
-*   `domain`: Entidades puras y reglas de negocio globales (sin dependencias externas).
-*   `application`: Casos de uso de la aplicación y puertos de la arquitectura hexagonal.
-*   `infrastructure`: Adaptadores de persistencia (Prisma DB) y servicios externos (SMTP, R2, AI clients).
-*   `trpc`: Enrutadores compartidos y esquemas de validación para una comunicación segura tipo-a-tipo.
-*   `ui`: Sistema de diseño modular y componentes interactivos reutilizables con Tailwind CSS.
-*   `config`: Tokens de configuración compartidos del monorepo.
-*   `cli`: [Instalador de skills](packages/cli/README.md) con `agent.json`, versiones exactas y snapshots de solo lectura.
+```sh
+agentrepo
+```
 
----
+[Guía del CLI](packages/cli/README.md) · [Releases del CLI](https://github.com/luisobz/agentrepo.dev/releases/tag/cli-v0.2.1)
 
-## 🚀 Inicio Rápido (Desarrollo Local)
+## Desarrollo local
 
-### 📋 Requisitos Previos
+Requiere Node.js 24, pnpm 10.33.4 y Docker Compose para PostgreSQL local.
 
-Asegúrate de tener instalados los siguientes componentes:
-*   **Node.js** v24 o superior
-*   **pnpm** v10.33.4 o superior
-*   **Docker** y **Docker Compose** (para la base de datos local)
+```sh
+git clone https://github.com/luisobz/agentrepo.dev.git
+cd agentrepo.dev
+pnpm install --frozen-lockfile
+cp .env.example .env
+```
 
----
+Configura `.env` con los servicios que vayas a utilizar y arranca el entorno:
 
-### ⚙️ Instalación y Configuración
+```sh
+pnpm db:up
+pnpm dev
+```
 
-1. **Clonar el repositorio:**
-   ```bash
-   git clone https://github.com/luisobz/agentrepo.dev.git
-   cd agentrepo.dev
-   ```
+```sh
+pnpm verify
+pnpm build
+```
 
-2. **Instalar dependencias:**
-   ```bash
-   pnpm install
-   ```
+## Monorepo
 
-3. **Configurar variables de entorno:**
-   Copia el archivo `.env.example` para crear tu entorno local y rellena las credenciales correspondientes:
-   ```bash
-   cp .env.example .env
-   ```
+| Aplicación                                | Función                               |
+| ----------------------------------------- | ------------------------------------- |
+| [web](apps/web/README.md)                 | Web pública con Next.js 16 y React 19 |
+| [admin](apps/admin/README.md)             | Panel de administración con Next.js   |
+| [backend-web](apps/backend-web/README.md) | API NestJS y tRPC                     |
+| [backend-ai](apps/backend-ai/README.md)   | Flujos de IA con NestJS y LangChain   |
 
-4. **Levantar la base de datos local:**
-   Ejecuta el script automático para levantar el contenedor PostgreSQL de Docker, generar el cliente de Prisma y ejecutar las migraciones:
-   ```bash
-   pnpm db:up
-   ```
-   *(Alternativamente, puedes usar `./infra/database/db-up.sh`)*
+| Paquete                                             | Función                                                  |
+| --------------------------------------------------- | -------------------------------------------------------- |
+| [domain](packages/domain/README.md)                 | Entidades y reglas de negocio                            |
+| [application](packages/application/README.md)       | Casos de uso y puertos                                   |
+| [infrastructure](packages/infrastructure/README.md) | Adaptadores de persistencia, correo, almacenamiento e IA |
+| [database](packages/database/README.md)             | Prisma, esquema y migraciones PostgreSQL                 |
+| [trpc](packages/trpc/README.md)                     | Routers y esquemas compartidos                           |
+| [ui](packages/ui/README.md)                         | Componentes y estilos compartidos                        |
+| [avatar](packages/avatar/README.md)                 | Avatar animado e interacciones                           |
+| [config](packages/config/README.md)                 | Configuración compartida                                 |
+| [cli](packages/cli/README.md)                       | Instalador interactivo de skills                         |
 
-5. **Iniciar el entorno de desarrollo:**
-   Ejecuta todos los servidores de desarrollo en paralelo con Nx:
-   ```bash
-   pnpm dev
-   ```
+Las aplicaciones utilizan casos de uso y adaptadores; el dominio permanece independiente de los frameworks. La interfaz usa Tailwind CSS, Radix UI y Motion. Auth se integra con Supabase; los datos se almacenan en PostgreSQL mediante Prisma.
 
----
+## Publicación y documentación
 
-## 🛠️ Tecnologías Utilizadas
+GitHub Actions ejecuta CI y despliega la plataforma mediante tags `v*`. También permite actualizar una aplicación concreta. Las releases `cli-v*` distribuyen el CLI por separado.
 
-*   **Frameworks:** Next.js 15, NestJS 11, Fastify
-*   **Bases de Datos & ORM:** PostgreSQL, Prisma Client
-*   **API & Comunicación:** tRPC, React Query
-*   **IA & Observabilidad:** LangChain, DeepSeek API, Langfuse
-*   **Estilos & Componentes:** Tailwind CSS, Radix UI, Framer Motion
-*   **Herramientas de Build:** Nx, SWC, TypeScript, Prettier, Vitest
+- [Despliegue y operación](docs/DEPLOY.md)
+- [Creator y revisión de propuestas](docs/CREATOR.md)
+- [Assets de marca](docs/assets/brand/README.md)
+- [Instrucciones para colaboradores y agentes](AGENTS.md)
 
----
+## Licencia
 
-## 🔒 Seguridad e Integridad
-
-Para asegurar que el proyecto se mantiene limpio y sin vulnerabilidades:
-*   **Secretos:** Nunca subas claves API directas. Usa siempre `.env` y el módulo de configuración.
-*   **Arquitectura:** Las capas internas (`packages/domain`) nunca deben importar paquetes de infraestructura.
-*   **Código Limpio:** Sigue rigurosamente las pautas establecidas en `skills/clean-code.md`.
-
----
-
-## 📄 Licencia
-
-Este proyecto estálicensed bajo la **Licencia GNU Affero General Public License v3 (AGPL-3.0)**. Para más detalles, consulta el archivo [LICENSE](LICENSE).
+[GNU Affero General Public License v3.0](LICENSE).

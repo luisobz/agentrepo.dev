@@ -13,7 +13,7 @@ import { buildCreateContext } from './trpc/trpc-context';
 
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
-  app.useBodyParser('json', { limit: '512kb' });
+  app.useBodyParser('json', { limit: '3mb', inflate: false });
   // LiteSpeed forwards Passenger's BaseURI as part of req.url.
   const baseUri = process.env.NODE_ENV === 'production' ? 'web/api/v1/' : '';
   const globalPrefix = `${baseUri}api`;
@@ -24,7 +24,10 @@ async function bootstrap() {
   // client address used for rate limiting instead of the proxy's.
   app.getHttpAdapter().getInstance().set('trust proxy', 1);
   app.enableCors({
-    origin: [BackendEnvironments.WEB_APP_URL, BackendEnvironments.ADMIN_APP_URL],
+    origin: [
+      BackendEnvironments.WEB_APP_URL,
+      BackendEnvironments.ADMIN_APP_URL,
+    ],
   });
 
   const prisma = app.get(PrismaService);
@@ -34,13 +37,13 @@ async function bootstrap() {
     trpcExpress.createExpressMiddleware({
       router: appRouter,
       createContext: buildCreateContext(prisma),
-    })
+    }),
   );
 
   const port = BackendEnvironments.BACKEND_WEB_PORT;
   await app.listen(port);
   Logger.log(
-    `🚀 Application is running on: http://localhost:${port}/${globalPrefix}`
+    `🚀 Application is running on: http://localhost:${port}/${globalPrefix}`,
   );
 }
 

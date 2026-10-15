@@ -76,6 +76,24 @@ export const webDictionary = {
     en: 'Skill content (Markdown)',
     es: 'Contenido de la skill (Markdown)',
   },
+  'creator.uploadAgent': {
+    en: 'Upload source files or a ZIP',
+    es: 'Subir archivos de código o un ZIP',
+  },
+  'creator.packageHelp': {
+    en: 'UTF-8 text sources: up to 200 files, 100 KB each and 1 MB total. ZIP up to 4 MB; folders are preserved. The editor above becomes README.md. Binary files, nested archives and links are not accepted. Exclude credentials.',
+    es: 'Archivos de texto UTF-8: hasta 200 archivos, 100 KB por archivo y 1 MB en total. ZIP de hasta 4 MB; se conservan las carpetas. El editor superior será README.md. No se admiten binarios, archivos comprimidos anidados ni enlaces. Excluye credenciales.',
+  },
+  'creator.readingFiles': {
+    en: 'Checking source files…',
+    es: 'Comprobando archivos…',
+  },
+  'creator.files': { en: 'files', es: 'archivos' },
+  'creator.packageFiles': {
+    en: 'Source package files',
+    es: 'Archivos del paquete',
+  },
+  'creator.clearFiles': { en: 'Clear files', es: 'Quitar archivos' },
   'creator.upload': {
     en: 'Or upload a Markdown file (.md or .txt)',
     es: 'O sube un fichero Markdown (.md o .txt)',

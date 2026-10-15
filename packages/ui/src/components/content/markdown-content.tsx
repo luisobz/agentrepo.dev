@@ -21,6 +21,7 @@ export function MarkdownContent({
   return (
     <div className={cn(PROSE_CLASSES, className)}>
       <ReactMarkdown
+        skipHtml
         remarkPlugins={
           hideFrontmatter ? [remarkGfm, remarkFrontmatter] : [remarkGfm]
         }

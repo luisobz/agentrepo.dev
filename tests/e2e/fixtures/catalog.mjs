@@ -56,7 +56,19 @@ function read(path) {
       shortDescription: 'An editorial project guide',
       repositoryUrl: relatedLinks[0].url,
       fileTree: [
+        { name: 'z.py', type: 'file', content: 'print(1)' },
         { name: 'README.md', type: 'file', content: '# Project guide' },
+        {
+          name: 'src',
+          type: 'directory',
+          children: [{ name: 'b.py', type: 'file', content: 'print(2)' }],
+        },
+        { name: 'settings.json', type: 'file', content: '{}' },
+        {
+          name: 'docs',
+          type: 'directory',
+          children: [{ name: 'usage.md', type: 'file', content: '# Usage' }],
+        },
       ],
       readmeContent:
         '# Project guide\n\nDocumentation comes before the file browser.\n\n' +

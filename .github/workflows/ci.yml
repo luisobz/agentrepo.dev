@@ -41,6 +41,9 @@ jobs:
 
       - run: pnpm install --frozen-lockfile
 
+      - name: Check production dependency advisories
+        run: pnpm audit --prod --audit-level=high
+
       - name: Lint + tests
         run: pnpm verify
 

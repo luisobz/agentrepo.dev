@@ -110,7 +110,7 @@ export function Header() {
               id="header"
               preserveSpace={false}
               scale={0.75}
-              className="hidden items-center sm:flex"
+              className="flex items-center"
             />
 
             {/* Navigation links */}

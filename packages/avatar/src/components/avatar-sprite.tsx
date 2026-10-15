@@ -1,110 +1,126 @@
 'use client';
 
-import { motion, useReducedMotion } from 'framer-motion';
+import { useEffect, useRef, useState, type CSSProperties } from 'react';
+import { CLIPS, clipDurationMs, type ClipName } from '../sprite/avatar-clips';
+import { AvatarFigure } from '../sprite/avatar-figure';
+import { usePrefersReducedMotion } from '../sprite/use-sprite-clock';
 import { useAvatar, type AvatarEmotion } from './avatar-context';
 
-/** A small hooded coder: pixel art stays crisp when the avatar docks at 75%. */
-function PixelKnight({ emotion, face }: { emotion: AvatarEmotion; face: string }) {
-  const eyes =
-    emotion === 'happy' ? (
-      <path d="M11 11h1v-1h2v1h1v2h-1v-1h-2v1h-1zM18 11h1v-1h2v1h1v2h-1v-1h-2v1h-1z" fill={face} />
-    ) : emotion === 'thinking' ? (
-      <path d="M11 10h4v1h-4zM18 11h4v1h-4zM12 12h2v1h-2zM19 13h2v1h-2z" fill={face} />
-    ) : (
-      <>
-        <path d="M11 10h4v4h-4zM18 10h4v4h-4z" fill={face} />
-        <path d="M12 11h1v1h-1zM19 11h1v1h-1z" fill="#fff6de" />
-      </>
-    );
+/** Flight phase reported by the stage so the character can act out a move. */
+export type AvatarTravelPhase = 'takeoff' | 'fly' | 'land';
 
-  const mouth =
-    emotion === 'surprised' ? (
-      <path d="M16 16h2v3h-2z" fill={face} />
-    ) : emotion === 'happy' ? (
-      <path d="M13 16h1v1h1v1h4v-1h1v-1h1v2h-1v1h-1v1h-4v-1h-1v-1h-1z" fill={face} />
-    ) : emotion === 'thinking' ? (
-      <path d="M17 17h3v1h-3z" fill={face} />
-    ) : (
-      <path d="M15 17h4v1h-4z" fill={face} />
-    );
-
-  return (
-    <svg
-      viewBox="0 0 32 32"
-      className="size-11"
-      shapeRendering="crispEdges"
-      aria-hidden="true"
-      data-testid="avatar-pixel-art"
-    >
-      {/* Boots and the flowing cape sit behind the hood. */}
-      <path d="M10 25h5v4H9v-2h1zM18 25h5v2h1v2h-6z" fill="#391c2b" />
-      <path d="M10 27h5v2H9v-1h1zM18 27h5v1h1v1h-6z" fill="#f3b65d" />
-      <path d="M9 14h16v3h2v3h2v6h-3v2h-5v-2H11v2H6v-3H4v-5h2v-3h3z" fill="#391c2b" />
-      <path d="M9 15h15v3h2v3h2v4h-3v2h-4v-2H10v2H7v-3H5v-3h2v-3h2z" fill="#782b41" />
-      <path d="M7 20h2v6H7zM23 18h2v7h-2z" fill="#b75765" />
-      <path d="M9 24h13v2H9zM14 26h4v2h-4z" fill="#4b1d32" />
-      <path d="M12 22h2v2h-2zM19 22h2v2h-2z" fill="#db9b56" />
-
-      {/* Burgundy hood frames the cream face; there is no antenna. */}
-      <path d="M12 2h10v1h2v2h2v3h1v9h-2v2H9v-2H7V8h1V5h2V3h2z" fill="#391c2b" />
-      <path d="M12 3h10v1h2v2h1v3h1v8h-2v1H10v-1H8V9h1V6h1V4h2z" fill="#882e48" />
-      <path d="M11 4h11v1H10v3H9v5H8V8h1V6h1V5h1z" fill="#bf596b" />
-      <path d="M23 5h2v4h1v7h-2V9h-1z" fill="#5b2038" />
-      <path d="M10 8h14v10h-2v1H12v-1h-2z" fill="#f6dba4" />
-      <path d="M11 8h12v1H11z" fill="#fff1c8" />
-      <path d="M11 18h12v1H11z" fill="#d99c75" />
-      {eyes}
-      {mouth}
-      <path d="M11 15h2v1h-2zM21 15h2v1h-2z" fill="#d67f81" />
-      <path d="M14 20h5v1h-5z" fill="#e2a552" />
-
-      {/* A readable cyan terminal and a small golden shield echo the reference. */}
-      <path d="M2 20h10v7H2z" fill="#321d2d" />
-      <path d="M3 20h9v7H3z" fill="#6ce9f5" />
-      <path d="M4 21h7v5H4z" fill="#0e3549" />
-      <path d="M5 22h1v1h1v1H6v1H5v-1h1v-1H5zM8 24h2v1H8z" fill="#adfbff" />
-      <path d="M3 26h9v1H3z" fill="#2a708a" />
-      <path d="M11 22h2v3h-2z" fill="#eab574" />
-      <path d="M25 20h5v1h1v5h-1v1h-5v-1h-1v-5h1z" fill="#4e2534" />
-      <path d="M25 21h5v5h-5z" fill="#f3bb68" />
-      <path d="M26 22h3v3h-3z" fill="#a35a42" />
-      <path d="M27 22h1v3h-1zM26 23h3v1h-3z" fill="#ffe397" />
-      <path d="M23 23h2v2h-2z" fill="#eab574" />
-    </svg>
-  );
+export interface AvatarTravel {
+  phase: AvatarTravelPhase;
+  /** Horizontal direction of the flight: -1 left, 0 vertical, 1 right. */
+  dir: -1 | 0 | 1;
 }
 
-const SHAKE_KEYFRAMES = {
-  x: [0, -3, 3, -3, 3, 0],
-  transition: { duration: 0.4 },
+const EMOTION_CLIP: Record<AvatarEmotion, ClipName> = {
+  idle: 'idle',
+  happy: 'happy',
+  thinking: 'thinking',
+  surprised: 'surprised',
 };
 
-export function AvatarSprite() {
-  const { emotion, isShaking, registerAvatarClick, setup, currentMessage, dismissMessage } = useAvatar();
-  const reducedMotion = useReducedMotion();
+/** Styles live with the component so it works in any host (no Tailwind needed). */
+export const AVATAR_SPRITE_CSS = `
+.ar-avatar-btn{position:relative;display:flex;align-items:center;justify-content:center;width:48px;height:48px;padding:0;margin:0;border:0;border-radius:14px;background:transparent;cursor:pointer;user-select:none;-webkit-tap-highlight-color:transparent;touch-action:manipulation}
+.ar-avatar-btn::before{content:"";position:absolute;inset:3px;border-radius:12px;background:var(--ar-avatar-halo);opacity:0;transform:scale(.85);transition:opacity .18s ease,transform .18s ease}
+.ar-avatar-btn:hover::before{opacity:.9;transform:scale(1)}
+.ar-avatar-btn:focus-visible{outline:2px solid var(--ar-avatar-ring);outline-offset:2px}
+.ar-avatar-btn:focus-visible::before{opacity:.9;transform:scale(1)}
+.ar-avatar-btn>svg{position:relative;image-rendering:pixelated}
+.ar-avatar-btn[data-shake=true]{animation:ar-avatar-shake .4s steps(5,end)}
+@keyframes ar-avatar-shake{0%,100%{transform:translateX(0)}20%,60%{transform:translateX(-3px)}40%,80%{transform:translateX(3px)}}
+@media (prefers-reduced-motion:reduce){.ar-avatar-btn::before{transition:none}.ar-avatar-btn[data-shake=true]{animation:none}}
+`;
+
+export interface AvatarSpriteProps {
+  /** Set by the stage while the avatar travels between slots. */
+  travel?: AvatarTravel | null;
+}
+
+export function AvatarSprite({ travel = null }: AvatarSpriteProps = {}) {
+  const {
+    emotion,
+    isShaking,
+    registerAvatarClick,
+    setup,
+    currentMessage,
+    dismissMessage,
+  } = useAvatar();
+  const reducedMotion = usePrefersReducedMotion();
   const shake = isShaking && !reducedMotion;
+  const [pokes, setPokes] = useState(0);
+  const [poking, setPoking] = useState(false);
+  const pokeTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  useEffect(
+    () => () => {
+      if (pokeTimer.current) clearTimeout(pokeTimer.current);
+    },
+    [],
+  );
+
+  const persistentMessage = Boolean(
+    currentMessage && currentMessage.durationMs === null,
+  );
 
   const handleClick = () => {
-    if (currentMessage && currentMessage.durationMs === null) {
+    if (persistentMessage) {
       dismissMessage();
       return;
     }
     registerAvatarClick();
+    // A short squash acknowledges the click unless an emotion takes over.
+    setPokes((n) => n + 1);
+    setPoking(true);
+    if (pokeTimer.current) clearTimeout(pokeTimer.current);
+    pokeTimer.current = setTimeout(
+      () => setPoking(false),
+      clipDurationMs(CLIPS.poke),
+    );
   };
 
+  // Priority: travel acting > click reaction (only over idle) > emotion.
+  const clip: ClipName = travel
+    ? travel.phase
+    : poking && emotion === 'idle'
+      ? 'poke'
+      : EMOTION_CLIP[emotion];
+  const lookX = travel && travel.phase !== 'land' ? travel.dir : undefined;
+
   return (
-    <motion.button
+    <button
       type="button"
-      animate={shake ? SHAKE_KEYFRAMES : { x: 0 }}
       onClick={handleClick}
-      aria-label="Interact with mascot"
+      aria-label={
+        persistentMessage ? 'Dismiss mascot message' : 'Interact with mascot'
+      }
       data-testid="avatar-sprite"
       data-emotion={emotion}
       data-shaking={isShaking}
-      className="flex size-12 cursor-pointer select-none items-center justify-center rounded-xl border-2 shadow-sm transition-transform hover:rotate-3 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-brand-garnet)]"
-      style={{ backgroundColor: setup.colors.background, borderColor: setup.colors.border }}
+      data-shake={shake}
+      data-clip={clip}
+      data-travel={travel?.phase ?? 'none'}
+      className="ar-avatar-btn"
+      style={
+        {
+          '--ar-avatar-halo': setup.colors.background,
+          '--ar-avatar-ring': setup.colors.border,
+        } as CSSProperties
+      }
     >
-      <PixelKnight emotion={emotion} face={setup.colors.face} />
-    </motion.button>
+      <style href="agentrepo-avatar-sprite" precedence="default">
+        {AVATAR_SPRITE_CSS}
+      </style>
+      <AvatarFigure
+        clip={clip}
+        face={setup.colors.face}
+        size={48}
+        lookX={lookX}
+        restartKey={clip === 'poke' ? pokes : travel?.phase}
+      />
+    </button>
   );
 }

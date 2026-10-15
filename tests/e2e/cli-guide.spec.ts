@@ -78,15 +78,15 @@ test('CLI commands have real line breaks and install and launch copy separately'
 }) => {
   await context.grantPermissions(['clipboard-read', 'clipboard-write']);
   await page.goto('/cli');
-  const install = page.locator('pre').filter({ hasText: 'pnpm add -g' });
+  const install = page.locator('main pre:visible').filter({ hasText: 'pnpm add -g' });
   await expect(install).not.toContainText('\\n');
   expect(await install.textContent()).not.toContain('\n');
   await expect(
-    page.locator('pre').filter({ hasText: /^agentrepo$/ }),
+    page.locator('main pre:visible').filter({ hasText: /^agentrepo$/ }),
   ).toHaveCount(1);
   const commands =
     'agentrepo skill2\nagentrepo verify\nagentrepo install\nagentrepo reset --hard';
-  await expect(page.locator('pre[aria-label="Commands"]')).toHaveText(commands);
+  await expect(page.locator('main pre[aria-label="Commands"]:visible')).toHaveText(commands);
   await page
     .getByRole('button', { name: 'Copy Commands', exact: true })
     .click();

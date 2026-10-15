@@ -16,7 +16,6 @@
         "@sentry/nestjs": "^10.53.1",
         "@swc/helpers": "~0.5.18",
         "@trpc/server": "11.17.0",
-        "better-auth": "^1.6.11",
         "class-transformer": "^0.5.1",
         "class-validator": "^0.15.1",
         "helmet": "^8.2.0",

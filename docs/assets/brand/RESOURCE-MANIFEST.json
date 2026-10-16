@@ -1,0 +1,70 @@
+{
+  "resources": [
+    {
+      "file": "references/brand-system-overview.jpg",
+      "sha256": "cd70f99323ed4aa9cf8df6c7480900e6afb3f1028268c6e9b4d93f94031d0ac2",
+      "bytes": 157432,
+      "kind": "original-reference"
+    },
+    {
+      "file": "references/ui-snippets.jpg",
+      "sha256": "29119a828f97c58b083f2105e4b33d0cc5dd0ba656915f96cc09f58123bf7c5f",
+      "bytes": 60239,
+      "kind": "original-reference"
+    },
+    {
+      "file": "references/mascot-poses.jpg",
+      "sha256": "7f6dfc6beeceeda41e6b0bfde9457f0abf160d55ef26303a3b281076c205db98",
+      "bytes": 80309,
+      "kind": "original-reference"
+    },
+    {
+      "file": "references/social-preview.jpg",
+      "sha256": "440baf90b83def00d2d1a82be1560b08539ea297b86ea4bd6ba499311220fa02",
+      "bytes": 107014,
+      "kind": "original-reference"
+    },
+    {
+      "file": "references/readme-banner.jpg",
+      "sha256": "51af3a09cbefcd46ff01eee06dec7225162d802450b9f752e49d3e69bdddce1f",
+      "bytes": 71273,
+      "kind": "original-reference"
+    },
+    {
+      "file": "references/badge-styles.jpg",
+      "sha256": "330b43fc728e031b3eb9065fec2b87906226e87c1ddcb2181a10730a56faa1fd",
+      "bytes": 60769,
+      "kind": "original-reference"
+    },
+    {
+      "file": "references/symbol-variants.jpg",
+      "sha256": "f91025df61696d541ced9d7a037160e93f5d141e0c7b56c58b8115878de7fc67",
+      "bytes": 68001,
+      "kind": "original-reference"
+    },
+    {
+      "file": "references/wordmark-lockups.jpg",
+      "sha256": "922911c040ae040a58e004c22d483e1001cdc9f58229305174f33b928c1cbe35",
+      "bytes": 59078,
+      "kind": "original-reference"
+    },
+    {
+      "file": "references/favicon-previews.jpg",
+      "sha256": "1a8444ef33976ec86edfbef492dba0045b978fcfb3b5586bd2f1f6b141e3ab50",
+      "bytes": 46020,
+      "kind": "original-reference"
+    },
+    {
+      "file": "drafts/mascot-overview-extraction.png",
+      "sha256": "68b2959fa598d2a19438d0b77ed816d3baecb93d842a2a31f079bb4642899b02",
+      "bytes": 889171,
+      "kind": "unused-generated-variant"
+    },
+    {
+      "file": "drafts/mascot-high-quality-extraction.png",
+      "sha256": "d80d4372f1a8b789db423d65f839532e0aa1e7cafed17f41312605319068bd61",
+      "bytes": 954625,
+      "kind": "unused-generated-variant"
+    }
+  ]
+}

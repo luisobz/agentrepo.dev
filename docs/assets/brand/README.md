@@ -17,3 +17,9 @@ Las ilustraciones de marca son independientes del avatar animado de `packages/av
 La licencia del proyecto es AGPL-3.0 y el gestor de paquetes es pnpm. Los badges del README reflejan esos datos, en lugar de las etiquetas MIT/npm de la referencia visual.
 
 La lámina `illustrations/mascot-static-sheet.png` contiene cinco poses estáticas: saludo, reposo, alegría, trabajo y ayuda. Se reconstruyó con `imagegen` desde la referencia de mayor calidad, con fondo transparente y sin etiquetas. No es una secuencia de animación.
+
+## Referencias y variantes
+
+`references/` conserva las nueve imágenes originales suministradas, incluida la lámina general, las poses, los banners, las insignias, los símbolos, los logotipos y las vistas de favicon. `drafts/` conserva las dos extracciones generadas anteriores a la lámina seleccionada.
+
+[RESOURCE-MANIFEST.json](RESOURCE-MANIFEST.json) registra tamaño y SHA-256 de cada recurso archivado. Estas referencias se conservan completas; sus etiquetas de ejemplo no sustituyen los datos del proyecto.

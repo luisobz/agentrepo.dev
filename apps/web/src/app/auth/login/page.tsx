@@ -1,3 +1,5 @@
+import type { Metadata } from 'next';
+export const metadata: Metadata = { robots: { index: false, follow: false } };
 import { ContributorLogin } from '../../../components/creator/contributor-login';
 
 export default function LoginPage() {

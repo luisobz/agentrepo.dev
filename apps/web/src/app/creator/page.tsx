@@ -8,6 +8,7 @@ import { getAuthenticatedUser } from '../../lib/supabase/server';
 
 export const metadata: Metadata = {
   title: 'Creator | AgentRepo.dev',
+  robots: { index: false, follow: false },
   description: 'Propose a skill, agent project or article to AgentRepo.dev.',
 };
 

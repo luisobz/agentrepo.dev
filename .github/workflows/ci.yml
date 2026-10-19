@@ -21,6 +21,7 @@ env:
   # Dummy: sólo se usa para generar el cliente Prisma, nunca se conecta.
   DATABASE_URL: postgresql://ci:ci@localhost:5432/ci?schema=public
   NEXT_PUBLIC_API_URL: http://localhost:4000
+  NEXT_PUBLIC_CLOUDFLARE_ANALYTICS_TOKEN: '11111111111111111111111111111111'
 
 jobs:
   verify:
@@ -37,6 +38,7 @@ jobs:
       - name: Check deployment safety gates
         run: |
           python3 tests/deployment/check-gates.py
+          python3 tests/deployment/check-launch-runtime.py
           python3 tests/deployment/check-availability.py
 
       - run: pnpm install --frozen-lockfile

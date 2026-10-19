@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { usePathname } from 'next/navigation';
 import { AvatarSlot, useAvatar } from '@agentrepo/avatar';
 import { cn } from '@agentrepo/ui';
@@ -90,9 +91,13 @@ export function Header() {
               href="/"
               className="flex items-center gap-2 group focus:outline-none"
             >
-              <div className="w-8 h-8 rounded-lg bg-[var(--color-brand-garnet)] flex items-center justify-center text-[var(--color-bg-base)] font-mono font-bold text-sm shadow-sm transition-transform group-hover:scale-105">
-                AR
-              </div>
+              <Image
+                src="/brand/icon.png"
+                alt=""
+                width={32}
+                height={32}
+                className="rounded-lg shadow-sm transition-transform group-hover:scale-105"
+              />
               <span
                 className={cn(
                   'font-mono font-bold tracking-tight text-sm transition-opacity duration-300',

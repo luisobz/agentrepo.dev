@@ -15,10 +15,12 @@ test('skills render the body while Raw, Copy and Download retain metadata', asyn
   ).toBeVisible();
   await expect(page.locator('body')).not.toContainText('Skill metadata');
   await expect(
-    page.locator('strong').filter({ hasText: 'clear language' }),
+    page.locator('main strong:visible').filter({ hasText: 'clear language' }),
   ).toBeVisible();
   await page.getByRole('tab', { name: 'Raw', exact: true }).click();
-  expect(await page.locator('pre code').textContent()).toBe(original);
+  expect(await page.locator('main pre:visible code').textContent()).toBe(
+    original,
+  );
   await page.getByRole('button', { name: 'Copy', exact: true }).click();
   await expect(
     page.getByRole('button', { name: 'Copied', exact: true }),

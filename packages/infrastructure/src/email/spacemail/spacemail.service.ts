@@ -25,6 +25,9 @@ export class SpacemailService implements EmailServicePort {
         host: config.host,
         port: config.port,
         secure: config.port === 465,
+        connectionTimeout: 15000,
+        greetingTimeout: 10000,
+        socketTimeout: 20000,
         auth: { user: config.user, pass: config.pass },
       });
     this.from = config.fromName
@@ -38,6 +41,10 @@ export class SpacemailService implements EmailServicePort {
       to: input.to,
       subject: input.subject,
       html: input.html,
+      headers: {
+        'Auto-Submitted': 'auto-replied',
+        'X-Auto-Response-Suppress': 'All',
+      },
       attachments: input.attachments?.map((attachment) => ({
         filename: attachment.filename,
         content: Buffer.from(attachment.content),

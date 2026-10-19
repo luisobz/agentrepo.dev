@@ -106,6 +106,24 @@ export function Footer() {
         >
           {t('nav.portfolio')}
         </Link>
+        <Link
+          href="/privacy"
+          className="inline-flex min-h-8 items-center hover:underline"
+        >
+          {t('footer.privacy')}
+        </Link>
+        <Link
+          href="/terms"
+          className="inline-flex min-h-8 items-center hover:underline"
+        >
+          {t('footer.terms')}
+        </Link>
+        <a
+          href="https://github.com/luisobz/agentrepo.dev/issues"
+          className="inline-flex min-h-8 items-center hover:underline"
+        >
+          {t('footer.support')}
+        </a>
       </nav>
     </footer>
   );

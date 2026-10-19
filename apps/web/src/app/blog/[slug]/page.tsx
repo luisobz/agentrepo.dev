@@ -1,3 +1,4 @@
+import { SHARE_IMAGE } from '../../../lib/seo/public-site';
 import { RelatedLinks } from '@agentrepo/ui';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
@@ -34,7 +35,9 @@ export async function generateMetadata({
   return {
     title: `${post.title} | AgentRepo.dev Blog`,
     description,
+    alternates: { canonical: `/blog/${slug}` },
     openGraph: {
+      images: [SHARE_IMAGE],
       title: post.title,
       description,
       type: 'article',

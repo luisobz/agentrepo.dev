@@ -1,6 +1,13 @@
 import type { Dictionary } from '@agentrepo/ui';
 
 export const webDictionary = {
+  'footer.privacy': { en: 'Privacy', es: 'Privacidad' },
+  'footer.terms': { en: 'Terms', es: 'Condiciones' },
+  'footer.support': { en: 'Report an issue', es: 'Comunicar un error' },
+  'creator.contributionTerms': {
+    en: 'Include a licence and attribution. By submitting, you confirm you may distribute these files and accept the contribution terms.',
+    es: 'Incluye licencia y atribución. Al enviar confirmas que puedes distribuir estos archivos y aceptas las condiciones de contribución.',
+  },
   'nav.admin': { en: 'Admin panel', es: 'Administración' },
   'creator.useEmail': {
     en: 'Use email instead',
@@ -99,8 +106,8 @@ export const webDictionary = {
     es: 'O sube un fichero Markdown (.md o .txt)',
   },
   'creator.pendingHelp': {
-    en: 'Submitted content stays unpublished until reviewed. One Markdown file can be uploaded per draft.',
-    es: 'El contenido queda privado hasta su revisión. Puedes subir un fichero Markdown por propuesta.',
+    en: 'Submitted content stays unpublished until reviewed.',
+    es: 'El contenido queda privado hasta su revisión.',
   },
   'creator.submit': {
     en: 'Submit draft for review',

@@ -51,6 +51,7 @@ env:
   NEXT_PUBLIC_SUPABASE_URL: ${{ vars.NEXT_PUBLIC_SUPABASE_URL }}
   NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: ${{ vars.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY }}
   NEXT_PUBLIC_GITHUB_AUTH_ENABLED: ${{ vars.NEXT_PUBLIC_GITHUB_AUTH_ENABLED || 'false' }}
+  NEXT_PUBLIC_CLOUDFLARE_ANALYTICS_TOKEN: ${{ vars.NEXT_PUBLIC_CLOUDFLARE_ANALYTICS_TOKEN }}
   NEXT_PUBLIC_SENTRY_DSN: ${{ vars.NEXT_PUBLIC_SENTRY_DSN }}
 
 jobs:
@@ -61,6 +62,7 @@ jobs:
     runs-on: ubuntu-latest
     env:
       NEXT_PUBLIC_API_URL: http://localhost:4000
+      NEXT_PUBLIC_CLOUDFLARE_ANALYTICS_TOKEN: '11111111111111111111111111111111'
       NEXT_PUBLIC_SUPABASE_URL: ''
       NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: ''
     steps:
@@ -73,7 +75,9 @@ jobs:
           cache: pnpm
 
       - name: Check deployment safety gates
-        run: python3 tests/deployment/check-gates.py
+        run: |
+          python3 tests/deployment/check-gates.py
+          python3 tests/deployment/check-launch-runtime.py
 
       - run: pnpm install --frozen-lockfile
 
@@ -216,6 +220,7 @@ jobs:
             --exclude '*.log' \
             deploy-out/web/ "$USER@$HOST:$DEST/"
           # Passenger recarga la app al ver cambiar tmp/restart.txt
+          $SSH "$USER@$HOST" "python3 -" < scripts/enable-public-indexing.py
           $SSH "$USER@$HOST" "mkdir -p '$DEST/tmp' && touch '$DEST/tmp/restart.txt'"
 
   # ---------------------------------------------------------------- ADMIN
@@ -366,6 +371,13 @@ jobs:
         env:
           HOST: ${{ secrets.SSH_HOST }}
           USER: ${{ secrets.SSH_USER }}
+          DEEPSEEK_API_KEY: ${{ secrets.DEEPSEEK_API_KEY }}
+          DEEPSEEK_MODEL: ${{ vars.DEEPSEEK_MODEL || 'deepseek-flash' }}
+          SPACEMAIL_HOST: mail.spacemail.com
+          SPACEMAIL_PORT: '465'
+          SPACEMAIL_USER: ${{ vars.SPACEMAIL_USER }}
+          SPACEMAIL_PASS: ${{ secrets.SPACEMAIL_PASS }}
+          CONTACT_FORM_NOTIFICATION_EMAIL: ${{ vars.CONTACT_FORM_NOTIFICATION_EMAIL }}
           DEST: ${{ vars.BACKEND_AI_PATH || 'backend/agentrepo.dev/backend-ai' }}
         run: |
           SSH="ssh -i ~/.ssh/id_deploy -p ${SSH_PORT} -o StrictHostKeyChecking=yes"
@@ -374,6 +386,7 @@ jobs:
             --exclude 'tmp/' \
             --exclude '*.log' \
             apps/backend-ai/dist/ "$USER@$HOST:$DEST/"
+          python3 scripts/configure-ai-runtime.py
           $SSH "$USER@$HOST" "mkdir -p '$DEST/tmp' && touch '$DEST/tmp/restart.txt'"
 
   # A release represents a deployment that passed live checks, not just a build.

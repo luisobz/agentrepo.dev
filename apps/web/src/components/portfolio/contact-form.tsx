@@ -77,10 +77,18 @@ export function ContactForm() {
           <p
             className="text-sm leading-relaxed text-[#cfc6b8] [&_strong]:text-[#fdf8ef]"
             // Static, trusted copy with a single <strong> emphasis per locale.
-            dangerouslySetInnerHTML={{ __html: t('portfolio.contact.agentNotice') }}
+            dangerouslySetInnerHTML={{
+              __html: t('portfolio.contact.agentNotice'),
+            }}
           />
         </div>
 
+        <p className="mb-6 text-xs leading-6 text-[#cfc6b8]">
+          AI · DeepSeek / Spacemail.{' '}
+          <a href="/privacy" className="underline">
+            {t('footer.privacy')}
+          </a>
+        </p>
         {isSent ? (
           <div
             role="status"
@@ -94,9 +102,16 @@ export function ContactForm() {
             </p>
           </div>
         ) : (
-          <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-5" noValidate>
+          <form
+            onSubmit={handleSubmit(onSubmit)}
+            className="flex flex-col gap-5"
+            noValidate
+          >
             <div>
-              <label htmlFor="contact-email" className="mb-1.5 block text-sm font-medium text-[#fdf8ef]">
+              <label
+                htmlFor="contact-email"
+                className="mb-1.5 block text-sm font-medium text-[#fdf8ef]"
+              >
                 {t('portfolio.contact.email')}
               </label>
               <input
@@ -117,7 +132,10 @@ export function ContactForm() {
             </div>
 
             <div>
-              <label htmlFor="contact-subject" className="mb-1.5 block text-sm font-medium text-[#fdf8ef]">
+              <label
+                htmlFor="contact-subject"
+                className="mb-1.5 block text-sm font-medium text-[#fdf8ef]"
+              >
                 {t('portfolio.contact.subject')}
               </label>
               <select
@@ -135,7 +153,10 @@ export function ContactForm() {
             </div>
 
             <div>
-              <label htmlFor="contact-message" className="mb-1.5 block text-sm font-medium text-[#fdf8ef]">
+              <label
+                htmlFor="contact-message"
+                className="mb-1.5 block text-sm font-medium text-[#fdf8ef]"
+              >
                 {t('portfolio.contact.message')}
               </label>
               <textarea

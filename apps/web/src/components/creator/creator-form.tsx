@@ -352,6 +352,16 @@ export function CreatorForm({ authorName }: { authorName: string }) {
           {error}
         </p>
       ) : null}
+      <p className="text-xs leading-6 text-[var(--color-text-muted)]">
+        {t('creator.contributionTerms')}{' '}
+        <a className="underline" href="/terms">
+          {t('footer.terms')}
+        </a>{' '}
+        ·{' '}
+        <a className="underline" href="/privacy">
+          {t('footer.privacy')}
+        </a>
+      </p>
       <button
         type="submit"
         disabled={busy || reading}

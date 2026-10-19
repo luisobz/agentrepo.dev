@@ -22,6 +22,7 @@ export function ContributorLogin() {
   const t = useT();
   const configured = isSupabaseConfigured();
   const githubEnabled = process.env.NEXT_PUBLIC_GITHUB_AUTH_ENABLED === 'true';
+  const [ready, setReady] = useState(false);
   const [showEmail, setShowEmail] = useState(false);
   const [mode, setMode] = useState<'signin' | 'signup'>('signin');
   const [email, setEmail] = useState('');
@@ -31,6 +32,7 @@ export function ContributorLogin() {
   const [busy, setBusy] = useState(false);
 
   useEffect(() => {
+    setReady(true);
     if (new URLSearchParams(window.location.search).get('error') === 'oauth') {
       setError(t('creator.oauthError'));
     }
@@ -97,7 +99,7 @@ export function ContributorLogin() {
         <Button
           type="button"
           className="w-full gap-2"
-          disabled={!configured || !githubEnabled || busy}
+          disabled={!ready || !configured || !githubEnabled || busy}
           onClick={signInWithGitHub}
         >
           <svg
@@ -127,7 +129,7 @@ export function ContributorLogin() {
         <button
           type="button"
           onClick={() => setShowEmail(!showEmail)}
-          disabled={busy}
+          disabled={!ready || busy}
           aria-expanded={showEmail}
           aria-controls="contributor-email"
           className="mt-4 text-sm underline underline-offset-4 disabled:opacity-50"
@@ -144,7 +146,7 @@ export function ContributorLogin() {
               <button
                 type="button"
                 role="tab"
-                disabled={busy}
+                disabled={!ready || busy}
                 aria-selected={mode === 'signin'}
                 onClick={() => {
                   setMode('signin');
@@ -158,7 +160,7 @@ export function ContributorLogin() {
               <button
                 type="button"
                 role="tab"
-                disabled={busy}
+                disabled={!ready || busy}
                 aria-selected={mode === 'signup'}
                 onClick={() => {
                   setMode('signup');

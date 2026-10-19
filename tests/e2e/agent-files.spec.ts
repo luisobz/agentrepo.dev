@@ -7,7 +7,10 @@ test('the file browser groups folders before file types on desktop and mobile', 
   page,
 }) => {
   await page.goto('/agents/linked-project');
-  await page.getByText('Files & downloads', { exact: true }).click();
+  await page
+    .getByText('Files & downloads', { exact: true })
+    .filter({ visible: true })
+    .click();
   const tree = page.getByRole('navigation', { name: 'Agent files' });
   await expect(tree).toBeVisible();
   await expect(tree.locator(':scope > ul > li > button')).toHaveText([

@@ -11,7 +11,7 @@ export interface ProcessContactWorkflowConfig {
   notificationEmail: string;
 }
 
-const PDF_FILENAME = 'Luisbz_Resume_Analysis.pdf';
+const PDF_FILENAME = 'AgentRepo-Contact-Report.pdf';
 
 /**
  * Suspicious payloads are processed with a canned reply instead of hitting
@@ -42,16 +42,30 @@ function escapeHtml(text: string): string {
 }
 
 function replyEmailHtml(analysis: string): string {
+  const spanish =
+    /\b(gracias|mensaje|hola|solicitud|equipo|podemos|necesitas|interés)\b/i.test(
+      analysis,
+    );
   const paragraphs = analysis
     .split(/\n{2,}/)
-    .map((block) => `<p>${escapeHtml(block.trim()).replace(/\n/g, '<br/>')}</p>`)
+    .map(
+      (block) => `<p>${escapeHtml(block.trim()).replace(/\n/g, '<br/>')}</p>`,
+    )
     .join('\n');
   return [
-    '<div style="font-family: Arial, Helvetica, sans-serif; max-width: 640px; margin: 0 auto; color: #1b1714;">',
-    '<h2 style="color: #7a2230;">AgentRepo.dev — AI Contact Agent</h2>',
+    '<!doctype html><html><body style="margin:0;background:#f6f1e8;color:#161616;font-family:Arial,Helvetica,sans-serif">',
+    '<table role="presentation" width="100%" cellpadding="0" cellspacing="0"><tr><td align="center" style="padding:28px 12px">',
+    '<table role="presentation" width="600" cellpadding="0" cellspacing="0" style="width:100%;max-width:600px;background:#fffcf7;border:1px solid #d8cdbd;border-radius:18px;overflow:hidden">',
+    '<tr><td><img src="https://agentrepo.dev/brand/readme-banner.jpg" width="600" alt="AgentRepo.dev — Discover, learn, build" style="display:block;width:100%;height:auto;border:0"></td></tr>',
+    '<tr><td style="padding:32px"><p style="font-size:11px;letter-spacing:2px;color:#7a2230;text-transform:uppercase">Contact · AgentRepo.dev</p>',
+    `<h1 style="font-size:26px;line-height:1.25;margin:12px 0 24px">${spanish ? 'Gracias por contactar' : 'Thank you for reaching out'}</h1>`,
+    '<div style="font-size:16px;line-height:1.7">',
     paragraphs,
-    '<p style="color: #8d8273; font-size: 12px;">Adjunto encontrarás un informe PDF con el análisis completo y el perfil de Luis.</p>',
     '</div>',
+    `<div style="margin-top:26px;padding:18px;background:#eee5d7;border-radius:10px;font-size:14px;line-height:1.6"><strong>${spanish ? 'Tu informe de contacto' : 'Your contact report'}</strong><br>${spanish ? 'El PDF adjunto recoge esta respuesta y el perfil profesional de Luis.' : 'The attached PDF includes this reply and Luis’s professional profile.'}</div>`,
+    `<p style="margin-top:24px;font-size:12px;line-height:1.6;color:#7a7065">${spanish ? 'Respuesta automática asistida por IA. No confirma disponibilidad, condiciones ni compromisos. Puedes responder a este correo para continuar la conversación.' : 'Automated AI-assisted reply. It does not confirm availability, terms or commitments. Reply to this email to continue the conversation.'}</p>`,
+    '<a href="https://agentrepo.dev" style="color:#7a2230;font-size:14px;font-weight:bold">agentrepo.dev</a>',
+    '</td></tr></table></td></tr></table></body></html>',
   ].join('\n');
 }
 
@@ -74,7 +88,7 @@ export class ProcessContactWorkflow
     private readonly emailService: EmailServicePort,
     private readonly contactRequests: ContactRequestRepository,
     private readonly logger: AppLoggerPort,
-    private readonly config: ProcessContactWorkflowConfig
+    private readonly config: ProcessContactWorkflowConfig,
   ) {}
 
   async execute(payload: ContactWorkflowPayload): Promise<void> {
@@ -95,7 +109,11 @@ export class ProcessContactWorkflow
         subject: 'Your AI analysis from agentrepo.dev',
         html: replyEmailHtml(analysis),
         attachments: [
-          { filename: PDF_FILENAME, content: pdf, contentType: 'application/pdf' },
+          {
+            filename: PDF_FILENAME,
+            content: pdf,
+            contentType: 'application/pdf',
+          },
         ],
       });
 
@@ -115,7 +133,7 @@ export class ProcessContactWorkflow
       const reason = error instanceof Error ? error.message : String(error);
       this.logger.error(
         `Contact workflow failed for ${contactRequestId}: ${reason}`,
-        error instanceof Error ? error.stack : undefined
+        error instanceof Error ? error.stack : undefined,
       );
       await this.contactRequests.updateStatus(contactRequestId, 'FAILED');
       throw error;
@@ -123,18 +141,25 @@ export class ProcessContactWorkflow
   }
 
   private async resolveAnalysis(
-    payload: ContactWorkflowPayload
+    payload: ContactWorkflowPayload,
   ): Promise<string> {
     if (isSuspiciousContactMessage(payload.message)) {
       this.logger.warn(
-        `Contact request ${payload.contactRequestId} flagged by guardrail; using fallback reply`
+        `Contact request ${payload.contactRequestId} flagged by guardrail; using fallback reply`,
       );
       return FALLBACK_ANALYSIS;
     }
-    return this.llm.generateContactAnalysis({
-      senderEmail: payload.email,
-      subject: payload.subject,
-      message: payload.message,
-    });
+    try {
+      return await this.llm.generateContactAnalysis({
+        senderEmail: payload.email,
+        subject: payload.subject,
+        message: payload.message,
+      });
+    } catch {
+      this.logger.warn(
+        `Contact request ${payload.contactRequestId}: AI unavailable after bounded attempts; using fallback`,
+      );
+      return FALLBACK_ANALYSIS;
+    }
   }
 }

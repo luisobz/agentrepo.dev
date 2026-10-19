@@ -39,7 +39,7 @@ export const envSchema = z.object({
 
   // AI
   DEEPSEEK_API_KEY: z.string().default(''),
-  DEEPSEEK_MODEL: z.string().default('deepseek-v4-flash'),
+  DEEPSEEK_MODEL: z.string().default('deepseek-flash'),
   DEEPSEEK_BASE_URL: z.string().url().default('https://api.deepseek.com/v1'),
 
   // Observabilidad

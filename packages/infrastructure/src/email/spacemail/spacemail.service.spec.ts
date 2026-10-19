@@ -31,7 +31,11 @@ describe('SpacemailService', () => {
         to: 'jane@company.com',
         subject: 'Your AI analysis',
         html: '<p>Hello</p>',
-      })
+        headers: {
+          'Auto-Submitted': 'auto-replied',
+          'X-Auto-Response-Suppress': 'All',
+        },
+      }),
     );
   });
 
@@ -39,7 +43,7 @@ describe('SpacemailService', () => {
     const { transporter, sendMail } = buildTransporter();
     const service = new SpacemailService(
       { ...CONFIG, fromName: 'AgentRepo Agent' },
-      transporter
+      transporter,
     );
     const pdfBytes = new Uint8Array([0x25, 0x50, 0x44, 0x46]);
 

@@ -10,58 +10,10 @@ import { AvatarEasterEggProvider } from '../components/providers/avatar-provider
 import { LocaleProvider } from '@agentrepo/ui';
 import { getServerLocale } from '../lib/i18n/server';
 import type { Metadata } from 'next';
+import { PUBLIC_SITE_METADATA } from '../lib/seo/public-site';
+import { WebAnalytics } from '../components/analytics/web-analytics';
 
-const SITE_URL = 'https://agentrepo.dev';
-const SITE_DESCRIPTION =
-  'Clean coding, AI subagents, and development assets for professional builders. Built by Luis Ballester Zafra.';
-
-export const metadata: Metadata = {
-  metadataBase: new URL(SITE_URL),
-  title: {
-    default: 'AgentRepo.dev | AI Development Repository & Portfolio',
-    template: '%s | AgentRepo.dev',
-  },
-  description: SITE_DESCRIPTION,
-  keywords: [
-    'AI agents',
-    'AI skills',
-    'prompts',
-    'LLM',
-    'agent repository',
-    'TypeScript',
-    'Next.js',
-    'NestJS',
-  ],
-  authors: [{ name: 'Luis Ballester Zafra', url: SITE_URL }],
-  openGraph: {
-    type: 'website',
-    url: SITE_URL,
-    siteName: 'AgentRepo.dev',
-    title: 'AgentRepo.dev — AI Development Repository & Portfolio',
-    description: SITE_DESCRIPTION,
-    locale: 'en_US',
-    alternateLocale: ['es_ES'],
-    images: [
-      {
-        url: '/og-cover.svg',
-        width: 1200,
-        height: 630,
-        alt: 'AgentRepo.dev — curated AI skills and agents',
-      },
-    ],
-  },
-  twitter: {
-    card: 'summary_large_image',
-    title: 'AgentRepo.dev — AI Development Repository & Portfolio',
-    description: SITE_DESCRIPTION,
-    images: ['/og-cover.svg'],
-  },
-  icons: {
-    icon: [{ url: '/favicon.ico', sizes: 'any' }, { url: '/icon.svg', type: 'image/svg+xml' }],
-    apple: '/icon.svg',
-  },
-  robots: { index: false, follow: false },
-};
+export const metadata: Metadata = PUBLIC_SITE_METADATA;
 
 export default async function RootLayout({
   children,
@@ -70,24 +22,26 @@ export default async function RootLayout({
 }) {
   const locale = await getServerLocale();
   return (
-    <html lang={locale} className={`${GeistSans.variable} ${GeistMono.variable}`}>
+    <html
+      lang={locale}
+      className={`${GeistSans.variable} ${GeistMono.variable}`}
+    >
       <body className="antialiased min-h-screen bg-[var(--color-bg-base)] text-[var(--color-text-primary)]">
         {/* Subtle global grid pattern background */}
         <div className="fixed inset-0 z-[-1] pointer-events-none opacity-[0.4] bg-[radial-gradient(var(--color-border-soft)_1px,transparent_1px)] [background-size:24px_24px] [mask-image:radial-gradient(ellipse_60%_60%_at_50%_50%,#000_70%,transparent_100%)]" />
 
         <LocaleProvider initialLocale={locale}>
-        <TRPCProvider>
-          <AvatarEasterEggProvider>
-            <CommandPaletteProvider>
-              <Header />
-              <main className="pt-24 min-h-screen">
-                {children}
-              </main>
-              <Footer />
-              <CommandPalette />
-            </CommandPaletteProvider>
-          </AvatarEasterEggProvider>
-        </TRPCProvider>
+          <TRPCProvider>
+            <AvatarEasterEggProvider>
+              <CommandPaletteProvider>
+                <Header />
+                <main className="pt-24 min-h-screen">{children}</main>
+                <Footer />
+                <WebAnalytics />
+                <CommandPalette />
+              </CommandPaletteProvider>
+            </AvatarEasterEggProvider>
+          </TRPCProvider>
         </LocaleProvider>
       </body>
     </html>

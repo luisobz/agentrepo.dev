@@ -15,7 +15,8 @@
     "@prisma/client": "^7.8.0",
     "@react-pdf/renderer": "^4.5.1",
     "nodemailer": "^10.0.6",
-    "react": "^19.2.0"
+    "react": "^19.2.0",
+    "zod": "4.4.3"
   },
   "devDependencies": {
     "@swc/helpers": "~0.5.18",

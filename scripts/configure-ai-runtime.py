@@ -9,8 +9,9 @@ remote = r'''
 import json, os, tempfile
 from pathlib import Path
 payload=json.load(__import__('sys').stdin)
-root=Path.home()/payload['destination']
-assert root.is_dir() and root.is_relative_to(Path.home()/'backend/agentrepo.dev')
+root=(Path.home()/payload['destination']).resolve()
+allowed=(Path.home()/'backend/agentrepo.dev').resolve()
+assert root.is_dir() and allowed in root.parents
 path=root/'.env'
 old=path.read_text() if path.exists() else ''
 keys=set(payload['values'])

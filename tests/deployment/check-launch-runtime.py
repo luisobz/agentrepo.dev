@@ -28,10 +28,14 @@ with tempfile.TemporaryDirectory() as directory:
     public = home / 'agentrepo.dev/.htaccess'
     public.parent.mkdir()
     public.write_text('Options -Indexes\nHeader always set X-Robots-Tag "noindex, nofollow, noarchive"\n# keep this\n')
+    robots = public.parent / 'robots.txt'
+    robots.write_text('User-agent: *\nDisallow: /\n')
     private = home / 'admin.agentrepo.dev/.htaccess'
     private.parent.mkdir()
     private.write_text('Header always set X-Robots-Tag "noindex"\n')
     subprocess.run(['python3', str(root / 'scripts/enable-public-indexing.py')], env=environment, check=True, capture_output=True)
     assert public.read_text() == 'Options -Indexes\n# keep this\n'
     assert 'noindex' in private.read_text()
+    assert not robots.exists(), 'Historical robots.txt must not shadow the application route'
+    assert (home / 'backend/agentrepo.dev/.launch-backups/public-robots-before-indexing').is_file()
 print('Runtime serialization, permissions and public/private indexing checks passed')

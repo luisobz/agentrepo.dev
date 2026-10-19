@@ -5,6 +5,7 @@ from pathlib import Path
 root = Path(__file__).resolve().parents[2]
 source = ast.parse((root / 'scripts/configure-ai-runtime.py').read_text())
 remote = next(ast.literal_eval(node.value) for node in source.body if isinstance(node, ast.Assign) and any(isinstance(target, ast.Name) and target.id == 'remote' for target in node.targets))
+assert '.is_relative_to(' not in remote, 'Remote hosting runs Python 3.6; avoid newer pathlib methods'
 with tempfile.TemporaryDirectory() as directory:
     home = Path(directory)
     destination = home / 'backend/agentrepo.dev/backend-ai'
@@ -18,6 +19,12 @@ with tempfile.TemporaryDirectory() as directory:
     assert len(lines) == 3 and lines[0] == 'AUTH_SECRET=preserved'
     assert json.loads(lines[2].split('=', 1)[1]) == values['SPACEMAIL_PASS']
     assert env_file.stat().st_mode & 0o777 == 0o600
+    outside = home / 'outside'
+    outside.mkdir()
+    (outside / '.env').write_text('untouched')
+    (destination.parent / 'escape').symlink_to(outside, target_is_directory=True)
+    rejected = subprocess.run(['python3', '-c', remote], input=json.dumps({'destination': 'backend/agentrepo.dev/escape', 'values': values}), text=True, env=environment, capture_output=True)
+    assert rejected.returncode != 0 and (outside / '.env').read_text() == 'untouched'
     public = home / 'agentrepo.dev/.htaccess'
     public.parent.mkdir()
     public.write_text('Options -Indexes\nHeader always set X-Robots-Tag "noindex, nofollow, noarchive"\n# keep this\n')

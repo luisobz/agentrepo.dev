@@ -3,6 +3,7 @@
 
 import os
 import sys
+import tempfile
 from pathlib import Path
 from urllib.parse import unquote, urlparse
 
@@ -14,7 +15,6 @@ values = {
     "PGHOST": url.hostname,
     "PGPORT": str(url.port or 5432),
     "PGUSER": unquote(url.username or ""),
-    "PGPASSWORD": unquote(url.password or ""),
     "PGDATABASE": url.path.lstrip("/"),
     "PGSSLMODE": "verify-full",
     "PGSSLROOTCERT": "/backup/ca.crt",
@@ -22,5 +22,7 @@ values = {
 if any("\n" in value or "\r" in value for value in values.values()):
     sys.exit("Newlines are not supported in database credentials")
 output = Path(os.environ["DB_WORK_DIR"]) / "db.env"
-output.write_text("".join(f"{key}={value}\n" for key, value in values.items()))
-output.chmod(0o600)
+descriptor, temporary = tempfile.mkstemp(dir=output.parent, prefix='.db-env-')
+with os.fdopen(descriptor, 'w') as stream:
+    stream.write(''.join(f'{key}={value}\n' for key, value in values.items()))
+os.replace(temporary, output)

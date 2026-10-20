@@ -37,11 +37,32 @@ export interface ContentCoverProps {
  * Content header image. Renders the uploaded cover when present; otherwise
  * generates a per-kind HTML/CSS template using the title.
  */
-export function ContentCover({ title, kind, imageUrl, className }: ContentCoverProps) {
-  if (imageUrl) {
+export function ContentCover({
+  title,
+  kind,
+  imageUrl,
+  className,
+}: ContentCoverProps) {
+  let safeImage: URL | null = null;
+  try {
+    const candidate = new URL(imageUrl ?? '');
+    if (
+      candidate.protocol === 'https:' &&
+      !candidate.username &&
+      !candidate.password
+    )
+      safeImage = candidate;
+  } catch {
+    /* Invalid sources use the generated cover. */
+  }
+  if (safeImage) {
     return (
       <div className={cn('relative overflow-hidden', className)}>
-        <img src={imageUrl} alt="" className="h-full w-full object-cover" />
+        <img
+          src={safeImage.href}
+          alt=""
+          className="h-full w-full object-cover"
+        />
       </div>
     );
   }
@@ -53,7 +74,7 @@ export function ContentCover({ title, kind, imageUrl, className }: ContentCoverP
       className={cn(
         'relative flex flex-col justify-between overflow-hidden p-4',
         style.background,
-        className
+        className,
       )}
     >
       {/* Dot grid texture */}
@@ -61,7 +82,7 @@ export function ContentCover({ title, kind, imageUrl, className }: ContentCoverP
       <span
         className={cn(
           'relative font-mono text-[10px] uppercase tracking-[0.2em]',
-          style.accent
+          style.accent,
         )}
       >
         [{style.label}] · agentrepo.dev

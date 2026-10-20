@@ -1,7 +1,6 @@
 {
   "$schema": "./node_modules/nx/schemas/nx-schema.json",
-  "nxCloudId": "6a0a039aa359ea180da3350c",
-  "analytics": true,
+  "analytics": false,
   "plugins": [
     {
       "plugin": "@nx/vitest",
@@ -11,7 +10,6 @@
         "testMode": "watch"
       }
     },
-
     {
       "plugin": "@nx/eslint/plugin",
       "options": {
@@ -49,5 +47,6 @@
         "unitTestRunner": "none"
       }
     }
-  }
+  },
+  "neverConnectToCloud": true
 }

@@ -39,8 +39,10 @@ export class SpacemailService implements EmailServicePort {
     await this.transporter.sendMail({
       from: this.from,
       to: input.to,
+      replyTo: input.replyTo,
       subject: input.subject,
       html: input.html,
+      text: input.text,
       headers: {
         'Auto-Submitted': 'auto-replied',
         'X-Auto-Response-Suppress': 'All',

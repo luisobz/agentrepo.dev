@@ -3,6 +3,7 @@ import type { CVAnalysisPdfInput } from '@agentrepo/application';
 import {
   Document,
   Image,
+  Link,
   type DocumentProps,
   Page,
   StyleSheet,
@@ -11,99 +12,77 @@ import {
 } from '@react-pdf/renderer';
 import { createElement as h, type ReactElement } from 'react';
 
-// Corporate palette (mirrors the web design tokens).
-const COLORS = {
-  ink: '#1b1714',
-  accent: '#7a2230',
-  muted: '#8d8273',
-  paper: '#fdf8ef',
-  line: '#e5dccb',
-};
-
 const styles = StyleSheet.create({
   page: {
-    flexDirection: 'row',
-    backgroundColor: COLORS.paper,
-    color: COLORS.ink,
-    fontSize: 10,
-    padding: 32,
+    backgroundColor: '#fffcf7',
+    color: '#26211d',
+    padding: 28,
+    paddingBottom: 42,
     fontFamily: 'Helvetica',
+    fontSize: 10,
   },
-  sidebar: {
-    width: '34%',
-    paddingRight: 18,
-    borderRightWidth: 1,
-    borderRightColor: COLORS.line,
+  header: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    borderBottomWidth: 1,
+    borderBottomColor: '#d8cdbd',
+    paddingBottom: 14,
+    marginBottom: 16,
   },
-  main: { width: '66%', paddingLeft: 18 },
-  name: { fontSize: 18, fontFamily: 'Helvetica-Bold', color: COLORS.accent },
-  role: { fontSize: 11, color: COLORS.muted, marginTop: 2, marginBottom: 14 },
-  sectionTitle: {
-    fontSize: 11,
+  brand: { fontSize: 18, fontFamily: 'Helvetica-Bold', color: '#7a2230' },
+  muted: { fontSize: 9, color: '#71665b', marginTop: 4 },
+  title: {
+    fontSize: 16,
     fontFamily: 'Helvetica-Bold',
-    color: COLORS.accent,
+    color: '#7a2230',
+    marginBottom: 14,
+  },
+  label: {
+    fontSize: 9,
+    fontFamily: 'Helvetica-Bold',
+    color: '#7a2230',
     marginTop: 12,
-    marginBottom: 4,
-    textTransform: 'uppercase',
+    marginBottom: 6,
   },
-  item: { marginBottom: 3, lineHeight: 1.4 },
-  paragraph: { marginBottom: 8, lineHeight: 1.5 },
-  metaBox: {
-    backgroundColor: '#f4ecdd',
+  paragraph: { fontSize: 10, lineHeight: 1.45, marginBottom: 10 },
+  excerpt: {
+    backgroundColor: '#f6f1e8',
+    padding: 10,
     borderRadius: 4,
-    padding: 8,
-    marginBottom: 12,
+    marginBottom: 4,
   },
-  metaLabel: { fontSize: 8, color: COLORS.muted, textTransform: 'uppercase' },
-  metaValue: { fontSize: 10, marginTop: 2 },
+  signature: {
+    borderTopWidth: 1,
+    borderTopColor: '#d8cdbd',
+    paddingTop: 12,
+    marginTop: 12,
+  },
+  link: {
+    color: '#7a2230',
+    fontSize: 10,
+    marginTop: 5,
+    textDecoration: 'none',
+  },
   footer: {
     position: 'absolute',
+    left: 28,
+    right: 28,
     bottom: 20,
-    left: 32,
-    right: 32,
     fontSize: 8,
-    color: COLORS.muted,
-    textAlign: 'center',
+    color: '#71665b',
   },
 });
 
-const PROFILE = {
-  name: 'Luis Ballester Zafra',
-  role: 'Head of Engineering',
-  skills: [
-    'AWS · Azure · Terraform · Ansible',
-    'Security, identity and secrets management',
-    'CI/CD · GitHub Actions',
-    'TypeScript · Next.js · React · NestJS',
-    'AI workflows and LLM orchestration',
-    'Performance and API observability',
-  ],
-  experience: [
-    'ClickDefense · Head of Engineering · July 2026 – present',
-    'Product engineering, cloud infrastructure, security and automation.',
-    'AgentRepo.dev · AI skills and agent project catalogue.',
-  ],
+const TOPICS: Record<string, [string, string]> = {
+  employment: ['Oportunidad profesional', 'Career opportunity'],
+  freelance: ['Colaboración', 'Collaboration'],
+  question: ['Consulta', 'Enquiry'],
+  other: ['Contacto', 'Contact'],
 };
-
-function section(title: string, children: ReactElement[]): ReactElement {
-  return h(
-    View,
-    {},
-    h(Text, { style: styles.sectionTitle }, title),
-    ...children,
-  );
-}
-
-function textItems(items: string[]): ReactElement[] {
-  return items.map((item, index) =>
-    h(Text, { key: index, style: styles.item }, `• ${item}`),
-  );
-}
-
-function analysisParagraphs(analysis: string): ReactElement[] {
-  return analysis
+function paragraphs(text: string): ReactElement[] {
+  return text
     .split(/\n{2,}/)
-    .filter((block) => block.trim().length > 0)
+    .filter((block) => block.trim())
     .map((block, index) =>
       h(Text, { key: index, style: styles.paragraph }, block.trim()),
     );
@@ -112,58 +91,105 @@ function analysisParagraphs(analysis: string): ReactElement[] {
 export function buildCvAnalysisDocument(
   input: CVAnalysisPdfInput,
 ): ReactElement<DocumentProps> {
-  const spanish =
-    /\b(gracias|mensaje|hola|solicitud|equipo|podemos|interés)\b/i.test(
-      input.aiAnalysisText,
-    );
+  const es = input.locale === 'es';
+  const contact = input.contactEmail ?? 'agent@agentrepo.dev';
+  const topic =
+    TOPICS[input.subject]?.[es ? 0 : 1] ?? (es ? 'Consulta' : 'Enquiry');
+  const message = input.originalMessage?.trim();
+  const excerpt =
+    message && message.length > 240 ? message.slice(0, 237) + '…' : message;
   return h(
     Document,
-    { title: 'AgentRepo.dev — Contact report', author: 'Luis Ballester Zafra' },
+    {
+      title: es
+        ? 'AgentRepo.dev — Tu consulta'
+        : 'AgentRepo.dev — Your enquiry',
+      author: 'AgentRepo.dev',
+    },
     h(
       Page,
-      { size: 'A4', style: styles.page },
+      { size: 'A5', style: styles.page },
       h(
         View,
-        { style: styles.sidebar },
+        { style: styles.header },
         h(Image, {
           src: BRAND_LOGO,
-          style: { width: 44, height: 44, marginBottom: 18 },
+          style: { width: 34, height: 34, marginRight: 10 },
         }),
-        h(Text, { style: styles.name }, PROFILE.name),
-        h(Text, { style: styles.role }, PROFILE.role),
-        section('Skills', textItems(PROFILE.skills)),
-        section('Experience', textItems(PROFILE.experience)),
-      ),
-      h(
-        View,
-        { style: styles.main },
         h(
           View,
-          { style: styles.metaBox },
+          {},
+          h(Text, { style: styles.brand }, 'agentrepo.dev'),
           h(
             Text,
-            { style: styles.metaLabel },
-            spanish ? 'Preparado para' : 'Prepared for',
+            { style: styles.muted },
+            es
+              ? 'Skills y proyectos de agentes de IA'
+              : 'AI skills and agent projects',
           ),
-          h(Text, { style: styles.metaValue }, input.recipientName),
-          h(
-            Text,
-            { style: { ...styles.metaLabel, marginTop: 6 } },
-            spanish ? 'Motivo' : 'Topic',
-          ),
-          h(Text, { style: styles.metaValue }, input.subject),
+        ),
+      ),
+      h(
+        Text,
+        { style: styles.title },
+        es ? 'Respuesta a tu consulta' : 'A reply to your enquiry',
+      ),
+      h(Text, { style: styles.muted }, input.recipientName),
+      h(Text, { style: styles.muted }, topic),
+      ...(excerpt
+        ? [
+            h(
+              Text,
+              { style: styles.label },
+              es ? 'Tu mensaje' : 'Your message',
+            ),
+            h(View, { style: styles.excerpt }, ...paragraphs(excerpt)),
+          ]
+        : []),
+      h(Text, { style: styles.label }, es ? 'Nuestra respuesta' : 'Our reply'),
+      ...paragraphs(input.aiAnalysisText),
+      ...(input.includeProfile
+        ? [
+            h(
+              Text,
+              { style: styles.label },
+              'Luis Ballester Zafra · Head of Engineering',
+            ),
+            ...paragraphs(
+              es
+                ? 'Desarrollo de producto, AWS y Azure, automatización de infraestructura, seguridad y CI/CD. Head of Engineering en ClickDefense desde julio de 2026.'
+                : 'Product engineering, AWS and Azure, infrastructure automation, security and CI/CD. Head of Engineering at ClickDefense since July 2026.',
+            ),
+          ]
+        : []),
+      h(
+        View,
+        { style: styles.signature, wrap: false },
+        h(
+          Text,
+          { style: { fontFamily: 'Helvetica-Bold', fontSize: 10 } },
+          es ? 'Equipo de AgentRepo.dev' : 'The AgentRepo.dev team',
+        ),
+        h(Link, { src: `mailto:${contact}`, style: styles.link }, contact),
+        h(
+          Link,
+          { src: 'https://agentrepo.dev', style: styles.link },
+          'agentrepo.dev',
         ),
         h(
           Text,
-          { style: styles.sectionTitle },
-          spanish ? 'Tu informe de contacto' : 'Your contact report',
+          { style: styles.muted },
+          es
+            ? 'Escríbenos para continuar la conversación.'
+            : 'Email us to continue the conversation.',
         ),
-        ...analysisParagraphs(input.aiAnalysisText),
       ),
       h(
         Text,
         { style: styles.footer, fixed: true },
-        'AgentRepo.dev · AI-assisted reply · No availability or commitments are confirmed',
+        es
+          ? 'Respuesta automática asistida por IA.'
+          : 'Automated AI-assisted reply.',
       ),
     ),
   );

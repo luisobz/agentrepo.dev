@@ -38,7 +38,7 @@ import { CONTACT_WORKFLOW_USE_CASE } from './workflow.tokens';
             port: BackendEnvironments.SPACEMAIL_PORT,
             user: BackendEnvironments.SPACEMAIL_USER,
             pass: BackendEnvironments.SPACEMAIL_PASS,
-            fromName: 'AgentRepo.dev AI Agent',
+            fromName: 'AgentRepo.dev',
           }),
           new PrismaContactRequestRepository(prisma),
           {

@@ -78,7 +78,12 @@ export function ContributorLogin() {
       if (mode === 'signup') {
         setMessage(t('creator.registered'));
       } else {
-        window.location.assign(returnPath());
+        const destination = new URL(returnPath(), window.location.origin);
+        if (destination.origin === window.location.origin) {
+          window.location.assign(destination.href);
+        } else {
+          window.location.assign('/creator');
+        }
       }
     } catch {
       setError(t('creator.network'));

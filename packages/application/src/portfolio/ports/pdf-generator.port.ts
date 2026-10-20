@@ -5,6 +5,10 @@ export interface CVAnalysisPdfInput {
   subject: string;
   /** Markdown/plain-text analysis produced by the LLM. */
   aiAnalysisText: string;
+  locale?: 'es' | 'en';
+  contactEmail?: string;
+  includeProfile?: boolean;
+  originalMessage?: string;
 }
 
 /**

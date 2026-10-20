@@ -6,8 +6,10 @@ export interface EmailAttachment {
 
 export interface SendEmailInput {
   to: string;
+  replyTo?: string;
   subject: string;
   html: string;
+  text?: string;
   attachments?: EmailAttachment[];
 }
 

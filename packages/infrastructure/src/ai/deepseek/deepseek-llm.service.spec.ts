@@ -122,7 +122,7 @@ it('sends bounded JSON-mode requests with thinking and SDK retries disabled', as
     );
     expect(requests).toHaveLength(1);
     expect(JSON.parse(requests[0])).toMatchObject({
-      max_tokens: 512,
+      max_tokens: 320,
       response_format: { type: 'json_object' },
       thinking: { type: 'disabled' },
       stream: false,

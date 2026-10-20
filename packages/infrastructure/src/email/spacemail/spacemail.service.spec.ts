@@ -68,3 +68,16 @@ describe('SpacemailService', () => {
     expect(mail.attachments[0].contentType).toBe('application/pdf');
   });
 });
+
+it('sets a real reply-to address for continuing the conversation', async () => {
+  const { transporter, sendMail } = buildTransporter();
+  await new SpacemailService(CONFIG, transporter).sendEmail({
+    to: 'owner@example.test',
+    replyTo: 'agent@agentrepo.dev',
+    subject: 'Contact',
+    html: '<p>Reply</p>',
+  });
+  expect(sendMail).toHaveBeenCalledWith(
+    expect.objectContaining({ replyTo: 'agent@agentrepo.dev' }),
+  );
+});

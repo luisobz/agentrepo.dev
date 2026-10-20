@@ -76,11 +76,13 @@ describe('ProcessContactWorkflow', () => {
       subject: PAYLOAD.subject,
       message: PAYLOAD.message,
     });
-    expect(deps.pdfGenerator.generateCVWithAnalysis).toHaveBeenCalledWith({
-      recipientName: PAYLOAD.email,
-      subject: PAYLOAD.subject,
-      aiAnalysisText: 'AI analysis text',
-    });
+    expect(deps.pdfGenerator.generateCVWithAnalysis).toHaveBeenCalledWith(
+      expect.objectContaining({
+        recipientName: PAYLOAD.email,
+        subject: PAYLOAD.subject,
+        aiAnalysisText: 'AI analysis text',
+      }),
+    );
     expect(deps.contactRequests.updateStatus).toHaveBeenNthCalledWith(
       1,
       'req-1',
@@ -167,4 +169,30 @@ describe('isSuspiciousContactMessage', () => {
       ),
     ).toBe(false);
   });
+});
+
+it('adds a visible AgentRepo contact, Reply-To and a localized concise presentation', async () => {
+  const deps = buildDeps();
+  vi.mocked(deps.llm.generateContactAnalysis).mockResolvedValue(
+    'AgentRepo reúne skills y proyectos de agentes.',
+  );
+  await deps.useCase.execute({
+    ...PAYLOAD,
+    subject: 'other',
+    message: 'Hola, ¿puedes presentarme tu proyecto AgentRepo?',
+  });
+  const mail = vi.mocked(deps.emailService.sendEmail).mock.calls[0][0];
+  expect(mail.subject).toBe('Tu consulta · AgentRepo.dev');
+  expect(mail).toMatchObject({ replyTo: 'agent@agentrepo.dev' });
+  expect(mail.html).toContain('mailto:agent@agentrepo.dev');
+  expect(mail.html).toContain('Equipo de AgentRepo.dev');
+  expect(mail.html).toContain('name="viewport"');
+  expect(mail.html).not.toContain('padding:32px');
+  expect(deps.pdfGenerator.generateCVWithAnalysis).toHaveBeenCalledWith(
+    expect.objectContaining({
+      locale: 'es',
+      contactEmail: 'agent@agentrepo.dev',
+      includeProfile: false,
+    }),
+  );
 });

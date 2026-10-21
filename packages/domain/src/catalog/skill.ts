@@ -1,3 +1,4 @@
+import type { LocalizedContent } from './content-locale';
 import type { RelatedLink } from './related-link';
 import { DataIntegrityError } from '../errors/domain.error';
 
@@ -5,7 +6,7 @@ export const SKILL_TYPES = ['prompt', 'system', 'config', 'template'] as const;
 
 export type SkillType = (typeof SKILL_TYPES)[number];
 
-export interface Skill {
+export interface Skill extends LocalizedContent {
   relatedLinks?: RelatedLink[];
   id: string;
   authorId?: string | null;

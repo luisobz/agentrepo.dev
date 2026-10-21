@@ -1,4 +1,8 @@
 import {
+  contentLocaleFromStorage,
+  contentTranslationsFromJson,
+} from '@agentrepo/domain';
+import {
   CreateSkillInput,
   ListContentParams,
   Paginated,
@@ -17,6 +21,8 @@ import { toTsQuery } from '../full-text';
 function toDomain(row: SkillRow, authorName?: string | null): Skill {
   return {
     ...row,
+    sourceLocale: contentLocaleFromStorage(row.sourceLocale),
+    translations: contentTranslationsFromJson(row.translations),
     relatedLinks: relatedLinksFromJson(row.relatedLinks),
     type: assertSkillType(row.type),
     authorName,
@@ -85,7 +91,7 @@ export class PrismaSkillRepository implements SkillRepository {
     // own `{ field: { search } }` compiles to an un-indexable to_tsvector()
     // computed per row (full-table scan); this uses the index instead.
     const skip = (params.page - 1) * params.pageSize;
-    const filter = Prisma.sql`"isPublished" = true AND "searchVector" @@ to_tsquery('english', ${tsQuery})`;
+    const filter = Prisma.sql`"isPublished" = true AND ("searchVector" @@ to_tsquery('english', ${tsQuery}) OR "searchVector" @@ to_tsquery('spanish', ${tsQuery}))`;
 
     const [rows, totals] = await this.prisma.$transaction([
       this.prisma.$queryRaw<
@@ -93,7 +99,7 @@ export class PrismaSkillRepository implements SkillRepository {
       >(Prisma.sql`
         SELECT "id", "slug", "title", "description", "content", "type", "version",
                "isPublished", "headerImageUrl", "isPremium", "priceCents", "currency",
-               "previewContent", "createdAt", "updatedAt", "latestVersionId", "authorId", "relatedLinks",
+               "previewContent", "createdAt", "updatedAt", "latestVersionId", "authorId", "relatedLinks", "sourceLocale", "translations",
                (SELECT "name" FROM "User" WHERE "User"."id" = "Skill"."authorId") AS "authorName"
         FROM "Skill"
         WHERE ${filter}

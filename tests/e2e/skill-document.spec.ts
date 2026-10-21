@@ -31,7 +31,7 @@ test('skills render the body while Raw, Copy and Download retain metadata', asyn
   const downloading = page.waitForEvent('download');
   await page.getByRole('button', { name: 'Download .md', exact: true }).click();
   const download = await downloading;
-  expect(download.suggestedFilename()).toBe('linked-project-1.0.0.md');
+  expect(download.suggestedFilename()).toBe('linked-project-1.0.0-en.md');
   const path = await download.path();
   expect(path).not.toBeNull();
   if (path !== null) expect(await readFile(path, 'utf8')).toBe(original);

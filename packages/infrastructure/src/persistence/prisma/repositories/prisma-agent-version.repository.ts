@@ -1,4 +1,8 @@
 import {
+  contentLocaleFromStorage,
+  contentTranslationsFromJson,
+} from '@agentrepo/domain';
+import {
   AgentVersionRepository,
   PublishVersionInput,
   RecordDownloadInput,
@@ -14,32 +18,51 @@ import {
   VersionAlreadyExistsError,
   VersionListEntry,
 } from '@agentrepo/domain';
-import { AgentVersion as AgentVersionRow, Prisma, PrismaClient } from '@prisma/client';
-import { isUniqueConstraintError, todayUtc, weekWindowStart } from './version-stats';
+import {
+  AgentVersion as AgentVersionRow,
+  Prisma,
+  PrismaClient,
+} from '@prisma/client';
+import {
+  isUniqueConstraintError,
+  todayUtc,
+  weekWindowStart,
+} from './version-stats';
 
 type RowWithDays = AgentVersionRow & { downloadDays: { count: number }[] };
 
-function fileTreeFromJson(value: Prisma.JsonValue, versionId: string): FileTree {
+function fileTreeFromJson(
+  value: Prisma.JsonValue,
+  versionId: string,
+): FileTree {
   if (!isFileTree(value)) {
     throw new DataIntegrityError(
-      `agent version ${versionId} has a malformed fileTree`
+      `agent version ${versionId} has a malformed fileTree`,
     );
   }
   return value;
 }
 
 function toDomain(row: AgentVersionRow): AgentVersion {
-  return { ...row, fileTree: fileTreeFromJson(row.fileTree, row.id) };
+  return {
+    ...row,
+    sourceLocale: contentLocaleFromStorage(row.sourceLocale),
+    translations: contentTranslationsFromJson(row.translations),
+    fileTree: fileTreeFromJson(row.fileTree, row.id),
+  };
 }
 
 function toEntry(
   row: RowWithDays,
-  latestVersionId: string | null
+  latestVersionId: string | null,
 ): VersionListEntry<AgentVersion> {
   const { downloadDays, ...version } = row;
   return {
     version: toDomain(version),
-    downloadsWeekly: downloadDays.reduce((sum, dayRow) => sum + dayRow.count, 0),
+    downloadsWeekly: downloadDays.reduce(
+      (sum, dayRow) => sum + dayRow.count,
+      0,
+    ),
     isLatest: row.id === latestVersionId,
   };
 }
@@ -49,7 +72,7 @@ export class PrismaAgentVersionRepository implements AgentVersionRepository {
 
   private async listFor(
     agentId: string,
-    latestVersionId: string | null
+    latestVersionId: string | null,
   ): Promise<VersionListEntry<AgentVersion>[]> {
     const rows = await this.prisma.agentVersion.findMany({
       where: { agentId },
@@ -65,7 +88,9 @@ export class PrismaAgentVersionRepository implements AgentVersionRepository {
       .sort((a, b) => compareSemver(b.version.version, a.version.version));
   }
 
-  async listByAssetId(agentId: string): Promise<VersionListEntry<AgentVersion>[]> {
+  async listByAssetId(
+    agentId: string,
+  ): Promise<VersionListEntry<AgentVersion>[]> {
     const head = await this.prisma.agent.findUnique({
       where: { id: agentId },
       select: { latestVersionId: true },
@@ -77,7 +102,7 @@ export class PrismaAgentVersionRepository implements AgentVersionRepository {
   }
 
   async listPublishedBySlug(
-    slug: string
+    slug: string,
   ): Promise<VersionListEntry<AgentVersion>[] | null> {
     const head = await this.prisma.agent.findUnique({
       where: { slug },
@@ -91,7 +116,7 @@ export class PrismaAgentVersionRepository implements AgentVersionRepository {
 
   async findPublishedBySlugAndVersion(
     slug: string,
-    version: string
+    version: string,
   ): Promise<AgentVersion | null> {
     const row = await this.prisma.agentVersion.findFirst({
       where: { version, agent: { slug, isPublished: true } },
@@ -111,6 +136,8 @@ export class PrismaAgentVersionRepository implements AgentVersionRepository {
           data: {
             agentId: head.id,
             version: input.version,
+            sourceLocale: head.sourceLocale,
+            translations: head.translations as Prisma.InputJsonValue,
             readmeContent: head.readmeContent,
             fileTree: head.fileTree as Prisma.InputJsonValue,
             changelog: input.changelog,
@@ -143,6 +170,8 @@ export class PrismaAgentVersionRepository implements AgentVersionRepository {
         data: {
           latestVersionId: row.id,
           version: row.version,
+          sourceLocale: row.sourceLocale,
+          translations: row.translations as Prisma.InputJsonValue,
           readmeContent: row.readmeContent,
           fileTree: row.fileTree as Prisma.InputJsonValue,
         },
@@ -153,7 +182,10 @@ export class PrismaAgentVersionRepository implements AgentVersionRepository {
 
   async recordDownload(input: RecordDownloadInput): Promise<void> {
     const where: Prisma.AgentVersionWhereInput = input.version
-      ? { version: input.version, agent: { slug: input.slug, isPublished: true } }
+      ? {
+          version: input.version,
+          agent: { slug: input.slug, isPublished: true },
+        }
       : { latestOf: { slug: input.slug, isPublished: true } };
     const row = await this.prisma.agentVersion.findFirst({
       where,

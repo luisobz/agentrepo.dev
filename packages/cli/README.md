@@ -10,7 +10,7 @@ Nunca ejecuta el contenido descargado.
 Instala una vez y ejecuta `agentrepo` dentro de tu proyecto:
 
 ```sh
-pnpm add -g https://github.com/luisobz/agentrepo.dev/releases/download/cli-v0.2.1/agentrepo-cli-0.2.1.tgz
+pnpm add -g https://github.com/luisobz/agentrepo.dev/releases/download/cli-v0.3.0/agentrepo-cli-0.3.0.tgz
 ```
 
 Dentro de tu proyecto:
@@ -42,6 +42,7 @@ no modifica el manifiesto ni los snapshots anteriores.
 {
   "schemaVersion": 1,
   "target": "claude",
+  "locale": "en",
   "skills": { "code-review": "1.0.0" }
 }
 ```
@@ -51,6 +52,14 @@ exactas; los comandos resuelven `latest`. `target` es opcional, con fallback
 `.agents/skills`. `registry` es opcional y predetermina
 `https://agentrepo.dev/web/api/v1`; alternativas deben ser HTTPS sin credenciales,
 query ni fragmento.
+
+`locale` elige el idioma de las skills, por ejemplo `en` o `es`. También puedes
+cambiarlo desde el menú interactivo. Si no hay traducción, se instala el original
+con un aviso del idioma utilizado. Sin `locale` se conserva el comportamiento
+anterior. El lock fija el idioma resuelto y su contenido: una traducción que
+aparezca después no sustituye automáticamente el fallback ya instalado.
+Cambiar `locale` permite elegir otra variante con `install`; `verify` y
+`reset --hard` mantienen el idioma del lock.
 
 | Target         | Carpeta del proyecto |
 | -------------- | -------------------- |

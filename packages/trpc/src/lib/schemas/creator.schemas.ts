@@ -13,6 +13,7 @@ export {
 } from '@agentrepo/domain';
 export type { AgentSourceFile } from '@agentrepo/domain';
 import {
+  contentLocaleSchema,
   skillTypeSchema,
   slugSchema,
   repositoryUrlSchema,
@@ -20,6 +21,7 @@ import {
 } from './catalog.schemas';
 
 export const submitSkillSchema = z.object({
+  sourceLocale: contentLocaleSchema.default('en'),
   relatedLinks: relatedLinksSchema.default([]),
   slug: slugSchema,
   title: z.string().trim().min(1).max(200),
@@ -48,6 +50,7 @@ export const agentSourceFilesSchema = z
 export const submitAgentSchema = z
   .object({
     files: agentSourceFilesSchema.optional(),
+    sourceLocale: contentLocaleSchema.default('en'),
     relatedLinks: relatedLinksSchema.default([]),
     slug: slugSchema,
     title: z.string().trim().min(1).max(200),
@@ -66,6 +69,7 @@ export const submitAgentSchema = z
   });
 
 export const submitBlogSchema = z.object({
+  sourceLocale: contentLocaleSchema.default('en'),
   relatedLinks: relatedLinksSchema.default([]),
   slug: slugSchema,
   title: z.string().trim().min(1).max(200),

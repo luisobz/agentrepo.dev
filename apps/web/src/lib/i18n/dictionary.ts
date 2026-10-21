@@ -191,8 +191,8 @@ export const webDictionary = {
     es: 'agent.json guarda tu herramienta y las skills instaladas en este proyecto. El CLI lo crea y actualiza por ti. Ejemplo:',
   },
   'cli.fields': {
-    en: 'target chooses the installation folder; skills maps each skill name to its version. These names are examples. Without a target, the CLI uses .agents/skills.',
-    es: 'target elige la carpeta de instalación; skills relaciona cada nombre con su versión. Los nombres son ejemplos. Sin target se usa .agents/skills.',
+    en: 'target chooses the folder; locale selects the skill language, with fallback to the original. The lock pins the resolved language. skills maps names to exact versions. The names are examples.',
+    es: 'target elige la carpeta; locale selecciona el idioma de las skills, con fallback al original. El lock fija el idioma utilizado. skills relaciona nombres con versiones exactas. Los nombres son ejemplos.',
   },
   'cli.run': {
     en: 'Short commands, when you need them',

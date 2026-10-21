@@ -10,6 +10,7 @@ import {
 import {
   integrity,
   manifestIntegrity,
+  normalizeLocale,
   parseManifest,
   record,
   renderSkill,
@@ -55,13 +56,28 @@ function validateLock(lock) {
       !validHash(entry.sourceIntegrity)
     )
       throw new InstallerError('agent-lock.json inválido.');
+    if (
+      entry.requestedLocale !== undefined ||
+      entry.contentLocale !== undefined
+    ) {
+      normalizeLocale(entry.requestedLocale);
+      normalizeLocale(entry.contentLocale);
+    }
   }
   return lock;
 }
 async function prepareSkills(manifest, lock, fetchSkill) {
   const prepared = {};
   for (const [slug, version] of Object.entries(manifest.skills)) {
-    const snapshot = await fetchSkill(slug, version);
+    const previous = lock?.skills[slug];
+    const sameVariant =
+      previous?.version === version &&
+      previous.requestedLocale === manifest.locale;
+    // Keep the resolved fallback pinned even if another translation appears later.
+    const locale = sameVariant
+      ? (previous.contentLocale ?? manifest.locale)
+      : manifest.locale;
+    const snapshot = await fetchSkill(slug, version, locale);
     if (snapshot?.isLocked === true)
       throw new InstallerError(
         `${slug}: contenido premium bloqueado; no se puede instalar públicamente.`,
@@ -77,15 +93,31 @@ async function prepareSkills(manifest, lock, fetchSkill) {
       throw new InstallerError(
         `${slug}@${version}: snapshot inválido o versión incorrecta.`,
       );
+    if (manifest.locale) {
+      normalizeLocale(snapshot.contentLocale);
+      if (
+        sameVariant &&
+        previous.contentLocale &&
+        snapshot.contentLocale !== previous.contentLocale
+      )
+        throw new InstallerError(
+          `${slug}@${version}: el idioma fijado ya no coincide con el catálogo.`,
+        );
+    }
     const content = renderSkill(slug, snapshot.content);
     const entry = {
       version,
+      ...(manifest.locale
+        ? {
+            requestedLocale: manifest.locale,
+            contentLocale: snapshot.contentLocale,
+          }
+        : {}),
       sourceIntegrity: integrity(snapshot.content),
       integrity: integrity(content),
     };
-    const previous = lock?.skills[slug];
     if (
-      previous?.version === version &&
+      sameVariant &&
       (previous.integrity !== entry.integrity ||
         previous.sourceIntegrity !== entry.sourceIntegrity)
     )
@@ -165,6 +197,17 @@ async function installLocked(options, root) {
   const lock = validateLock(await readJson(root, 'agent-lock.json', true));
   const manifestHash = manifestIntegrity(manifest);
   if (
+    lock?.manifestIntegrity === manifestHash &&
+    Object.entries(manifest.skills).some(
+      ([slug, version]) =>
+        lock.skills[slug]?.version === version &&
+        lock.skills[slug].requestedLocale !== manifest.locale,
+    )
+  )
+    throw new InstallerError(
+      'agent-lock.json: idioma solicitado incoherente con agent.json.',
+    );
+  if (
     options.frozen &&
     (!lock ||
       lock.manifestIntegrity !== manifestHash ||
@@ -192,7 +235,8 @@ async function installLocked(options, root) {
   const stateTarget = target === 'codex' ? 'agents' : target;
   const fetchSkill =
     options.fetchSkill ??
-    ((slug, version) => fetchPublishedSkill(manifest.registry, slug, version));
+    ((slug, version, locale) =>
+      fetchPublishedSkill(manifest.registry, slug, version, locale));
   const prepared = await prepareSkills(manifest, lock, fetchSkill);
   const { changes, repaired } = await planSkillFiles(
     root,
@@ -236,7 +280,13 @@ async function installLocked(options, root) {
     readOnly: true,
   });
   await commitFiles(root, changes);
-  return { target, directory, installed: Object.keys(prepared), repaired };
+  return {
+    target,
+    directory,
+    installed: Object.keys(prepared),
+    repaired,
+    ...languageReport(prepared),
+  };
 }
 export async function installSkills(options) {
   const root = await realpath(options.root);
@@ -272,7 +322,9 @@ export async function verifyInstalledSkills(options) {
     lock.manifestIntegrity !== manifestIntegrity(manifest) ||
     Object.keys(lock.skills).length !== Object.keys(manifest.skills).length ||
     Object.entries(manifest.skills).some(
-      ([slug, version]) => lock.skills[slug]?.version !== version,
+      ([slug, version]) =>
+        lock.skills[slug]?.version !== version ||
+        lock.skills[slug]?.requestedLocale !== manifest.locale,
     )
   )
     throw new InstallerError('agent-lock.json no coincide con agent.json.');
@@ -280,8 +332,8 @@ export async function verifyInstalledSkills(options) {
     manifest,
     lock,
     options.fetchSkill ??
-      ((slug, version) =>
-        fetchPublishedSkill(manifest.registry, slug, version)),
+      ((slug, version, locale) =>
+        fetchPublishedSkill(manifest.registry, slug, version, locale)),
   );
   for (const [slug, item] of Object.entries(prepared)) {
     const folder = join(root, directory, slug);
@@ -306,5 +358,33 @@ export async function verifyInstalledSkills(options) {
         `${slug}: permisos de escritura habilitados. Ejecuta install para restaurar solo lectura.`,
       );
   }
-  return { directory, verified: Object.keys(prepared) };
+  return {
+    directory,
+    verified: Object.keys(prepared),
+    ...languageReport(prepared),
+  };
+}
+
+function languageReport(prepared) {
+  const languages = Object.entries(prepared)
+    .filter(([, item]) => item.entry.requestedLocale)
+    .map(([slug, item]) => ({
+      slug,
+      requested: item.entry.requestedLocale,
+      resolved: item.entry.contentLocale,
+    }));
+  return languages.length
+    ? {
+        languages,
+        fallbacks: languages.filter((item) => item.requested !== item.resolved),
+      }
+    : {};
+}
+export function languageSummary(result) {
+  return (result.languages ?? [])
+    .map(
+      ({ slug, requested, resolved }) =>
+        `${slug}: ${resolved}${requested !== resolved ? ` (fallback de ${requested})` : ''}`,
+    )
+    .join('\n');
 }

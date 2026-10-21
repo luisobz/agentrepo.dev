@@ -14,3 +14,4 @@ export * from './playground/playground-token';
 
 export * from './catalog/related-link';
 export * from './catalog/agent-files';
+export * from './catalog/content-locale';

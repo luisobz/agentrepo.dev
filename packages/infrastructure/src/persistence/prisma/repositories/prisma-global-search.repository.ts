@@ -33,6 +33,7 @@ export class PrismaGlobalSearchRepository implements GlobalSearchRepository {
   async searchPublished({
     query,
     limitPerType,
+    locale,
   }: GlobalSearchParams): Promise<SearchHit[]> {
     const tsQuery = toTsQuery(query, { prefixLast: true });
     if (!tsQuery) {
@@ -42,22 +43,26 @@ export class PrismaGlobalSearchRepository implements GlobalSearchRepository {
     // Query the trigger-maintained `searchVector` GIN indexes directly; Prisma's
     // `{ field: { search } }` filter is not index-backed (see the skill repo).
     const match = (table: string) => Prisma.sql`
-      ${Prisma.raw(`"${table}"."searchVector"`)} @@ to_tsquery('english', ${tsQuery})
+      ( ${Prisma.raw(`"${table}"."searchVector"`)} @@ to_tsquery('english', ${tsQuery}) OR ${Prisma.raw(`"${table}"."searchVector"`)} @@ to_tsquery('spanish', ${tsQuery}) )
     `;
 
+    const translated = (field: string) =>
+      locale
+        ? Prisma.sql`coalesce("translations"->${locale}->>${field}, ${Prisma.raw('"' + field + '"')})`
+        : Prisma.raw('"' + field + '"');
     const [skills, agents, posts] = await Promise.all([
       this.prisma.$queryRaw<SkillHitRow[]>(Prisma.sql`
-        SELECT "id", "slug", "title", "description", "type" FROM "Skill"
+        SELECT "id", "slug", ${translated('title')} AS "title", ${translated('description')} AS "description", "type" FROM "Skill"
         WHERE "isPublished" = true AND ${match('Skill')}
         ORDER BY "updatedAt" DESC LIMIT ${limitPerType}
       `),
       this.prisma.$queryRaw<AgentHitRow[]>(Prisma.sql`
-        SELECT "id", "slug", "title", "shortDescription", "version" FROM "Agent"
+        SELECT "id", "slug", ${translated('title')} AS "title", ${translated('shortDescription')} AS "shortDescription", "version" FROM "Agent"
         WHERE "isPublished" = true AND ${match('Agent')}
         ORDER BY "updatedAt" DESC LIMIT ${limitPerType}
       `),
       this.prisma.$queryRaw<PostHitRow[]>(Prisma.sql`
-        SELECT "id", "slug", "title", "excerpt" FROM "BlogPost"
+        SELECT "id", "slug", ${translated('title')} AS "title", ${translated('excerpt')} AS "excerpt" FROM "BlogPost"
         WHERE "isPublished" = true AND ${match('BlogPost')}
         ORDER BY "updatedAt" DESC LIMIT ${limitPerType}
       `),
@@ -72,7 +77,7 @@ export class PrismaGlobalSearchRepository implements GlobalSearchRepository {
           description: skill.description ?? '',
           type: 'skill',
           badge: skill.type,
-        })
+        }),
       ),
       ...agents.map(
         (agent): SearchHit => ({
@@ -82,7 +87,7 @@ export class PrismaGlobalSearchRepository implements GlobalSearchRepository {
           description: agent.shortDescription,
           type: 'agent',
           badge: `v${agent.version}`,
-        })
+        }),
       ),
       ...posts.map(
         (post): SearchHit => ({
@@ -91,7 +96,7 @@ export class PrismaGlobalSearchRepository implements GlobalSearchRepository {
           title: post.title,
           description: post.excerpt ?? '',
           type: 'blog',
-        })
+        }),
       ),
     ];
   }

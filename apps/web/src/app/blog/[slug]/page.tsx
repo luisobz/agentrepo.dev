@@ -1,3 +1,5 @@
+import { ContentLanguage } from '../../../components/content-language';
+import { getServerLocale } from '../../../lib/i18n/server';
 import { SHARE_IMAGE } from '../../../lib/seo/public-site';
 import { RelatedLinks } from '@agentrepo/ui';
 import Link from 'next/link';
@@ -54,6 +56,7 @@ export async function generateMetadata({
 }
 
 export default async function BlogPostPage({ params }: BlogPostPageProps) {
+  const locale = await getServerLocale();
   const { slug } = await params;
   const post = await getPublishedPostBySlug(slug);
   if (!post) {
@@ -61,12 +64,15 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
   }
 
   return (
-    <article className="mx-auto w-full max-w-2xl px-4 pb-24 sm:px-6">
+    <article
+      lang={post.contentLocale}
+      className="mx-auto w-full max-w-2xl px-4 pb-24 sm:px-6"
+    >
       <Link
         href="/blog"
         className="font-mono text-sm text-[var(--color-text-muted)] transition-colors hover:text-[var(--color-brand-garnet)]"
       >
-        ← Back to blog
+        {locale === 'es' ? '← Volver al blog' : '← Back to blog'}
       </Link>
 
       <header className="mb-10 mt-8">
@@ -74,14 +80,14 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
           dateTime={post.createdAt.toISOString()}
           className="font-mono text-xs uppercase tracking-[0.08em] text-[var(--color-text-muted)]"
         >
-          {formatDate(post.createdAt)}
+          {formatDate(post.createdAt, locale)}
         </time>
         <h1 className="mt-3 text-3xl font-semibold leading-tight tracking-tight sm:text-4xl">
           {post.title}
         </h1>
         {post.authorName && (
           <p className="mt-3 text-sm text-[var(--color-text-muted)]">
-            Autoría: {post.authorName}
+            {locale === 'es' ? 'Autoría:' : 'Author:'} {post.authorName}
           </p>
         )}
         {post.excerpt && (
@@ -90,6 +96,7 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
           </p>
         )}
       </header>
+      <ContentLanguage contentLocale={post.contentLocale} />
       <RelatedLinks links={post.relatedLinks} />
 
       {post.headerImageUrl && (

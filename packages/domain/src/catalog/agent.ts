@@ -1,7 +1,8 @@
+import type { LocalizedContent } from './content-locale';
 import type { RelatedLink } from './related-link';
 import { FileTree } from './file-tree';
 
-export interface Agent {
+export interface Agent extends LocalizedContent {
   repositoryUrl?: string | null;
   relatedLinks?: RelatedLink[];
   id: string;

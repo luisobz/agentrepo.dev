@@ -9,6 +9,8 @@ datasource db {
 }
 
 model Skill {
+  sourceLocale String @default("en")
+  translations Json @default("{}")
   relatedLinks Json @default("[]")
   id             String   @id @default(uuid())
   authorId       String?
@@ -46,6 +48,8 @@ model Skill {
 
 // Immutable snapshot of a published skill version (npm-style registry entry).
 model SkillVersion {
+  sourceLocale String @default("en")
+  translations Json @default("{}")
   id             String   @id @default(uuid())
   skillId        String
   version        String // semver, unique per skill
@@ -73,6 +77,8 @@ model SkillVersionDownloadDay {
 }
 
 model Agent {
+  sourceLocale String @default("en")
+  translations Json @default("{}")
   relatedLinks Json @default("[]")
   repositoryUrl String?
   id               String   @id @default(uuid())
@@ -109,6 +115,8 @@ model Agent {
 
 // Immutable snapshot of a published agent version (README + file tree).
 model AgentVersion {
+  sourceLocale String @default("en")
+  translations Json @default("{}")
   id             String   @id @default(uuid())
   agentId        String
   version        String // semver, unique per agent
@@ -136,6 +144,8 @@ model AgentVersionDownloadDay {
 }
 
 model BlogPost {
+  sourceLocale String @default("en")
+  translations Json @default("{}")
   relatedLinks Json @default("[]")
   authorId String?
   author User? @relation("BlogAuthor", fields: [authorId], references: [id], onDelete: SetNull)

@@ -1,5 +1,6 @@
 import {
   FileTreeNode,
+  isDocumentationPath,
   SKILL_TYPES,
   RELATED_LINK_KINDS,
   isPublicReferenceUrl,
@@ -68,6 +69,7 @@ export const slugSchema = z
   );
 
 export const paginationSchema = z.object({
+  locale: z.enum(['en', 'es']).optional(),
   page: z.number().int().min(1).default(1),
   pageSize: z.number().int().min(1).max(100).default(20),
 });
@@ -78,7 +80,10 @@ export const adminListSchema = paginationSchema.extend({
 });
 
 export const idInputSchema = z.object({ id: z.uuid() });
-export const slugInputSchema = z.object({ slug: slugSchema });
+export const slugInputSchema = z.object({
+  slug: slugSchema,
+  locale: z.enum(['en', 'es']).optional(),
+});
 
 // ─── Versioning (npm-style registry) ────────────
 
@@ -87,6 +92,7 @@ export const semverSchema = z
   .regex(/^\d+\.\d+\.\d+$/, 'Use semantic versioning (e.g. 1.0.0)');
 
 export const versionParamsSchema = z.object({
+  locale: z.enum(['en', 'es']).optional(),
   slug: slugSchema,
   version: semverSchema,
 });
@@ -138,6 +144,65 @@ function requirePriceWhenPremium(
   }
 }
 
+export const contentLocaleSchema = z.enum(['en', 'es']);
+const proseTranslationSchema = z
+  .object({
+    title: z.string().trim().min(1).max(200).optional(),
+    description: z.string().max(500).optional(),
+    shortDescription: z.string().max(500).optional(),
+    excerpt: z.string().max(500).optional(),
+    content: z.string().min(1).max(500_000).optional(),
+    readmeContent: z.string().min(1).max(500_000).optional(),
+    previewContent: z.string().max(100_000).optional(),
+    changelog: z.string().max(10_000).optional(),
+    files: z
+      .record(
+        z.string().refine(isDocumentationPath, 'Use a relative Markdown path'),
+        z.string().max(500_000),
+      )
+      .optional(),
+  })
+  .strict();
+export const contentTranslationsSchema = z
+  .object({
+    en: proseTranslationSchema.optional(),
+    es: proseTranslationSchema.optional(),
+  })
+  .strict();
+export type ContentTranslations = z.infer<typeof contentTranslationsSchema>;
+export type ContentLocale = z.infer<typeof contentLocaleSchema>;
+function translatedLocales<T extends z.ZodType>(schema: T) {
+  return z.object({ en: schema.optional(), es: schema.optional() }).strict();
+}
+const skillTranslationsSchema = translatedLocales(
+  proseTranslationSchema
+    .pick({
+      title: true,
+      description: true,
+      content: true,
+      previewContent: true,
+      changelog: true,
+    })
+    .required({ title: true, content: true }),
+);
+const agentTranslationsSchema = translatedLocales(
+  proseTranslationSchema
+    .pick({
+      title: true,
+      shortDescription: true,
+      readmeContent: true,
+      previewContent: true,
+      changelog: true,
+      files: true,
+    })
+    .required({ title: true, shortDescription: true }),
+);
+const blogTranslationsSchema = translatedLocales(
+  proseTranslationSchema
+    .pick({ title: true, excerpt: true, content: true })
+    .required({ title: true, content: true }),
+);
+
 // ─── Skill ──────────────────────────────────────
 
 export const skillTypeSchema = z.enum(SKILL_TYPES);
@@ -145,6 +210,8 @@ export const skillTypeSchema = z.enum(SKILL_TYPES);
 // Base schemas hold no defaults: defaults belong to creation only. Reusing
 // them in updates would silently reset fields omitted from a partial patch.
 const skillBaseSchema = z.object({
+  sourceLocale: contentLocaleSchema.optional(),
+  translations: skillTranslationsSchema.optional(),
   relatedLinks: relatedLinksSchema,
   slug: slugSchema,
   title: z.string().trim().min(1).max(200),
@@ -198,6 +265,8 @@ export const fileTreeNodeSchema: z.ZodType<FileTreeNode> = z.lazy(() =>
 export const fileTreeSchema = z.array(fileTreeNodeSchema);
 
 const agentBaseSchema = z.object({
+  sourceLocale: contentLocaleSchema.optional(),
+  translations: agentTranslationsSchema.optional(),
   relatedLinks: relatedLinksSchema,
   repositoryUrl: repositoryUrlSchema.nullable().optional(),
   slug: slugSchema,
@@ -233,6 +302,8 @@ export const updateAgentSchema = agentBaseSchema
 // ─── BlogPost ───────────────────────────────────
 
 const blogPostBaseSchema = z.object({
+  sourceLocale: contentLocaleSchema.optional(),
+  translations: blogTranslationsSchema.optional(),
   relatedLinks: relatedLinksSchema,
   slug: slugSchema,
   title: z.string().trim().min(1).max(200),

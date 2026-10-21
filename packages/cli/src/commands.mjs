@@ -9,6 +9,8 @@ export async function runCommand(options) {
   const root = await realpath(options.root);
   const original = await readJson(root, 'agent.json', true);
   const manifest = parseManifest(original ?? { schemaVersion: 1, skills: {} });
+  if (options.locale === 'source') delete manifest.locale;
+  else if (options.locale !== undefined) manifest.locale = options.locale;
   const target = options.target ?? manifest.target ?? 'agents';
   const common = { root, target, fetchSkill: options.fetchSkill };
   if (options.command === 'verify') return verifyInstalledSkills(common);
@@ -19,7 +21,12 @@ export async function runCommand(options) {
       );
     return installSkills({ ...common, frozen: true });
   }
-  if (options.command === 'install' && original && !options.target)
+  if (
+    options.command === 'install' &&
+    original &&
+    !options.target &&
+    options.locale === undefined
+  )
     return installSkills({ ...common, frozen: options.frozen });
   if (options.command !== 'install') {
     const match = options.command.match(

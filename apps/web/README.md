@@ -54,3 +54,15 @@ CLI releases use their own cli-vX.Y.Z tags and workflow; platform releases do no
 The rendered skill view recognises YAML frontmatter as metadata. Raw, Copy and
 Download preserve the complete original document, including frontmatter. Other
 Markdown viewers retain their existing rendering behaviour.
+
+## Bilingual catalogue
+
+The existing EN/ES selector also selects skills, agent guides and blog bodies,
+including file previews and downloads. API read inputs accept optional `locale`.
+Omitting it preserves the original registry bytes for existing CLI integrity
+locks; selecting a translation never rewrites executable files. Markdown paths
+can have translated bodies while retaining their original tree and filenames.
+Missing translations show the original with an explicit language notice.
+Catalogue summaries exclude translation maps and full bodies; premium
+projections protect all language variants. Public search uses both language
+vectors and returns titles/excerpts in the requested language.

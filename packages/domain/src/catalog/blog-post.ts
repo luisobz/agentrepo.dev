@@ -1,5 +1,6 @@
+import type { LocalizedContent } from './content-locale';
 import type { RelatedLink } from './related-link';
-export interface BlogPost {
+export interface BlogPost extends LocalizedContent {
   authorId?: string | null;
   authorName?: string | null;
   relatedLinks?: RelatedLink[];

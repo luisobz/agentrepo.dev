@@ -1,6 +1,11 @@
 'use client';
 
 import {
+  ContentLanguages,
+  useContentLanguages,
+} from '../form/content-languages';
+
+import {
   createAgentSchema,
   fileTreeSchema,
   type FileTree,
@@ -38,6 +43,7 @@ export function AgentForm({ agent }: { agent?: Agent }) {
   const [relatedLinks, setRelatedLinks] = useState<ContentRelatedLink[]>(
     agent?.relatedLinks ?? [],
   );
+  const languages = useContentLanguages(agent);
   const router = useRouter();
   const utils = trpc.useUtils();
   const [error, setError] = useState<string | null>(null);
@@ -132,6 +138,8 @@ export function AgentForm({ agent }: { agent?: Agent }) {
 
     const parsed = createAgentSchema.safeParse({
       ...values,
+      sourceLocale: languages.sourceLocale,
+      translations: languages.translations,
       relatedLinks,
       repositoryUrl: values.repositoryUrl.trim() || null,
       readmeContent: values.readmeContent.trim() ? values.readmeContent : null,
@@ -315,6 +323,12 @@ export function AgentForm({ agent }: { agent?: Agent }) {
           setValues((prev) => ({ ...prev, readmeContent }))
         }
         height="320px"
+      />
+      <ContentLanguages
+        kind="agent"
+        value={languages}
+        disabled={isSaving}
+        fileTree={fileTree}
       />
       <FormError message={error} />
       <div className="flex gap-3">

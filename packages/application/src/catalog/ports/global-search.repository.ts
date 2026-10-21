@@ -2,6 +2,7 @@ import { SearchHit } from '@agentrepo/domain';
 
 export interface GlobalSearchParams {
   query: string;
+  locale?: 'en' | 'es';
   /** Maximum number of hits returned per content type. */
   limitPerType: number;
 }

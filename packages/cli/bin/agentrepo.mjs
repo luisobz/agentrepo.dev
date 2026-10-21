@@ -3,11 +3,12 @@ import { parseArgs } from 'node:util';
 import { realpath, writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
 import { InstallerError } from '../src/errors.mjs';
+import { languageSummary } from '../src/install.mjs';
 import { runCommand } from '../src/commands.mjs';
 import { runInteractive } from '../src/interactive.mjs';
 import { chooseTarget } from '../src/prompt.mjs';
 import { readJson } from '../src/filesystem.mjs';
-const HELP = `AgentRepo CLI 0.2.1
+const HELP = `AgentRepo CLI 0.3.0
 
   agentrepo                Abre el asistente interactivo
   agentrepo skill2          Añade una skill y fija la versión resuelta
@@ -34,7 +35,7 @@ async function main() {
     },
   });
   if (values.version) {
-    console.log('0.2.1');
+    console.log('0.3.0');
     return;
   }
   if (values.help) {
@@ -89,6 +90,8 @@ async function main() {
   console.log(
     `✓ ${(result.installed ?? result.verified).length} skills en ${result.directory}.`,
   );
+  const languages = languageSummary(result);
+  if (languages) console.log(languages);
   if (result.repaired?.length)
     console.log(`Restaurados snapshots: ${result.repaired.join(', ')}.`);
 }

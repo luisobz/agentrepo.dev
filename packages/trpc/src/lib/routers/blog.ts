@@ -1,3 +1,4 @@
+import { localizeContent } from '@agentrepo/domain';
 import { postSummary } from './catalog-summary';
 import { paginationSchema, slugInputSchema } from '../schemas/catalog.schemas';
 import { publicProcedure, router } from '../trpc';
@@ -15,19 +16,33 @@ export const blogRouter = router({
         publishedOnly: true,
         orderBy: 'createdAt',
       });
-      return { ...page, items: page.items.map(postSummary) };
+      return {
+        ...page,
+        items: page.items.map((item) =>
+          postSummary(localizeContent(item, input.locale)),
+        ),
+      };
     }),
-  getPosts: publicProcedure.input(paginationSchema).query(({ input, ctx }) =>
-    ctx.catalog.blogPosts.list.execute({
-      ...input,
-      publishedOnly: true,
-      orderBy: 'createdAt',
+  getPosts: publicProcedure
+    .input(paginationSchema)
+    .query(async ({ input, ctx }) => {
+      const page = await ctx.catalog.blogPosts.list.execute({
+        ...input,
+        publishedOnly: true,
+        orderBy: 'createdAt',
+      });
+      return {
+        ...page,
+        items: page.items.map((item) => localizeContent(item, input.locale)),
+      };
     }),
-  ),
 
   getPostBySlug: publicProcedure
     .input(slugInputSchema)
-    .query(({ input, ctx }) =>
-      ctx.catalog.blogPosts.getPublishedBySlug.execute(input.slug),
+    .query(async ({ input, ctx }) =>
+      localizeContent(
+        await ctx.catalog.blogPosts.getPublishedBySlug.execute(input.slug),
+        input.locale,
+      ),
     ),
 });

@@ -10,7 +10,7 @@ Nunca ejecuta el contenido descargado.
 Instala una vez y ejecuta `agentrepo` dentro de tu proyecto:
 
 ```sh
-pnpm add -g https://github.com/luisobz/agentrepo.dev/releases/download/cli-v0.3.0/agentrepo-cli-0.3.0.tgz
+pnpm add -g https://github.com/luisobz/agentrepo.dev/releases/download/cli-v0.3.1/agentrepo-cli-0.3.1.tgz
 ```
 
 Dentro de tu proyecto:

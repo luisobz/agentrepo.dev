@@ -22,7 +22,7 @@ test('main navigation promotes CLI and secondary links stay in the footer', asyn
   ).toBeVisible();
   await expect(page.locator('main')).toContainText('agent.json');
   await expect(page.locator('main')).toContainText(
-    'cli-v0.3.0/agentrepo-cli-0.3.0.tgz',
+    'cli-v0.3.1/agentrepo-cli-0.3.1.tgz',
   );
   await expect(page.locator('main')).toContainText('agentrepo skill2');
   await expect(page.locator('main')).toContainText('agentrepo reset --hard');

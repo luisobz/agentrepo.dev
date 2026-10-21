@@ -8,7 +8,7 @@ import { runCommand } from '../src/commands.mjs';
 import { runInteractive } from '../src/interactive.mjs';
 import { chooseTarget } from '../src/prompt.mjs';
 import { readJson } from '../src/filesystem.mjs';
-const HELP = `AgentRepo CLI 0.3.0
+const HELP = `AgentRepo CLI 0.3.1
 
   agentrepo                Abre el asistente interactivo
   agentrepo skill2          Añade una skill y fija la versión resuelta
@@ -35,7 +35,7 @@ async function main() {
     },
   });
   if (values.version) {
-    console.log('0.3.0');
+    console.log('0.3.1');
     return;
   }
   if (values.help) {

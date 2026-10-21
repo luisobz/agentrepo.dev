@@ -25,6 +25,7 @@ const snapshot = (locale = 'es') => ({
   content:
     locale === 'en' ? 'English instructions' : 'Instrucciones originales',
   contentLocale: locale,
+  sourceLocale: 'es',
   isLocked: false,
 });
 it('installs the requested language and locks its actual variant', async () => {
@@ -167,4 +168,46 @@ it('rejects lock language metadata inconsistent with an unchanged manifest', asy
   await expect(verifyInstalledSkills({ root, fetchSkill })).rejects.toThrow(
     /no coincide/,
   );
+});
+
+it('changing the requested locale cannot bypass integrity for the same resolved variant', async () => {
+  const root = await project('fr');
+  await installSkills({ root, fetchSkill: async () => snapshot('es') });
+  await writeFile(
+    join(root, 'agent.json'),
+    JSON.stringify({
+      schemaVersion: 1,
+      locale: 'de',
+      skills: { example: '0.1.0' },
+    }),
+  );
+  await expect(
+    installSkills({
+      root,
+      fetchSkill: async () => ({
+        ...snapshot('es'),
+        content: 'Poisoned original',
+      }),
+    }),
+  ).rejects.toThrow(/integrity/);
+});
+
+it('adding a locale preference preserves integrity of a legacy source snapshot', async () => {
+  const root = await project(undefined);
+  const original = { ...snapshot('es'), sourceLocale: 'es' };
+  await installSkills({ root, fetchSkill: async () => original });
+  await writeFile(
+    join(root, 'agent.json'),
+    JSON.stringify({
+      schemaVersion: 1,
+      locale: 'fr',
+      skills: { example: '0.1.0' },
+    }),
+  );
+  await expect(
+    installSkills({
+      root,
+      fetchSkill: async () => ({ ...original, content: 'Poisoned original' }),
+    }),
+  ).rejects.toThrow(/integrity/);
 });

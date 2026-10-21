@@ -1,6 +1,11 @@
 'use client';
 
 import {
+  ContentLanguages,
+  useContentLanguages,
+} from '../form/content-languages';
+
+import {
   createSkillSchema,
   SKILL_TYPES,
   skillTypeSchema,
@@ -33,6 +38,7 @@ export function SkillForm({ skill }: { skill?: Skill }) {
   const [relatedLinks, setRelatedLinks] = useState<ContentRelatedLink[]>(
     skill?.relatedLinks ?? [],
   );
+  const languages = useContentLanguages(skill);
   const router = useRouter();
   const utils = trpc.useUtils();
   const [error, setError] = useState<string | null>(null);
@@ -72,6 +78,8 @@ export function SkillForm({ skill }: { skill?: Skill }) {
 
     const parsed = createSkillSchema.safeParse({
       ...values,
+      sourceLocale: languages.sourceLocale,
+      translations: languages.translations,
       relatedLinks,
       description: values.description.trim() ? values.description.trim() : null,
       ...premiumPayloadFrom(premium),
@@ -220,6 +228,7 @@ export function SkillForm({ skill }: { skill?: Skill }) {
           value={values.content}
           onChange={(content) => setValues((prev) => ({ ...prev, content }))}
         />
+        <ContentLanguages kind="skill" value={languages} disabled={isSaving} />
         <FormError message={error} />
         <div className="flex gap-3">
           <Button type="submit" disabled={isSaving}>

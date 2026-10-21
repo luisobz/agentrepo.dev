@@ -239,6 +239,7 @@ export function Header() {
       >
         <AvatarSlot id="mobile-menu" className="absolute right-6 top-3" />
         <nav className="flex flex-col gap-4">
+          <LocaleSwitcher className="self-start sm:hidden" />
           <AdminLink
             isAdmin={isAdmin}
             onClick={() => setMobileMenuOpen(false)}

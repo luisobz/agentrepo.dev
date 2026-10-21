@@ -1,3 +1,4 @@
+import { localizeContent } from '@agentrepo/domain';
 import { agentSummary } from './catalog-summary';
 import { redactPremiumAgent } from '@agentrepo/domain';
 import {
@@ -25,7 +26,9 @@ export const agentsRouter = router({
       });
       return {
         ...page,
-        items: page.items.map((item) => agentSummary(redactPremiumAgent(item))),
+        items: page.items.map((item) =>
+          agentSummary(redactPremiumAgent(localizeContent(item, input.locale))),
+        ),
       };
     }),
   list: publicProcedure
@@ -35,14 +38,22 @@ export const agentsRouter = router({
         ...input,
         publishedOnly: true,
       });
-      return { ...page, items: page.items.map(redactPremiumAgent) };
+      return {
+        ...page,
+        items: page.items.map((item) =>
+          redactPremiumAgent(localizeContent(item, input.locale)),
+        ),
+      };
     }),
 
   bySlug: publicProcedure
     .input(slugInputSchema)
     .query(async ({ input, ctx }) =>
       redactPremiumAgent(
-        await ctx.catalog.agents.getPublishedBySlug.execute(input.slug),
+        localizeContent(
+          await ctx.catalog.agents.getPublishedBySlug.execute(input.slug),
+          input.locale,
+        ),
       ),
     ),
 
@@ -53,7 +64,7 @@ export const agentsRouter = router({
       const entries = await ctx.catalog.agentVersions.listPublished.execute(
         input.slug,
       );
-      return entries.map(toVersionSummary);
+      return entries.map((entry) => toVersionSummary(entry, input.locale));
     }),
 
   /** One pinned version; premium bodies stay behind the paywall. */
@@ -64,9 +75,10 @@ export const agentsRouter = router({
         ctx.catalog.agents.getPublishedBySlug.execute(input.slug),
         ctx.catalog.agentVersions.getPublished.execute(input),
       ]);
+      const localized = localizeContent(version, input.locale);
       return head.isPremium
-        ? { ...version, fileTree: [], readmeContent: null, isLocked: true }
-        : { ...version, isLocked: false };
+        ? { ...localized, fileTree: [], readmeContent: null, isLocked: true }
+        : { ...localized, isLocked: false };
     }),
 
   recordDownload: publicProcedure
@@ -104,7 +116,7 @@ export const agentsRouter = router({
         const entries = await ctx.catalog.agentVersions.listForAdmin.execute(
           input.id,
         );
-        return entries.map(toVersionSummary);
+        return entries.map((entry) => toVersionSummary(entry));
       }),
 
     /** Snapshots the current draft (README + file tree) as a new version. */

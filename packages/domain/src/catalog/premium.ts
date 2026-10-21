@@ -7,16 +7,22 @@ import { Skill } from './skill';
  */
 export type WithAccess<TModel> = TModel & { isLocked: boolean };
 
-export function redactPremiumSkill(skill: Skill): WithAccess<Skill> {
+export function redactPremiumSkill<T extends Skill>(
+  skill: T,
+): WithAccess<Omit<T, 'translations'>> {
+  const { translations: _translations, ...publicSkill } = skill;
   if (!skill.isPremium) {
-    return { ...skill, isLocked: false };
+    return { ...publicSkill, isLocked: false };
   }
-  return { ...skill, content: '', isLocked: true };
+  return { ...publicSkill, content: '', isLocked: true };
 }
 
-export function redactPremiumAgent(agent: Agent): WithAccess<Agent> {
+export function redactPremiumAgent<T extends Agent>(
+  agent: T,
+): WithAccess<Omit<T, 'translations'>> {
+  const { translations: _translations, ...publicAgent } = agent;
   if (!agent.isPremium) {
-    return { ...agent, isLocked: false };
+    return { ...publicAgent, isLocked: false };
   }
-  return { ...agent, fileTree: [], readmeContent: null, isLocked: true };
+  return { ...publicAgent, fileTree: [], readmeContent: null, isLocked: true };
 }

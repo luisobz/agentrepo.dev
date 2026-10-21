@@ -1,3 +1,5 @@
+import { ContentLanguage } from '../../../components/content-language';
+import { getServerLocale } from '../../../lib/i18n/server';
 import { SHARE_IMAGE } from '../../../lib/seo/public-site';
 import { RelatedLinks } from '@agentrepo/ui';
 import Link from 'next/link';
@@ -56,6 +58,7 @@ export default async function SkillPage({
     params,
     searchParams,
   ]);
+  const locale = await getServerLocale();
   const [skill, versions] = await Promise.all([
     getPublishedSkillBySlug(slug),
     getSkillVersions(slug),
@@ -85,12 +88,15 @@ export default async function SkillPage({
   );
 
   return (
-    <div className="mx-auto w-full max-w-4xl px-4 pb-24 sm:px-6">
+    <div
+      lang={pinned?.contentLocale ?? skill.contentLocale}
+      className="mx-auto w-full max-w-4xl px-4 pb-24 sm:px-6"
+    >
       <Link
         href="/skills"
         className="font-mono text-sm text-[var(--color-text-muted)] transition-colors hover:text-[var(--color-brand-garnet)]"
       >
-        ← Back to skills
+        {locale === 'es' ? '← Volver a skills' : '← Back to skills'}
       </Link>
 
       <header className="mb-8 mt-8">
@@ -126,32 +132,39 @@ export default async function SkillPage({
         <dl className="mt-4 flex flex-wrap gap-x-6 gap-y-1 font-mono text-xs text-[var(--color-text-muted)]">
           {skill.authorName && (
             <div className="flex gap-1.5">
-              <dt>Author:</dt>
+              <dt>{locale === 'es' ? 'Autoría:' : 'Author:'}</dt>
               <dd>{skill.authorName}</dd>
             </div>
           )}
           <div className="flex gap-1.5">
-            <dt>Updated:</dt>
+            <dt>{locale === 'es' ? 'Actualizado:' : 'Updated:'}</dt>
             <dd>
               <time dateTime={skill.updatedAt.toISOString()}>
-                {formatDate(skill.updatedAt)}
+                {formatDate(skill.updatedAt, locale)}
               </time>
             </dd>
           </div>
           <div className="flex gap-1.5">
-            <dt>Words:</dt>
+            <dt>{locale === 'es' ? 'Palabras:' : 'Words:'}</dt>
             <dd>{countWords(shownContent)}</dd>
           </div>
           <div className="flex gap-1.5">
-            <dt>Weekly downloads:</dt>
+            <dt>
+              {locale === 'es' ? 'Descargas semanales:' : 'Weekly downloads:'}
+            </dt>
             <dd>{downloadsWeekly.toLocaleString()}</dd>
           </div>
           <div className="flex gap-1.5">
-            <dt>Total downloads:</dt>
+            <dt>
+              {locale === 'es' ? 'Descargas totales:' : 'Total downloads:'}
+            </dt>
             <dd>{downloadsTotal.toLocaleString()}</dd>
           </div>
         </dl>
       </header>
+      <ContentLanguage
+        contentLocale={pinned?.contentLocale ?? skill.contentLocale}
+      />
       <RelatedLinks links={skill.relatedLinks} />
 
       <ContentCover
@@ -169,13 +182,15 @@ export default async function SkillPage({
         />
       ) : (
         <SkillContentViewer
+          locale={locale}
           content={shownContent}
-          downloadFileName={`${skill.slug}-${shownVersion}.md`}
+          downloadFileName={`${skill.slug}-${shownVersion}-${pinned?.contentLocale ?? skill.contentLocale}.md`}
           trackDownload={{ slug: skill.slug, version: shownVersion }}
         />
       )}
 
       <VersionHistory
+        locale={locale}
         versions={versions}
         basePath={`/skills/${skill.slug}`}
         currentVersion={shownVersion}

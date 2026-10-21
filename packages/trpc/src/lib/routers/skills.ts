@@ -1,3 +1,4 @@
+import { localizeContent } from '@agentrepo/domain';
 import { skillSummary } from './catalog-summary';
 import { redactPremiumSkill } from '@agentrepo/domain';
 import {
@@ -26,7 +27,9 @@ export const skillsRouter = router({
       });
       return {
         ...page,
-        items: page.items.map((item) => skillSummary(redactPremiumSkill(item))),
+        items: page.items.map((item) =>
+          skillSummary(redactPremiumSkill(localizeContent(item, input.locale))),
+        ),
       };
     }),
   list: publicProcedure
@@ -36,14 +39,22 @@ export const skillsRouter = router({
         ...input,
         publishedOnly: true,
       });
-      return { ...page, items: page.items.map(redactPremiumSkill) };
+      return {
+        ...page,
+        items: page.items.map((item) =>
+          redactPremiumSkill(localizeContent(item, input.locale)),
+        ),
+      };
     }),
 
   bySlug: publicProcedure
     .input(slugInputSchema)
     .query(async ({ input, ctx }) =>
       redactPremiumSkill(
-        await ctx.catalog.skills.getPublishedBySlug.execute(input.slug),
+        localizeContent(
+          await ctx.catalog.skills.getPublishedBySlug.execute(input.slug),
+          input.locale,
+        ),
       ),
     ),
 
@@ -51,7 +62,12 @@ export const skillsRouter = router({
     .input(searchSkillsSchema)
     .query(async ({ input, ctx }) => {
       const page = await ctx.catalog.skills.searchPublished.execute(input);
-      return { ...page, items: page.items.map(redactPremiumSkill) };
+      return {
+        ...page,
+        items: page.items.map((item) =>
+          redactPremiumSkill(localizeContent(item, input.locale)),
+        ),
+      };
     }),
 
   /** Version history with download stats (metadata only, npm-style). */
@@ -61,7 +77,7 @@ export const skillsRouter = router({
       const entries = await ctx.catalog.skillVersions.listPublished.execute(
         input.slug,
       );
-      return entries.map(toVersionSummary);
+      return entries.map((entry) => toVersionSummary(entry, input.locale));
     }),
 
   /** One pinned version; premium bodies stay behind the paywall. */
@@ -72,9 +88,10 @@ export const skillsRouter = router({
         ctx.catalog.skills.getPublishedBySlug.execute(input.slug),
         ctx.catalog.skillVersions.getPublished.execute(input),
       ]);
+      const localized = localizeContent(version, input.locale);
       return head.isPremium
-        ? { ...version, content: '', isLocked: true }
-        : { ...version, isLocked: false };
+        ? { ...localized, content: '', isLocked: true }
+        : { ...localized, isLocked: false };
     }),
 
   recordDownload: publicProcedure
@@ -112,7 +129,7 @@ export const skillsRouter = router({
         const entries = await ctx.catalog.skillVersions.listForAdmin.execute(
           input.id,
         );
-        return entries.map(toVersionSummary);
+        return entries.map((entry) => toVersionSummary(entry));
       }),
 
     /** Snapshots the current draft content as a new version tagged latest. */

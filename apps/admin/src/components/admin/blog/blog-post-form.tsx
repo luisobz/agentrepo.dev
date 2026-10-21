@@ -1,6 +1,11 @@
 'use client';
 
 import {
+  ContentLanguages,
+  useContentLanguages,
+} from '../form/content-languages';
+
+import {
   createBlogPostSchema,
   type RouterOutputs,
 } from '@agentrepo/trpc/schemas';
@@ -25,6 +30,7 @@ export function BlogPostForm({ post }: { post?: BlogPost }) {
   const [relatedLinks, setRelatedLinks] = useState<ContentRelatedLink[]>(
     post?.relatedLinks ?? [],
   );
+  const languages = useContentLanguages(post);
   const router = useRouter();
   const utils = trpc.useUtils();
   const [error, setError] = useState<string | null>(null);
@@ -61,6 +67,8 @@ export function BlogPostForm({ post }: { post?: BlogPost }) {
 
     const parsed = createBlogPostSchema.safeParse({
       ...values,
+      sourceLocale: languages.sourceLocale,
+      translations: languages.translations,
       relatedLinks,
       excerpt: values.excerpt.trim() ? values.excerpt.trim() : null,
       headerImageUrl: values.headerImageUrl.trim() || null,
@@ -188,6 +196,7 @@ export function BlogPostForm({ post }: { post?: BlogPost }) {
           value={values.content}
           onChange={(content) => setValues((prev) => ({ ...prev, content }))}
         />
+        <ContentLanguages kind="blog" value={languages} disabled={isSaving} />
         <FormError message={error} />
         <div className="flex gap-3">
           <Button type="submit" disabled={isSaving}>

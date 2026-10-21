@@ -10,7 +10,7 @@ async function fetchPayload(registry, procedure, input, slug, version) {
       signal: AbortSignal.timeout(15_000),
       headers: {
         accept: 'application/json',
-        'user-agent': 'AgentRepo-CLI/0.2.1',
+        'user-agent': 'AgentRepo-CLI/0.3.0',
       },
     });
   } catch {
@@ -45,11 +45,16 @@ async function fetchPayload(registry, procedure, input, slug, version) {
   return payload;
 }
 
-export function fetchPublishedSkill(registry, slug, version) {
+export function fetchPublishedSkill(registry, slug, version, locale) {
+  const language = locale?.split('-')[0];
   return fetchPayload(
     registry,
     'skills.byVersion',
-    { slug, version },
+    {
+      slug,
+      version,
+      ...(['en', 'es'].includes(language) ? { locale: language } : {}),
+    },
     slug,
     version,
   );

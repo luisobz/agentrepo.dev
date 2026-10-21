@@ -12,6 +12,7 @@ export interface VersionHistoryEntry {
 }
 
 interface VersionHistoryProps {
+  locale?: 'en' | 'es';
   versions: VersionHistoryEntry[];
   /** Detail page path, e.g. /skills/my-skill; versions link as ?version=x.y.z */
   basePath: string;
@@ -21,6 +22,7 @@ interface VersionHistoryProps {
 /** npm-style version history: every release with its downloads and tag. */
 export function VersionHistory({
   versions,
+  locale = 'en',
   basePath,
   currentVersion,
 }: VersionHistoryProps) {
@@ -30,17 +32,28 @@ export function VersionHistory({
 
   return (
     <section aria-labelledby="versions-heading" className="mt-12">
-      <h2 id="versions-heading" className="text-xl font-semibold tracking-tight">
-        Versions ({versions.length})
+      <h2
+        id="versions-heading"
+        className="text-xl font-semibold tracking-tight"
+      >
+        {locale === 'es' ? 'Versiones' : 'Versions'} ({versions.length})
       </h2>
       <div className="mt-4 overflow-x-auto rounded-[12px] border border-[var(--color-border-soft)] bg-[var(--color-bg-warm-white)]">
         <table className="w-full min-w-[540px] text-left text-sm">
           <thead>
             <tr className="border-b border-[var(--color-border-soft)] font-mono text-xs text-[var(--color-text-muted)]">
-              <th className="px-4 py-3 font-medium">Version</th>
-              <th className="px-4 py-3 font-medium">Downloads (weekly)</th>
-              <th className="px-4 py-3 font-medium">Downloads (total)</th>
-              <th className="px-4 py-3 font-medium">Published</th>
+              <th className="px-4 py-3 font-medium">
+                {locale === 'es' ? 'Versión' : 'Version'}
+              </th>
+              <th className="px-4 py-3 font-medium">
+                {locale === 'es' ? 'Descargas (semana)' : 'Downloads (weekly)'}
+              </th>
+              <th className="px-4 py-3 font-medium">
+                {locale === 'es' ? 'Descargas (total)' : 'Downloads (total)'}
+              </th>
+              <th className="px-4 py-3 font-medium">
+                {locale === 'es' ? 'Publicación' : 'Published'}
+              </th>
             </tr>
           </thead>
           <tbody>
@@ -84,7 +97,7 @@ export function VersionHistory({
                     {entry.downloadsTotal.toLocaleString()}
                   </td>
                   <td className="px-4 py-3 font-mono text-xs text-[var(--color-text-muted)]">
-                    {formatDate(entry.createdAt)}
+                    {formatDate(entry.createdAt, locale)}
                   </td>
                 </tr>
               );

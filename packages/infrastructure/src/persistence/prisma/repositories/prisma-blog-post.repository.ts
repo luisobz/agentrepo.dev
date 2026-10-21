@@ -1,4 +1,8 @@
 import {
+  contentLocaleFromStorage,
+  contentTranslationsFromJson,
+} from '@agentrepo/domain';
+import {
   BlogPostRepository,
   CreateBlogPostInput,
   ListContentParams,
@@ -48,6 +52,8 @@ export class PrismaBlogPostRepository implements BlogPostRepository {
     return {
       items: items.map((row) => ({
         ...row,
+        sourceLocale: contentLocaleFromStorage(row.sourceLocale),
+        translations: contentTranslationsFromJson(row.translations),
         relatedLinks: relatedLinksFromJson(row.relatedLinks),
         authorName: row.author?.name ?? null,
       })),
@@ -65,6 +71,8 @@ export class PrismaBlogPostRepository implements BlogPostRepository {
     return row
       ? {
           ...row,
+          sourceLocale: contentLocaleFromStorage(row.sourceLocale),
+          translations: contentTranslationsFromJson(row.translations),
           relatedLinks: relatedLinksFromJson(row.relatedLinks),
           authorName: row.author?.name ?? null,
         }
@@ -79,6 +87,8 @@ export class PrismaBlogPostRepository implements BlogPostRepository {
     return row
       ? {
           ...row,
+          sourceLocale: contentLocaleFromStorage(row.sourceLocale),
+          translations: contentTranslationsFromJson(row.translations),
           relatedLinks: relatedLinksFromJson(row.relatedLinks),
           authorName: row.author?.name ?? null,
         }
@@ -94,12 +104,22 @@ export class PrismaBlogPostRepository implements BlogPostRepository {
 
   async create(data: CreateBlogPostInput): Promise<BlogPost> {
     const row = await this.prisma.blogPost.create({ data });
-    return { ...row, relatedLinks: relatedLinksFromJson(row.relatedLinks) };
+    return {
+      ...row,
+      sourceLocale: contentLocaleFromStorage(row.sourceLocale),
+      translations: contentTranslationsFromJson(row.translations),
+      relatedLinks: relatedLinksFromJson(row.relatedLinks),
+    };
   }
 
   async update(id: string, data: UpdateBlogPostInput): Promise<BlogPost> {
     const row = await this.prisma.blogPost.update({ where: { id }, data });
-    return { ...row, relatedLinks: relatedLinksFromJson(row.relatedLinks) };
+    return {
+      ...row,
+      sourceLocale: contentLocaleFromStorage(row.sourceLocale),
+      translations: contentTranslationsFromJson(row.translations),
+      relatedLinks: relatedLinksFromJson(row.relatedLinks),
+    };
   }
 
   async delete(id: string): Promise<void> {

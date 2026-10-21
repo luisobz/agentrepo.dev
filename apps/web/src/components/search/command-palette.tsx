@@ -2,7 +2,7 @@
 
 import { AvatarSlot, useAvatar } from '@agentrepo/avatar';
 import { skillTypeSchema } from '@agentrepo/trpc/schemas';
-import { TypeChip } from '@agentrepo/ui';
+import { TypeChip, useLocale } from '@agentrepo/ui';
 import { FileText, Loader2, Search } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useEffect, useMemo, useRef, useState } from 'react';
@@ -38,6 +38,7 @@ export function CommandPalette() {
   const { isOpen, close } = useCommandPalette();
   const { setEmotion, focusAvatar, say, clearMessages } = useAvatar();
   const t = useT();
+  const { locale } = useLocale();
   const router = useRouter();
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -50,7 +51,7 @@ export function CommandPalette() {
   const isQueryReady = debouncedQuery.length >= MIN_QUERY_LENGTH;
 
   const search = trpc.search.global.useQuery(
-    { query: debouncedQuery },
+    { query: debouncedQuery, locale },
     {
       enabled: isOpen && isQueryReady,
       placeholderData: (previous) => previous,

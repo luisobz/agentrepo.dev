@@ -1,3 +1,5 @@
+import { ContentLanguage } from '../../../components/content-language';
+import { getServerLocale } from '../../../lib/i18n/server';
 import { SHARE_IMAGE } from '../../../lib/seo/public-site';
 import { RelatedLinks } from '@agentrepo/ui';
 import Link from 'next/link';
@@ -55,6 +57,7 @@ export default async function AgentPage({
     params,
     searchParams,
   ]);
+  const locale = await getServerLocale();
   const [agent, versions] = await Promise.all([
     getPublishedAgentBySlug(slug),
     getAgentVersions(slug),
@@ -87,12 +90,15 @@ export default async function AgentPage({
   const playgroundIncluded = hasPlayground(shownFileTree);
 
   return (
-    <div className="mx-auto w-full max-w-6xl px-4 pb-24 sm:px-6">
+    <div
+      lang={pinned?.contentLocale ?? agent.contentLocale}
+      className="mx-auto w-full max-w-6xl px-4 pb-24 sm:px-6"
+    >
       <Link
         href="/agents"
         className="font-mono text-sm text-[var(--color-text-muted)] transition-colors hover:text-[var(--color-brand-garnet)]"
       >
-        ← Back to agents
+        {locale === 'es' ? '← Volver a agentes' : '← Back to agents'}
       </Link>
 
       <header className="mb-8 mt-8">
@@ -125,7 +131,8 @@ export default async function AgentPage({
             dateTime={agent.updatedAt.toISOString()}
             className="font-mono text-xs text-[var(--color-text-muted)]"
           >
-            Updated {formatDate(agent.updatedAt)}
+            {locale === 'es' ? 'Actualizado' : 'Updated'}{' '}
+            {formatDate(agent.updatedAt, locale)}
           </time>
         </div>
         <h1 className="mt-3 text-3xl font-semibold leading-tight tracking-tight sm:text-4xl">
@@ -144,15 +151,20 @@ export default async function AgentPage({
               rel="noopener noreferrer"
               className="mt-4 inline-block text-sm font-semibold underline underline-offset-4"
             >
-              Repositorio del proyecto ↗
+              {locale === 'es'
+                ? 'Repositorio del proyecto ↗'
+                : 'Project repository ↗'}
             </a>
           )}
         {agent.authorName && (
           <p className="mt-3 font-mono text-xs text-[var(--color-text-muted)]">
-            Author: {agent.authorName}
+            {locale === 'es' ? 'Autoría:' : 'Author:'} {agent.authorName}
           </p>
         )}
       </header>
+      <ContentLanguage
+        contentLocale={pinned?.contentLocale ?? agent.contentLocale}
+      />
       <RelatedLinks links={agent.relatedLinks} />
 
       <ContentCover
@@ -173,7 +185,7 @@ export default async function AgentPage({
           {shownReadme && (
             <section className="mt-12">
               <h2 className="mb-4 text-xl font-semibold tracking-tight">
-                About
+                {locale === 'es' ? 'Acerca del agente' : 'About'}
               </h2>
               <MarkdownContent content={shownReadme} />
             </section>
@@ -183,10 +195,12 @@ export default async function AgentPage({
             className="mt-8 rounded-xl border border-[var(--color-border-soft)] p-4"
           >
             <summary className="mb-4 cursor-pointer font-semibold">
-              Files & downloads
+              {locale === 'es' ? 'Ficheros y descargas' : 'Files & downloads'}
             </summary>
             <div className="mb-4 flex justify-end">
               <AgentDownloadButton
+                locale={locale}
+                contentLocale={pinned?.contentLocale ?? agent.contentLocale}
                 slug={agent.slug}
                 version={shownVersion}
                 fileTree={shownFileTree}
@@ -208,6 +222,7 @@ export default async function AgentPage({
       )}
 
       <VersionHistory
+        locale={locale}
         versions={versions}
         basePath={`/agents/${agent.slug}`}
         currentVersion={shownVersion}

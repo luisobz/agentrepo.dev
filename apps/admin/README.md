@@ -55,3 +55,13 @@ website link and an accessible menu toggle. The menu closes on navigation or
 Escape (restoring toggle focus). Desktop keeps a sticky sidebar with icon labels,
 active-page semantics, website access and language/session controls. Returning to
 the public site preserves both existing sessions.
+
+## Content languages
+
+Each content form records the original language and offers an optional EN/ES
+translation editor for titles, summaries and Markdown. Agent translations can
+also replace existing Markdown document bodies; code files remain unchanged.
+Creator proposals record their source language and remain subject to moderation.
+Publishing a skill/agent release snapshots its language variants; retagging a
+release restores those variants with the original body. Ordinary draft edits do
+not alter previously published snapshots. Blog translations belong to the entry.

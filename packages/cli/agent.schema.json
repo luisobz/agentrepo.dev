@@ -31,6 +31,12 @@
     "target": {
       "type": "string",
       "enum": ["agents", "codex", "claude", "cursor", "copilot"]
+    },
+    "locale": {
+      "type": "string",
+      "maxLength": 35,
+      "pattern": "^[A-Za-z]{2,3}(?:-[A-Za-z0-9]{1,8})*$",
+      "description": "Preferred content language. Unavailable translations fall back to the source; the lock records the resolved language."
     }
   }
 }

@@ -1,4 +1,8 @@
 import {
+  contentLocaleFromStorage,
+  contentTranslationsFromJson,
+} from '@agentrepo/domain';
+import {
   AgentRepository,
   CreateAgentInput,
   ListContentParams,
@@ -24,6 +28,8 @@ function fileTreeFromJson(value: Prisma.JsonValue, agentId: string): FileTree {
 function toDomain(row: AgentRow, authorName?: string | null): Agent {
   return {
     ...row,
+    sourceLocale: contentLocaleFromStorage(row.sourceLocale),
+    translations: contentTranslationsFromJson(row.translations),
     relatedLinks: relatedLinksFromJson(row.relatedLinks),
     fileTree: fileTreeFromJson(row.fileTree, row.id),
     authorName,

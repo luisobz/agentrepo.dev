@@ -1,4 +1,8 @@
 import {
+  contentLocaleFromStorage,
+  contentTranslationsFromJson,
+} from '@agentrepo/domain';
+import {
   PublishVersionInput,
   RecordDownloadInput,
   SetLatestVersionInput,
@@ -11,21 +15,39 @@ import {
   VersionAlreadyExistsError,
   VersionListEntry,
 } from '@agentrepo/domain';
-import { Prisma, PrismaClient, SkillVersion as SkillVersionRow } from '@prisma/client';
-import { isUniqueConstraintError, todayUtc, weekWindowStart } from './version-stats';
+import {
+  Prisma,
+  PrismaClient,
+  SkillVersion as SkillVersionRow,
+} from '@prisma/client';
+import {
+  isUniqueConstraintError,
+  todayUtc,
+  weekWindowStart,
+} from './version-stats';
 
 type RowWithDays = SkillVersionRow & { downloadDays: { count: number }[] };
 
 function toDomain(row: SkillVersionRow): SkillVersion {
   const { ...version } = row;
-  return version;
+  return {
+    ...version,
+    sourceLocale: contentLocaleFromStorage(row.sourceLocale),
+    translations: contentTranslationsFromJson(row.translations),
+  };
 }
 
-function toEntry(row: RowWithDays, latestVersionId: string | null): VersionListEntry<SkillVersion> {
+function toEntry(
+  row: RowWithDays,
+  latestVersionId: string | null,
+): VersionListEntry<SkillVersion> {
   const { downloadDays, ...version } = row;
   return {
     version: toDomain(version),
-    downloadsWeekly: downloadDays.reduce((sum, dayRow) => sum + dayRow.count, 0),
+    downloadsWeekly: downloadDays.reduce(
+      (sum, dayRow) => sum + dayRow.count,
+      0,
+    ),
     isLatest: row.id === latestVersionId,
   };
 }
@@ -35,7 +57,7 @@ export class PrismaSkillVersionRepository implements SkillVersionRepository {
 
   private async listFor(
     skillId: string,
-    latestVersionId: string | null
+    latestVersionId: string | null,
   ): Promise<VersionListEntry<SkillVersion>[]> {
     const rows = await this.prisma.skillVersion.findMany({
       where: { skillId },
@@ -51,7 +73,9 @@ export class PrismaSkillVersionRepository implements SkillVersionRepository {
       .sort((a, b) => compareSemver(b.version.version, a.version.version));
   }
 
-  async listByAssetId(skillId: string): Promise<VersionListEntry<SkillVersion>[]> {
+  async listByAssetId(
+    skillId: string,
+  ): Promise<VersionListEntry<SkillVersion>[]> {
     const head = await this.prisma.skill.findUnique({
       where: { id: skillId },
       select: { latestVersionId: true },
@@ -63,7 +87,7 @@ export class PrismaSkillVersionRepository implements SkillVersionRepository {
   }
 
   async listPublishedBySlug(
-    slug: string
+    slug: string,
   ): Promise<VersionListEntry<SkillVersion>[] | null> {
     const head = await this.prisma.skill.findUnique({
       where: { slug },
@@ -77,7 +101,7 @@ export class PrismaSkillVersionRepository implements SkillVersionRepository {
 
   async findPublishedBySlugAndVersion(
     slug: string,
-    version: string
+    version: string,
   ): Promise<SkillVersion | null> {
     const row = await this.prisma.skillVersion.findFirst({
       where: { version, skill: { slug, isPublished: true } },
@@ -97,6 +121,8 @@ export class PrismaSkillVersionRepository implements SkillVersionRepository {
           data: {
             skillId: head.id,
             version: input.version,
+            sourceLocale: head.sourceLocale,
+            translations: head.translations as Prisma.InputJsonValue,
             content: head.content,
             changelog: input.changelog,
           },
@@ -129,6 +155,8 @@ export class PrismaSkillVersionRepository implements SkillVersionRepository {
         data: {
           latestVersionId: row.id,
           version: row.version,
+          sourceLocale: row.sourceLocale,
+          translations: row.translations as Prisma.InputJsonValue,
           content: row.content,
         },
       });
@@ -138,7 +166,10 @@ export class PrismaSkillVersionRepository implements SkillVersionRepository {
 
   async recordDownload(input: RecordDownloadInput): Promise<void> {
     const where: Prisma.SkillVersionWhereInput = input.version
-      ? { version: input.version, skill: { slug: input.slug, isPublished: true } }
+      ? {
+          version: input.version,
+          skill: { slug: input.slug, isPublished: true },
+        }
       : { latestOf: { slug: input.slug, isPublished: true } };
     const row = await this.prisma.skillVersion.findFirst({
       where,

@@ -1,3 +1,4 @@
+import { getServerLocale } from './i18n/server';
 import { cache } from 'react';
 import type { RouterOutputs } from '@agentrepo/trpc/schemas';
 import type { FileTree, FileTreeNode } from '@agentrepo/trpc/schemas';
@@ -8,17 +9,23 @@ export type Agent = RouterOutputs['agents']['bySlug'];
 export type AgentVersionDetail = RouterOutputs['agents']['byVersion'];
 export type AgentVersionSummary = RouterOutputs['agents']['versions'][number];
 
-export function getPublishedAgents(): Promise<
+export async function getPublishedAgents(): Promise<
   RouterOutputs['agents']['catalog']['items']
 > {
-  return fetchAllPages((input) => serverTrpc.agents.catalog.query(input));
+  const locale = await getServerLocale();
+  return fetchAllPages((input) =>
+    serverTrpc.agents.catalog.query({ ...input, locale }),
+  );
 }
 
 /** Deduplicated per request so the page and its metadata share one fetch. */
 export const getPublishedAgentBySlug = cache(
   async (slug: string): Promise<Agent | null> => {
     try {
-      return await serverTrpc.agents.bySlug.query({ slug });
+      return await serverTrpc.agents.bySlug.query({
+        slug,
+        locale: await getServerLocale(),
+      });
     } catch (error) {
       if (isClientNotFound(error)) {
         return null;
@@ -31,7 +38,10 @@ export const getPublishedAgentBySlug = cache(
 export const getAgentVersions = cache(
   async (slug: string): Promise<AgentVersionSummary[]> => {
     try {
-      return await serverTrpc.agents.versions.query({ slug });
+      return await serverTrpc.agents.versions.query({
+        slug,
+        locale: await getServerLocale(),
+      });
     } catch (error) {
       if (isClientNotFound(error)) {
         return [];
@@ -44,7 +54,11 @@ export const getAgentVersions = cache(
 export const getAgentVersion = cache(
   async (slug: string, version: string): Promise<AgentVersionDetail | null> => {
     try {
-      return await serverTrpc.agents.byVersion.query({ slug, version });
+      return await serverTrpc.agents.byVersion.query({
+        slug,
+        version,
+        locale: await getServerLocale(),
+      });
     } catch (error) {
       if (isClientNotFound(error)) {
         return null;

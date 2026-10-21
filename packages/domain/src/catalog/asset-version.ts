@@ -1,3 +1,4 @@
+import type { LocalizedContent } from './content-locale';
 import { DomainError } from '../errors/domain.error';
 import type { FileTree } from './file-tree';
 
@@ -43,7 +44,7 @@ export class VersionAlreadyExistsError extends DomainError {
 }
 
 /** Immutable snapshot of a published skill release. */
-export interface SkillVersion {
+export interface SkillVersion extends LocalizedContent {
   id: string;
   skillId: string;
   version: string;
@@ -54,7 +55,7 @@ export interface SkillVersion {
 }
 
 /** Immutable snapshot of a published agent release. */
-export interface AgentVersion {
+export interface AgentVersion extends LocalizedContent {
   id: string;
   agentId: string;
   version: string;

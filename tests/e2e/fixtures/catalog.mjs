@@ -20,6 +20,9 @@ const relatedLinks = [
   },
 ];
 const shared = {
+  sourceLocale: 'en',
+  contentLocale: 'en',
+  availableLocales: ['en', 'es'],
   id: '11111111-1111-4111-8111-111111111111',
   slug: 'linked-project',
   title: 'Linked project',
@@ -90,6 +93,37 @@ function read(path) {
     };
   return { items: [], total: 0, page: 1, pageSize: 6 };
 }
+function localizedRead(path, locale) {
+  const value = read(path);
+  if (locale !== 'es') return value;
+  const translate = (item) => ({
+    ...item,
+    contentLocale: 'es',
+    title: 'Proyecto enlazado',
+    ...(item.description ? { description: 'Una skill enlazada' } : {}),
+    ...(item.shortDescription
+      ? { shortDescription: 'Una guía del proyecto' }
+      : {}),
+    ...(item.excerpt ? { excerpt: 'Un artículo enlazado' } : {}),
+    ...(path.startsWith('skills.') && item.content
+      ? {
+          content:
+            '---\nname: linked-project\ndescription: Metadatos de la skill\n---\n\n# Skill enlazada\n\nUsa **lenguaje claro**.',
+        }
+      : {}),
+    ...(path.startsWith('blog.') && item.content
+      ? { content: '# Artículo enlazado' }
+      : {}),
+    ...(item.readmeContent
+      ? { readmeContent: '# Guía del proyecto\n\nDocumentación en español.' }
+      : {}),
+  });
+  return value.items
+    ? { ...value, items: value.items.map(translate) }
+    : Array.isArray(value)
+      ? value
+      : translate(value);
+}
 createServer((request, response) => {
   if (request.method !== 'GET') {
     response.writeHead(405).end();
@@ -99,10 +133,16 @@ createServer((request, response) => {
     .split('/')
     .at(-1)
     .split(',');
-  const results = paths.map((path) => ({
+  const input = JSON.parse(
+    new URL(request.url, 'http://localhost').searchParams.get('input') ?? '{}',
+  );
+  const results = paths.map((path, index) => ({
     result: {
       data: {
-        json: read(path),
+        json: localizedRead(
+          path,
+          input[index]?.json?.locale ?? input.json?.locale,
+        ),
         ...(path === 'agents.catalog'
           ? {
               meta: {

@@ -9,6 +9,7 @@ import { trpc } from '../utils/trpc';
 type ViewerTab = 'rendered' | 'raw';
 
 interface SkillContentViewerProps {
+  locale?: 'en' | 'es';
   content: string;
   downloadFileName: string;
   /** When set, copy/download actions count as a download of slug@version. */
@@ -53,6 +54,7 @@ function TabButton({
 
 export function SkillContentViewer({
   content,
+  locale = 'en',
   downloadFileName,
   trackDownload,
 }: SkillContentViewerProps) {
@@ -86,21 +88,23 @@ export function SkillContentViewer({
             isActive={tab === 'rendered'}
             onClick={() => setTab('rendered')}
           >
-            Rendered
+            {locale === 'es' ? 'Vista previa' : 'Rendered'}
           </TabButton>
           <TabButton isActive={tab === 'raw'} onClick={() => setTab('raw')}>
-            Raw
+            {locale === 'es' ? 'Código fuente' : 'Raw'}
           </TabButton>
         </div>
         <div className="flex gap-2 pb-2">
           <Button variant="secondary" size="sm" onClick={handleCopy}>
             {isCopied ? (
               <>
-                <Check className="mr-1.5 h-3.5 w-3.5" /> Copied
+                <Check className="mr-1.5 h-3.5 w-3.5" />{' '}
+                {locale === 'es' ? 'Copiado' : 'Copied'}
               </>
             ) : (
               <>
-                <Copy className="mr-1.5 h-3.5 w-3.5" /> Copy
+                <Copy className="mr-1.5 h-3.5 w-3.5" />{' '}
+                {locale === 'es' ? 'Copiar' : 'Copy'}
               </>
             )}
           </Button>
@@ -112,7 +116,8 @@ export function SkillContentViewer({
               countDownload();
             }}
           >
-            <Download className="mr-1.5 h-3.5 w-3.5" /> Download .md
+            <Download className="mr-1.5 h-3.5 w-3.5" />{' '}
+            {locale === 'es' ? 'Descargar .md' : 'Download .md'}
           </Button>
         </div>
       </div>

@@ -1,6 +1,10 @@
 'use client';
 
-import { RelatedLinksEditor, type ContentRelatedLink } from '@agentrepo/ui';
+import {
+  useLocale,
+  RelatedLinksEditor,
+  type ContentRelatedLink,
+} from '@agentrepo/ui';
 import { useT } from '../../lib/i18n/use-t';
 
 import {
@@ -32,6 +36,8 @@ function toSlug(value: string): string {
 
 export function CreatorForm({ authorName }: { authorName: string }) {
   const t = useT();
+  const { locale } = useLocale();
+  const [sourceLocale, setSourceLocale] = useState<'en' | 'es'>(locale);
   const [relatedLinks, setRelatedLinks] = useState<ContentRelatedLink[]>([]);
   const [kind, setKind] = useState<AssetKind>('skill');
   const [title, setTitle] = useState('');
@@ -127,7 +133,7 @@ export function CreatorForm({ authorName }: { authorName: string }) {
       const response = await fetch('/api/creator/submit', {
         method: 'POST',
         headers: { 'content-type': 'application/json' },
-        body: JSON.stringify({ ...payload, relatedLinks }),
+        body: JSON.stringify({ ...payload, relatedLinks, sourceLocale }),
       });
       if (!response.ok) {
         const body: { error?: string } = await response.json();
@@ -212,6 +218,19 @@ export function CreatorForm({ authorName }: { authorName: string }) {
           {t('creator.author')}: <strong>{authorName}</strong>
         </p>
       </div>
+      <label className="block text-sm font-medium">
+        {locale === 'es' ? 'Idioma del contenido' : 'Content language'}
+        <select
+          value={sourceLocale}
+          onChange={(event) =>
+            setSourceLocale(event.target.value === 'es' ? 'es' : 'en')
+          }
+          className="mt-2 block w-full rounded-lg border bg-transparent p-3"
+        >
+          <option value="en">English</option>
+          <option value="es">Español</option>
+        </select>
+      </label>
       <RelatedLinksEditor
         value={relatedLinks}
         onChange={setRelatedLinks}

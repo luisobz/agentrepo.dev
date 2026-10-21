@@ -101,7 +101,9 @@ describe('skills version endpoints', () => {
 
     await caller.skills.recordDownload({ slug: 'my-skill' });
 
-    expect(ctx.catalog.skillVersions.recordDownload.execute).toHaveBeenCalledWith({
+    expect(
+      ctx.catalog.skillVersions.recordDownload.execute,
+    ).toHaveBeenCalledWith({
       slug: 'my-skill',
     });
   });
@@ -110,7 +112,7 @@ describe('skills version endpoints', () => {
     const caller = appRouter.createCaller(buildContext());
 
     await expect(
-      caller.skills.byVersion({ slug: 'my-skill', version: 'latest' })
+      caller.skills.byVersion({ slug: 'my-skill', version: 'latest' }),
     ).rejects.toBeInstanceOf(TRPCError);
   });
 
@@ -122,9 +124,9 @@ describe('skills version endpoints', () => {
         id: 'b3b6a8a2-8f4f-4a63-9a2e-3f8f0f9d2c11',
         version: '1.2.0',
         changelog: null,
-      })
+      }),
     ).rejects.toSatisfy(
-      (error) => error instanceof TRPCError && error.code === 'UNAUTHORIZED'
+      (error) => error instanceof TRPCError && error.code === 'UNAUTHORIZED',
     );
   });
 
@@ -152,4 +154,34 @@ describe('skills version endpoints', () => {
       versionId: 'c4c7b9b3-9f5f-4b74-8b3f-4f9f1f0e3d22',
     });
   });
+});
+
+it('serves pinned translations independently of the head and protects premium variants', async () => {
+  for (const premium of [false, true]) {
+    const ctx = buildContext({ isPremium: premium });
+    vi.mocked(ctx.catalog.skillVersions.getPublished.execute).mockResolvedValue(
+      {
+        ...VERSION,
+        sourceLocale: 'es',
+        content: 'Original fijado',
+        translations: {
+          en: { content: 'Pinned English', changelog: 'English notes' },
+        },
+      },
+    );
+    const caller = appRouter.createCaller(ctx);
+    const translated = await caller.skills.byVersion({
+      slug: 'my-skill',
+      version: '1.1.0',
+      locale: 'en',
+    });
+    expect(translated.content).toBe(premium ? '' : 'Pinned English');
+    expect(translated.contentLocale).toBe('en');
+    expect(translated).not.toHaveProperty('translations');
+    const original = await caller.skills.byVersion({
+      slug: 'my-skill',
+      version: '1.1.0',
+    });
+    expect(original.content).toBe(premium ? '' : 'Original fijado');
+  }
 });

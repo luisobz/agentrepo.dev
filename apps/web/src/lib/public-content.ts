@@ -14,7 +14,7 @@ type PageQuery<TItem> = (input: {
 
 /** Drains a paginated public endpoint until every published item is loaded. */
 export async function fetchAllPages<TItem>(
-  query: PageQuery<TItem>
+  query: PageQuery<TItem>,
 ): Promise<TItem[]> {
   const items: TItem[] = [];
   let page = 1;
@@ -41,6 +41,8 @@ export function isClientNotFound(error: unknown): boolean {
   );
 }
 
-export function formatDate(date: Date): string {
-  return new Intl.DateTimeFormat('en-US', { dateStyle: 'long' }).format(date);
+export function formatDate(date: Date, locale = 'en'): string {
+  return new Intl.DateTimeFormat(locale === 'es' ? 'es-ES' : 'en-US', {
+    dateStyle: 'long',
+  }).format(date);
 }

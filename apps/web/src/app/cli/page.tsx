@@ -8,13 +8,14 @@ export const metadata: Metadata = {
     'Install pinned skill snapshots with pnpm and agent.json. Choose your tool, verify integrity and reproduce installations.',
 };
 const RELEASE =
-  'https://github.com/luisobz/agentrepo.dev/releases/tag/cli-v0.2.1';
+  'https://github.com/luisobz/agentrepo.dev/releases/tag/cli-v0.3.0';
 const PACKAGE =
-  'https://github.com/luisobz/agentrepo.dev/releases/download/cli-v0.2.1/agentrepo-cli-0.2.1.tgz';
+  'https://github.com/luisobz/agentrepo.dev/releases/download/cli-v0.3.0/agentrepo-cli-0.3.0.tgz';
 const MANIFEST = JSON.stringify(
   {
     schemaVersion: 1,
     target: 'claude',
+    locale: 'en',
     skills: { 'code-review': '1.0.0', 'project-planning': '2.1.0' },
   },
   null,
@@ -34,7 +35,7 @@ export default async function CliPage() {
     <div className="mx-auto w-full min-w-0 max-w-4xl px-4 pb-20 sm:px-6">
       <header className="mb-10 mt-6">
         <p className="font-mono text-xs font-semibold uppercase tracking-widest text-[var(--color-brand-garnet)]">
-          AgentRepo CLI · 0.2.1
+          AgentRepo CLI · 0.3.0
         </p>
         <h1 className="mt-4 text-4xl font-semibold tracking-tight sm:text-5xl">
           {t('cli.title')}

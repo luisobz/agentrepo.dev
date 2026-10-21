@@ -22,9 +22,14 @@ export function parseManifest(value) {
   if (
     Object.keys(value).some(
       (key) =>
-        !['schemaVersion', 'skills', 'registry', '$schema', 'target'].includes(
-          key,
-        ),
+        ![
+          'schemaVersion',
+          'skills',
+          'registry',
+          '$schema',
+          'target',
+          'locale',
+        ].includes(key),
     )
   )
     throw new InstallerError('agent.json contiene propiedades desconocidas.');
@@ -66,7 +71,10 @@ export function parseManifest(value) {
       'Registry debe ser una URL HTTPS sin credenciales, query ni fragmento.',
     );
   if (value.target !== undefined) targetDirectory(value.target);
+  const locale =
+    value.locale === undefined ? undefined : normalizeLocale(value.locale);
   return {
+    ...(locale ? { locale } : {}),
     ...(value.target ? { target: value.target } : {}),
     schemaVersion: 1,
     registry: url.toString().replace(/\/$/, ''),
@@ -78,8 +86,22 @@ export function manifestIntegrity(manifest) {
     schemaVersion: manifest.schemaVersion,
     registry: manifest.registry,
     skills: manifest.skills,
+    ...(manifest.locale ? { locale: manifest.locale } : {}),
   };
   return integrity(JSON.stringify(portable));
+}
+export function normalizeLocale(value) {
+  try {
+    if (typeof value !== 'string' || value.length > 35) throw new RangeError();
+    const [locale] = Intl.getCanonicalLocales(value);
+    if (!locale || !/^[a-z]{2,3}(?:-[a-z0-9]{1,8})*$/i.test(locale))
+      throw new RangeError();
+    return locale;
+  } catch {
+    throw new InstallerError(
+      'Idioma inválido: utiliza un código como en, es o en-GB.',
+    );
+  }
 }
 export function targetDirectory(target = 'agents') {
   if (!Object.hasOwn(TARGETS, target))

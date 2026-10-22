@@ -10,7 +10,7 @@ async function fetchPayload(registry, procedure, input, slug, version) {
       signal: AbortSignal.timeout(15_000),
       headers: {
         accept: 'application/json',
-        'user-agent': 'AgentRepo-CLI/0.3.0',
+        'user-agent': 'AgentRepo-CLI/0.3.1',
       },
     });
   } catch {

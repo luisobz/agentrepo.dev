@@ -3,6 +3,11 @@ import type { Dictionary } from '@agentrepo/ui';
 export const webDictionary = {
   'footer.privacy': { en: 'Privacy', es: 'Privacidad' },
   'footer.terms': { en: 'Terms', es: 'Condiciones' },
+  'footer.donate': { en: 'Support the project', es: 'Apoyar el proyecto' },
+  'footer.donateHint': {
+    en: 'Voluntary support through Ko-fi (opens in a new tab)',
+    es: 'Apoyo voluntario a través de Ko-fi (se abre en una pestaña nueva)',
+  },
   'footer.support': { en: 'Report an issue', es: 'Comunicar un error' },
   'creator.contributionTerms': {
     en: 'Include a licence and attribution. By submitting, you confirm you may distribute these files and accept the contribution terms.',

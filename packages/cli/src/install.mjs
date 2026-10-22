@@ -95,6 +95,7 @@ async function prepareSkills(manifest, lock, fetchSkill) {
       );
     if (manifest.locale) {
       normalizeLocale(snapshot.contentLocale);
+      normalizeLocale(snapshot.sourceLocale);
       if (
         sameVariant &&
         previous.contentLocale &&
@@ -116,8 +117,15 @@ async function prepareSkills(manifest, lock, fetchSkill) {
       sourceIntegrity: integrity(snapshot.content),
       integrity: integrity(content),
     };
+    const previousContentLocale =
+      previous?.contentLocale ?? snapshot.sourceLocale;
+    const samePublishedVariant =
+      previous?.version === version &&
+      (sameVariant ||
+        !snapshot.contentLocale ||
+        previousContentLocale === snapshot.contentLocale);
     if (
-      sameVariant &&
+      samePublishedVariant &&
       (previous.integrity !== entry.integrity ||
         previous.sourceIntegrity !== entry.sourceIntegrity)
     )

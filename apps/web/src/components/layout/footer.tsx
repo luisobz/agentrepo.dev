@@ -119,6 +119,15 @@ export function Footer() {
           {t('footer.terms')}
         </Link>
         <a
+          href="https://ko-fi.com/luisobz"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="inline-flex min-h-8 items-center hover:underline"
+          title={t('footer.donateHint')}
+        >
+          {t('footer.donate')}
+        </a>
+        <a
           href="https://github.com/luisobz/agentrepo.dev/issues"
           className="inline-flex min-h-8 items-center hover:underline"
         >

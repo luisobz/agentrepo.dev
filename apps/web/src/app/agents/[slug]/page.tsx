@@ -66,18 +66,17 @@ export default async function AgentPage({
     notFound();
   }
 
-  // A pinned version (?version=x.y.z) swaps the served snapshot npm-style.
-  const pinned =
-    requestedVersion && requestedVersion !== agent.version
-      ? await getAgentVersion(slug, requestedVersion)
-      : null;
+  // Downloads use the published snapshot even when it is the latest release;
+  // editing a translation draft must not change an already tagged download.
+  const pinned = await getAgentVersion(slug, requestedVersion ?? agent.version);
   if (requestedVersion && requestedVersion !== agent.version && !pinned) {
     notFound();
   }
+  const isHistorical = (pinned?.version ?? agent.version) !== agent.version;
 
   const shownVersion = pinned?.version ?? agent.version;
   const shownFileTree = pinned?.fileTree ?? agent.fileTree;
-  const shownReadme = pinned?.readmeContent ?? agent.readmeContent;
+  const shownReadme = pinned ? pinned.readmeContent : agent.readmeContent;
   const downloadsTotal = versions.reduce(
     (sum, entry) => sum + entry.downloadsTotal,
     0,
@@ -106,12 +105,13 @@ export default async function AgentPage({
           <span className="rounded-full border border-[var(--color-border-medium)] px-2.5 py-0.5 font-mono text-xs text-[var(--color-text-secondary)]">
             v{shownVersion}
           </span>
-          {pinned ? (
+          {isHistorical ? (
             <Link
               href={`/agents/${agent.slug}`}
               className="font-mono text-xs text-[var(--color-text-muted)] underline-offset-2 hover:underline"
             >
-              ver latest (v{agent.version})
+              {locale === 'es' ? 'Ver última' : 'View latest'} (v{agent.version}
+              )
             </Link>
           ) : (
             <span className="rounded-full bg-emerald-500/15 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-emerald-700">

@@ -67,14 +67,13 @@ export default async function SkillPage({
     notFound();
   }
 
-  // A pinned version (?version=x.y.z) swaps the served content npm-style.
-  const pinned =
-    requestedVersion && requestedVersion !== skill.version
-      ? await getSkillVersion(slug, requestedVersion)
-      : null;
+  // Downloads use the published snapshot even when it is the latest release;
+  // editing a translation draft must not change an already tagged download.
+  const pinned = await getSkillVersion(slug, requestedVersion ?? skill.version);
   if (requestedVersion && requestedVersion !== skill.version && !pinned) {
     notFound();
   }
+  const isHistorical = (pinned?.version ?? skill.version) !== skill.version;
 
   const shownVersion = pinned?.version ?? skill.version;
   const shownContent = pinned?.content ?? skill.content;
@@ -108,12 +107,13 @@ export default async function SkillPage({
           <span className="rounded-full bg-[var(--color-brand-garnet-ghost)] px-2.5 py-0.5 font-mono text-xs font-semibold text-[var(--color-brand-garnet)]">
             v{shownVersion}
           </span>
-          {pinned ? (
+          {isHistorical ? (
             <Link
               href={`/skills/${skill.slug}`}
               className="font-mono text-xs text-[var(--color-text-muted)] underline-offset-2 hover:underline"
             >
-              ver latest (v{skill.version})
+              {locale === 'es' ? 'Ver última' : 'View latest'} (v{skill.version}
+              )
             </Link>
           ) : (
             <span className="rounded-full bg-emerald-500/15 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-emerald-700">

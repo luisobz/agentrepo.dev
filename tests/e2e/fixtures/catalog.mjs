@@ -39,6 +39,8 @@ const shared = {
   version: '1.0.0',
 };
 function read(path) {
+  if (path === 'skills.byVersion') return read('skills.bySlug');
+  if (path === 'agents.byVersion') return read('agents.bySlug');
   if (path.endsWith('.versions')) return [];
   if (path === 'agents.catalog')
     return {
@@ -93,8 +95,14 @@ function read(path) {
     };
   return { items: [], total: 0, page: 1, pageSize: 6 };
 }
-function localizedRead(path, locale) {
-  const value = read(path);
+function localizedRead(path, locale, slug) {
+  let value = read(path);
+  if (path === 'skills.bySlug' && slug === 'draft-head')
+    value = { ...value, slug, content: '# Unreleased draft' };
+  if (path === 'agents.bySlug' && slug === 'draft-head')
+    value = { ...value, slug, readmeContent: '# Unreleased README' };
+  if (path === 'agents.byVersion' && slug === 'draft-head')
+    value = { ...value, fileTree: [], readmeContent: null };
   if (locale !== 'es') return value;
   const translate = (item) => ({
     ...item,
@@ -142,6 +150,7 @@ createServer((request, response) => {
         json: localizedRead(
           path,
           input[index]?.json?.locale ?? input.json?.locale,
+          input[index]?.json?.slug ?? input.json?.slug,
         ),
         ...(path === 'agents.catalog'
           ? {

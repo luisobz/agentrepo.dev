@@ -43,3 +43,39 @@ test('skills render the body while Raw, Copy and Download retain metadata', asyn
     ),
   ).toBe(true);
 });
+
+test('latest downloads use the released snapshot rather than an edited draft', async ({
+  page,
+}) => {
+  await page.goto('/skills/draft-head');
+  await expect(
+    page.getByRole('heading', { name: 'Linked skill', exact: true }),
+  ).toBeVisible();
+  await expect(page.getByRole('main')).not.toContainText('Unreleased draft');
+  const downloading = page.waitForEvent('download');
+  await page.getByRole('button', { name: 'Download .md', exact: true }).click();
+  const download = await downloading;
+  const file = await download.path();
+  expect(file).not.toBeNull();
+  if (file) expect(await readFile(file, 'utf8')).toBe(original);
+});
+
+test('an agent release with no README never inherits an unpublished README', async ({
+  page,
+}) => {
+  await page.goto('/agents/draft-head');
+  await expect(page.getByRole('main')).not.toContainText('Unreleased README');
+  await page.getByRole('main').getByText('Files & downloads', { exact: true }).click();
+  const downloading = page.waitForEvent('download');
+  await page
+    .getByRole('button', { name: 'Download v1.0.0', exact: true })
+    .click();
+  const download = await downloading;
+  const file = await download.path();
+  expect(file).not.toBeNull();
+  if (file)
+    expect(JSON.parse(await readFile(file, 'utf8'))).toMatchObject({
+      readme: null,
+      files: [],
+    });
+});

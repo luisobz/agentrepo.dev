@@ -14,7 +14,8 @@ pnpm 10.33.4, frozen-lockfile dependencies, Prisma native engines, Chromium and
 its system dependencies. It compiles every Nx build target, then runs the
 verification script in a Docker build step with networking disabled. The final
 image retains sources, generated clients, compiled applications, caches and test
-fixtures; its default user is unprivileged. Anthropic adds its own tools/root
+fixtures; its default user is unprivileged. Test projects run serially with at
+most two Vitest/Playwright workers to fit the scanner's two-CPU runtime. Anthropic adds its own tools/root
 shell on top, as documented by its checker.
 
 A Dockerfile-specific ignore file retains documentation and fixtures otherwise

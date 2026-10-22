@@ -1,0 +1,23 @@
+# Retain source, Markdown, fixtures and scripts hidden by the runtime .dockerignore.
+# Do not copy local credentials, caches, generated clients or build output.
+.git
+**/node_modules
+**/.next
+**/dist
+.nx
+.tmp
+**/.env
+**/.env.*
+**/.secrets
+**/.private
+**/*.key
+**/*.pem
+**/*.p12
+**/*.pfx
+**/prod.seed.data.json
+**/prod.seed.data.enc
+AGENTS_LOCAL.md
+SPACESHIP_DEPLOY.md
+coverage
+playwright-report
+test-results

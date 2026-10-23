@@ -332,6 +332,9 @@ describe('admin OAuth identity', () => {
       await expect(
         useCases.loginWithToken.execute('verified-github'),
       ).rejects.toBeInstanceOf(InvalidCredentialsError);
+      expect(await useCases.resolveIdentity.execute('verified-github')).toEqual(
+        supabaseId === SUPABASE_ID ? { id: 'user-1' } : null,
+      );
       expect(repository.sessions).toHaveLength(0);
     },
   );
@@ -359,6 +362,9 @@ describe('admin navigation eligibility', () => {
       expect(await useCases.checkAccess.execute('verified-github')).toBe(
         supabaseId === SUPABASE_ID,
       );
+      expect(await useCases.resolveIdentity.execute('verified-github')).toEqual(
+        supabaseId === SUPABASE_ID ? { id: 'user-1' } : null,
+      );
       expect(repository.sessions).toHaveLength(0);
     },
   );
@@ -366,5 +372,9 @@ describe('admin navigation eligibility', () => {
     const { useCases } = buildUseCases({ admins: [] });
     expect(await useCases.checkAccess.execute('verified-github')).toBe(false);
     expect(await useCases.checkAccess.execute('forged')).toBe(false);
+    expect(
+      await useCases.resolveIdentity.execute('verified-github'),
+    ).toBeNull();
+    expect(await useCases.resolveIdentity.execute('forged')).toBeNull();
   });
 });

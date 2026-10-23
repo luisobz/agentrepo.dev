@@ -80,3 +80,20 @@ Missing translations show the original with an explicit language notice.
 Catalogue summaries exclude translation maps and full bodies; premium
 projections protect all language variants. Public search uses both language
 vectors and returns titles/excerpts in the requested language.
+
+## Owner-private skills (administrator pilot)
+
+Verified web administrators can open **My private skills** from `/skills`.
+`/skills/private` supports creating, reading, editing, copying and downloading
+personal Markdown documents. There is no publish action. A dedicated
+`PrivateSkill` table keeps these records separate from public working copies,
+immutable versions, search, catalogue, CLI registry and download metrics.
+
+Every private operation revalidates the provider credential and exact local
+administrator link, deriving the owner ID server-side. Another administrator
+cannot access the owner's records by ID. Legacy administrator sessions alone
+cannot identify an owner. Database RLS and revoked anonymous/authenticated grants
+block direct Supabase data API access; the backend retains its existing trusted
+database role. Revisions prevent overwriting concurrent edits. Private routes
+and API responses are no-store/noindex and omitted from public analytics.
+No personal preferences are seeded or committed; owners create them privately.

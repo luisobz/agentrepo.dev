@@ -19,7 +19,9 @@ import { serverTrpc } from './lib/trpc-server';
 export async function middleware(request: NextRequest) {
   const isReview =
     request.nextUrl.pathname === '/blog/review' ||
-    request.nextUrl.pathname.startsWith('/blog/review/');
+    request.nextUrl.pathname.startsWith('/blog/review/') ||
+    request.nextUrl.pathname === '/skills/private' ||
+    request.nextUrl.pathname.startsWith('/skills/private/');
   const protectReviewResponse = (response: NextResponse) => {
     if (isReview) {
       response.headers.set('Cache-Control', 'private, no-store');

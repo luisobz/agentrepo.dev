@@ -136,10 +136,22 @@ export class LoginAdminWithToken
 export class CheckAdminAccess implements UseCase<string, boolean> {
   constructor(private readonly deps: AdminAuthDependencies) {}
   async execute(token = ''): Promise<boolean> {
+    return (await new ResolveAdminIdentity(this.deps).execute(token)) !== null;
+  }
+}
+
+/** Stable local owner id, returned only after provider and local role verification. */
+export class ResolveAdminIdentity
+  implements UseCase<string, { id: string } | null>
+{
+  constructor(private readonly deps: AdminAuthDependencies) {}
+  async execute(token = ''): Promise<{ id: string } | null> {
     const identity = token ? await this.deps.tokenVerifier.verify(token) : null;
-    if (!identity) return false;
+    if (!identity) return null;
     const admin = await this.deps.adminUsers.findAdminByEmail(identity.email);
-    return !!admin && admin.supabaseId === identity.providerUserId;
+    return admin && admin.supabaseId === identity.providerUserId
+      ? { id: admin.id }
+      : null;
   }
 }
 
@@ -201,6 +213,7 @@ export interface AdminAuthUseCases {
   login: UseCase<AdminLoginInput, AdminSessionTokens>;
   loginWithToken: UseCase<string, AdminSessionTokens>;
   checkAccess: UseCase<string, boolean>;
+  resolveIdentity: UseCase<string, { id: string } | null>;
   refresh: UseCase<string, AdminSessionTokens>;
   logout: UseCase<string, void>;
 }
@@ -212,6 +225,7 @@ export function createAdminAuthUseCases(
     login: new LoginAdmin(deps),
     loginWithToken: new LoginAdminWithToken(deps),
     checkAccess: new CheckAdminAccess(deps),
+    resolveIdentity: new ResolveAdminIdentity(deps),
     refresh: new RefreshAdminSession(deps),
     logout: new LogoutAdmin(deps),
   };

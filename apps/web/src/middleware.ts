@@ -9,6 +9,7 @@ import {
   publicUserInfoFromClaims,
 } from './lib/auth/user-info';
 import { getSupabasePublicEnv } from './lib/supabase/config';
+import { serverTrpc } from './lib/trpc-server';
 
 /**
  * Keeps the Supabase session alive server-side: getClaims() verifies signatures and refreshes expired
@@ -16,9 +17,22 @@ import { getSupabasePublicEnv } from './lib/supabase/config';
  * user-info cookie is kept in sync with the (validated) session state.
  */
 export async function middleware(request: NextRequest) {
+  const isReview =
+    request.nextUrl.pathname === '/blog/review' ||
+    request.nextUrl.pathname.startsWith('/blog/review/');
+  const protectReviewResponse = (response: NextResponse) => {
+    if (isReview) {
+      response.headers.set('Cache-Control', 'private, no-store');
+      response.headers.set('X-Robots-Tag', 'noindex, nofollow');
+      response.headers.set('Referrer-Policy', 'no-referrer');
+    }
+    return response;
+  };
   const env = getSupabasePublicEnv();
   if (!env) {
-    return NextResponse.next();
+    return protectReviewResponse(
+      isReview ? new NextResponse(null, { status: 404 }) : NextResponse.next(),
+    );
   }
 
   let response = NextResponse.next({ request });
@@ -27,13 +41,15 @@ export async function middleware(request: NextRequest) {
     .getAll()
     .some(({ name }) => /^sb-.+-auth-token(?:\.\d+)?$/.test(name));
   if (!hasSession) {
+    if (isReview)
+      return protectReviewResponse(new NextResponse(null, { status: 404 }));
     if (currentInfo)
       response.cookies.set(USER_INFO_COOKIE, '', {
         ...AUTH_COOKIE_OPTIONS,
         httpOnly: false,
         maxAge: 0,
       });
-    return response;
+    return protectReviewResponse(response);
   }
   const supabase = createServerClient(env.url, env.publishableKey, {
     cookies: {
@@ -55,6 +71,22 @@ export async function middleware(request: NextRequest) {
 
   const { data, error } = await supabase.auth.getClaims();
   const user = error ? null : publicUserInfoFromClaims(data?.claims);
+  if (isReview) {
+    let allowed = false;
+    try {
+      const session = user
+        ? (await supabase.auth.getSession()).data.session
+        : null;
+      if (session)
+        allowed = await serverTrpc.adminAuth.checkAccess.mutate({
+          token: session.access_token,
+        });
+    } catch {
+      // Drafts must remain private if the identity or role service is unavailable.
+    }
+    if (!allowed)
+      return protectReviewResponse(new NextResponse(null, { status: 404 }));
+  }
   if (user) {
     const info = serializeUserInfo(user);
     if (currentInfo !== info) {
@@ -71,7 +103,7 @@ export async function middleware(request: NextRequest) {
     });
   }
 
-  return response;
+  return protectReviewResponse(response);
 }
 
 export const config = {

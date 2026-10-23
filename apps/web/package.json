@@ -11,7 +11,7 @@
     "@agentrepo/avatar": "workspace:*",
     "@agentrepo/trpc": "workspace:*",
     "@agentrepo/ui": "workspace:*",
-    "@sentry/nextjs": "^10.53.1",
+    "@sentry/nextjs": "^10.76.2",
     "@supabase/ssr": "^0.12.0",
     "@supabase/supabase-js": "^2.108.1",
     "@t3-oss/env-nextjs": "^0.13.11",

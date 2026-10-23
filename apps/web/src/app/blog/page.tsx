@@ -4,7 +4,7 @@ import { ContentCover } from '@agentrepo/ui';
 import { getPublishedPosts } from '../../lib/blog';
 import { getServerT } from '../../lib/i18n/server';
 import { formatDate } from '../../lib/public-content';
-
+import { BlogReviewLink } from '../../components/blog/review-link';
 
 export const metadata: Metadata = {
   title: 'Blog | AgentRepo.dev',
@@ -24,6 +24,7 @@ export default async function BlogPage() {
         <p className="mt-2 text-[var(--color-text-secondary)]">
           {t('blog.subtitle')}
         </p>
+        <BlogReviewLink />
       </header>
 
       {posts.length === 0 ? (

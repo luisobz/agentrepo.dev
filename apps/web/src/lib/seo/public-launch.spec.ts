@@ -15,6 +15,8 @@ describe('public launch metadata', () => {
       '/api/creator/submit',
       '/portfolio/luisbz',
       '/admin',
+      '/blog/review',
+      '/blog/review/private-id',
     ])
       expect(isPublicPage(route)).toBe(false);
     for (const route of [

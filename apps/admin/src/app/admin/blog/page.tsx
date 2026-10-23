@@ -76,6 +76,19 @@ export default function BlogPostsPage() {
         columns={[
           { header: 'Title', render: (post) => post.title },
           {
+            header: 'Preview',
+            render: (post) => (
+              <a
+                href={`https://agentrepo.dev/blog/review/${post.id}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="underline"
+              >
+                Web preview ↗
+              </a>
+            ),
+          },
+          {
             header: 'Slug',
             render: (post) => (
               <span className="font-mono text-xs">{post.slug}</span>

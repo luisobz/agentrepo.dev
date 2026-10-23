@@ -1,6 +1,14 @@
 import { beforeEach, expect, it, vi } from 'vitest';
 import { NextRequest } from 'next/server';
-const auth = vi.hoisted(() => ({ getClaims: vi.fn(), getUser: vi.fn() }));
+const auth = vi.hoisted(() => ({
+  getClaims: vi.fn(),
+  getUser: vi.fn(),
+  getSession: vi.fn(),
+}));
+const { checkAccess } = vi.hoisted(() => ({ checkAccess: vi.fn() }));
+vi.mock('./lib/trpc-server', () => ({
+  serverTrpc: { adminAuth: { checkAccess: { mutate: checkAccess } } },
+}));
 vi.mock('@supabase/ssr', () => ({ createServerClient: () => ({ auth }) }));
 vi.mock('./lib/supabase/config', () => ({
   getSupabasePublicEnv: () => ({
@@ -51,4 +59,53 @@ it('invalid claims never populate user display data', async () => {
     }),
   );
   expect(response.cookies.get('agentrepo_user_info')?.value).toBe('');
+});
+
+it('cuts off anonymous draft previews before rendering, with private and noindex headers', async () => {
+  const response = await middleware(
+    new NextRequest('https://example.test/blog/review/private-id'),
+  );
+  expect(response.status).toBe(404);
+  expect(response.headers.get('cache-control')).toBe('private, no-store');
+  expect(response.headers.get('x-robots-tag')).toBe('noindex, nofollow');
+  expect(checkAccess).not.toHaveBeenCalled();
+});
+
+it.each([false, true])(
+  'requires the backend role check for preview access (%s), not user-editable metadata',
+  async (allowed) => {
+    auth.getClaims.mockResolvedValue({
+      data: { claims: { sub: 'member', user_metadata: { role: 'admin' } } },
+      error: null,
+    });
+    auth.getSession.mockResolvedValue({
+      data: { session: { access_token: 'provider-credential' } },
+    });
+    checkAccess.mockResolvedValue(allowed);
+    const response = await middleware(
+      new NextRequest('https://example.test/blog/review', {
+        headers: { cookie: 'sb-example-auth-token=session' },
+      }),
+    );
+    expect(checkAccess).toHaveBeenCalledWith({ token: 'provider-credential' });
+    expect(response.status).toBe(allowed ? 200 : 404);
+    expect(response.headers.get('cache-control')).toBe('private, no-store');
+  },
+);
+
+it('fails closed if role verification is unavailable', async () => {
+  auth.getClaims.mockResolvedValue({
+    data: { claims: { sub: 'member' } },
+    error: null,
+  });
+  auth.getSession.mockResolvedValue({
+    data: { session: { access_token: 'provider-credential' } },
+  });
+  checkAccess.mockRejectedValue(new TypeError('offline'));
+  const response = await middleware(
+    new NextRequest('https://example.test/blog/review', {
+      headers: { cookie: 'sb-example-auth-token=session' },
+    }),
+  );
+  expect(response.status).toBe(404);
 });

@@ -18,6 +18,7 @@ export class PrismaBlogPostRepository implements BlogPostRepository {
   async list(params: ListContentParams): Promise<Paginated<BlogPost>> {
     const where: Prisma.BlogPostWhereInput = {
       ...(params.publishedOnly ? { isPublished: true } : {}),
+      ...(params.unpublishedOnly ? { isPublished: false } : {}),
       ...(params.pendingReviewOnly ? { isPublished: false } : {}),
       ...(params.authorId
         ? { authorId: params.authorId }

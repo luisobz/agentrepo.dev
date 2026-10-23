@@ -11,6 +11,8 @@ export interface ListContentParams {
   pageSize: number;
   search?: string;
   publishedOnly?: boolean;
+  /** Editorial draft list, including drafts created by administrators. */
+  unpublishedOnly?: boolean;
   /** Private filters; callers must derive authorId from the verified session. */
   authorId?: string;
   pendingReviewOnly?: boolean;

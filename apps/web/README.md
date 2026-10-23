@@ -2,6 +2,20 @@
 
 Next.js Public Web App.
 
+## Private blog review
+
+Verified administrators signed in on the web see **Review drafts** on `/blog`.
+`/blog/review` lists unpublished posts, including administrator-created drafts;
+`/blog/review/<id>` renders the same article component as the public page with a
+private preview banner and an explicit publish button. The admin blog table also
+links to these previews. The web's Supabase credential stays server-side; the
+backend verifies provider identity and the existing local administrator role on
+every preview and publication, without creating a separate admin session.
+Review operations use POST bodies, never credential-bearing URLs. Responses are
+private/no-store, excluded from analytics and marked noindex/nofollow. Publication
+invalidates the public catalogue cache. Anonymous and non-admin users cannot read
+drafts; public blog endpoints, sitemap and search remain published-only.
+
 ## Administrator shortcut
 
 The desktop header and mobile menu display an admin-panel shortcut only after

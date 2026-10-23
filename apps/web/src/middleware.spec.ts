@@ -109,3 +109,18 @@ it('fails closed if role verification is unavailable', async () => {
   );
   expect(response.status).toBe(404);
 });
+
+it.each([
+  '/skills/private',
+  '/skills/private/new',
+  '/skills/private/unknown/edit',
+])('blocks anonymous private skills before rendering: %s', async (path) => {
+  const response = await middleware(
+    new NextRequest(`https://example.test${path}`),
+  );
+  expect(response.status).toBe(404);
+  expect(response.headers.get('cache-control')).toBe('private, no-store');
+  expect(response.headers.get('x-robots-tag')).toBe('noindex, nofollow');
+  expect(response.headers.get('referrer-policy')).toBe('no-referrer');
+  expect(checkAccess).not.toHaveBeenCalled();
+});

@@ -15,6 +15,7 @@ import {
   InvalidRefreshTokenError,
   SlugAlreadyInUseError,
   VersionAlreadyExistsError,
+  RevisionConflictError,
 } from '@agentrepo/domain';
 import type { SearchHit } from '@agentrepo/domain';
 import { FixedWindowRateLimiter } from './auth/login-rate-limit';
@@ -26,6 +27,7 @@ export interface TRPCContext {
   clientIp: string | null;
   adminAuth: AdminAuthUseCases;
   catalog: CatalogUseCases;
+  privateSkills?: import('@agentrepo/application').PrivateSkillUseCases;
   globalSearch: UseCase<GlobalSearchParams, SearchHit[]>;
   portfolio: PortfolioUseCases;
   playground: PlaygroundUseCases;
@@ -37,19 +39,32 @@ export const t = initTRPC.context<TRPCContext>().create({
 
 function toTRPCError(error: DomainError): TRPCError {
   if (error instanceof EntityNotFoundError) {
-    return new TRPCError({ code: 'NOT_FOUND', message: error.message, cause: error });
+    return new TRPCError({
+      code: 'NOT_FOUND',
+      message: error.message,
+      cause: error,
+    });
   }
   if (
     error instanceof InvalidCredentialsError ||
     error instanceof InvalidRefreshTokenError
   ) {
-    return new TRPCError({ code: 'UNAUTHORIZED', message: error.message, cause: error });
+    return new TRPCError({
+      code: 'UNAUTHORIZED',
+      message: error.message,
+      cause: error,
+    });
   }
   if (
     error instanceof SlugAlreadyInUseError ||
-    error instanceof VersionAlreadyExistsError
+    error instanceof VersionAlreadyExistsError ||
+    error instanceof RevisionConflictError
   ) {
-    return new TRPCError({ code: 'CONFLICT', message: error.message, cause: error });
+    return new TRPCError({
+      code: 'CONFLICT',
+      message: error.message,
+      cause: error,
+    });
   }
   return new TRPCError({
     code: 'INTERNAL_SERVER_ERROR',
@@ -89,14 +104,20 @@ export function rateLimit(limiter: FixedWindowRateLimiter, bucket: string) {
 
 export const adminProcedure = publicProcedure.use(({ ctx, next }) => {
   if (!ctx.isAdmin) {
-    throw new TRPCError({ code: 'UNAUTHORIZED', message: 'Admin session required' });
+    throw new TRPCError({
+      code: 'UNAUTHORIZED',
+      message: 'Admin session required',
+    });
   }
   return next();
 });
 
 export const creatorProcedure = publicProcedure.use(({ ctx, next }) => {
   if (!ctx.creatorUserId) {
-    throw new TRPCError({ code: 'UNAUTHORIZED', message: 'Creator sign-in required' });
+    throw new TRPCError({
+      code: 'UNAUTHORIZED',
+      message: 'Creator sign-in required',
+    });
   }
   return next({ ctx: { creatorUserId: ctx.creatorUserId } });
 });

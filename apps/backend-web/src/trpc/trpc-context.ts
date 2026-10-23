@@ -6,6 +6,7 @@ import {
   createPortfolioUseCases,
   SearchCatalog,
   ResolveCreatorIdentity,
+  createPrivateSkillUseCases,
 } from '@agentrepo/application';
 import { BackendEnvironments } from '@agentrepo/config';
 import {
@@ -27,6 +28,7 @@ import {
   PrismaSkillVersionRepository,
   StaticCodeValidator,
   SupabasePasswordAuthenticator,
+  PrismaPrivateSkillRepository,
 } from '@agentrepo/infrastructure';
 import {
   createSessionToken,
@@ -55,6 +57,9 @@ function extractBearerToken(
  * application use cases and resolves the admin session per request.
  */
 export function buildCreateContext(prisma: PrismaService) {
+  const privateSkills = createPrivateSkillUseCases(
+    new PrismaPrivateSkillRepository(prisma),
+  );
   const catalog = createCatalogUseCases({
     skillRepository: new PrismaSkillRepository(prisma),
     agentRepository: new PrismaAgentRepository(prisma),
@@ -118,7 +123,18 @@ export function buildCreateContext(prisma: PrismaService) {
 
   return async function createContext({
     req,
+    res,
   }: CreateExpressContextOptions): Promise<TRPCContext> {
+    if (
+      req.path
+        .split('/')
+        .at(-1)
+        ?.split(',')
+        .some((name) => name.startsWith('privateSkills.'))
+    ) {
+      res.setHeader('Cache-Control', 'private, no-store');
+      res.setHeader('X-Robots-Tag', 'noindex, nofollow');
+    }
     const token = extractBearerToken(req.headers.authorization);
     const isAdmin = await verifySessionToken(
       token,
@@ -133,6 +149,7 @@ export function buildCreateContext(prisma: PrismaService) {
       clientIp: req.ip ?? null,
       adminAuth,
       catalog,
+      privateSkills,
       globalSearch,
       portfolio,
       playground,

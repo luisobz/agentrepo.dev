@@ -31,6 +31,13 @@ export class InvalidCredentialsError extends DomainError {
   }
 }
 
+export class RevisionConflictError extends DomainError {
+  readonly code = 'REVISION_CONFLICT';
+  constructor() {
+    super('The document changed. Reload it before saving.');
+  }
+}
+
 export class InvalidRefreshTokenError extends DomainError {
   readonly code = 'INVALID_REFRESH_TOKEN';
 

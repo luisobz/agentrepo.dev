@@ -7,6 +7,8 @@ export const SHARE_IMAGE = {
   alt: 'AgentRepo.dev — Discover, learn and build with AI skills and agents',
 };
 export function isPublicPage(path: string): boolean {
+  if (path === '/skills/private' || path.startsWith('/skills/private/'))
+    return false;
   if (path === '/blog/review' || path.startsWith('/blog/review/')) return false;
   return (
     path === '/' ||

@@ -5,9 +5,16 @@ const auth = vi.hoisted(() => ({
   getUser: vi.fn(),
   getSession: vi.fn(),
 }));
-const { checkAccess } = vi.hoisted(() => ({ checkAccess: vi.fn() }));
+const { checkAccess, versions, snapshot } = vi.hoisted(() => ({
+  checkAccess: vi.fn(),
+  versions: vi.fn(),
+  snapshot: vi.fn(),
+}));
 vi.mock('./lib/trpc-server', () => ({
-  serverTrpc: { adminAuth: { checkAccess: { mutate: checkAccess } } },
+  serverTrpc: {
+    adminAuth: { checkAccess: { mutate: checkAccess } },
+    skills: { versions: { query: versions }, byVersion: { query: snapshot } },
+  },
 }));
 vi.mock('@supabase/ssr', () => ({ createServerClient: () => ({ auth }) }));
 vi.mock('./lib/supabase/config', () => ({
@@ -123,4 +130,45 @@ it.each([
   expect(response.headers.get('x-robots-tag')).toBe('noindex, nofollow');
   expect(response.headers.get('referrer-policy')).toBe('no-referrer');
   expect(checkAccess).not.toHaveBeenCalled();
+});
+
+it('returns an HTTP temporary redirect for floating skill aliases', async () => {
+  versions.mockResolvedValue([{ version: '0.1.0', isLatest: true }]);
+  const response = await middleware(
+    new NextRequest('https://example.test/skills/writer'),
+  );
+  expect(response.status).toBe(307);
+  expect(response.headers.get('cache-control')).toBe('no-store');
+  expect(response.headers.get('location')).toBe(
+    'https://example.test/skills/writer/0.1.0',
+  );
+});
+it('returns HTTP 404 before streaming when a pinned release does not exist', async () => {
+  snapshot.mockResolvedValue(null);
+  const response = await middleware(
+    new NextRequest('https://example.test/skills/writer/9.9.9'),
+  );
+  expect(response.status).toBe(404);
+  expect(response.headers.get('x-robots-tag')).toContain('noindex');
+});
+
+it('fails with 503 rather than inventing a missing version when metadata is unavailable', async () => {
+  snapshot.mockRejectedValue(new TypeError('offline'));
+  const response = await middleware(
+    new NextRequest('https://example.test/skills/writer/0.1.0'),
+  );
+  expect(response.status).toBe(503);
+  expect(response.headers.get('retry-after')).toBe('5');
+});
+it('keeps exact path versions independent from conflicting legacy query parameters', async () => {
+  versions.mockResolvedValue([
+    { version: '0.1.0', isLatest: false },
+    { version: '0.1.1', isLatest: true },
+  ]);
+  snapshot.mockResolvedValue({ version: '0.1.0' });
+  const response = await middleware(
+    new NextRequest('https://example.test/skills/writer/0.1.0?version=0.1.1'),
+  );
+  expect(response.status).toBe(200);
+  expect(response.headers.get('location')).toBeNull();
 });

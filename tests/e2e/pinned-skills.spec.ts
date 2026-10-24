@@ -59,7 +59,8 @@ test('missing or invalid snapshots never display latest or an unreleased draft',
     '/skills/linked-project/bogus',
     '/skills/missing-snapshot/1.0.0',
   ]) {
-    await page.goto(path);
+    const response = await page.goto(path);
+    expect(response?.status()).toBe(404);
     await expect(
       page.getByRole('heading', { name: 'Linked skill', exact: true }),
     ).toHaveCount(0);
@@ -73,4 +74,16 @@ test('missing or invalid snapshots never display latest or an unreleased draft',
       page.getByRole('heading', { name: 'Skill not found', exact: true }),
     ).toBeVisible();
   }
+});
+
+test('agents receive HTTP redirects without needing JavaScript', async ({
+  request,
+}) => {
+  const response = await request.get('/skills/linked-project', {
+    maxRedirects: 0,
+  });
+  expect(response.status()).toBe(307);
+  expect(response.headers()['location']).toContain(
+    '/skills/linked-project/1.0.0',
+  );
 });

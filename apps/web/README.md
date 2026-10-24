@@ -112,3 +112,8 @@ mismatched snapshots render not-found, even if the parent still has a working
 copy. Preview, raw/copy and download all use that snapshot; language selection
 uses its saved translations. The page shows the snapshot's publication date.
 Private skills keep their existing owner-protected routes.
+
+Public skill routing checks the selected snapshot (or latest-tag metadata for aliases) before rendering. Floating
+aliases return HTTP 307; unavailable releases return an uncached HTTP 404 page
+before the root loading boundary can stream a 200 response. An unavailable
+metadata service returns HTTP 503 with Retry-After instead of a false 404.

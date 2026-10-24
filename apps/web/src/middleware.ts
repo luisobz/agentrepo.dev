@@ -1,4 +1,5 @@
 import { createServerClient } from '@supabase/ssr';
+import { routePublicSkill } from './lib/skill-routing';
 import { NextRequest, NextResponse } from 'next/server';
 import {
   AUTH_COOKIE_OPTIONS,
@@ -17,6 +18,8 @@ import { serverTrpc } from './lib/trpc-server';
  * user-info cookie is kept in sync with the (validated) session state.
  */
 export async function middleware(request: NextRequest) {
+  const publicSkillResponse = await routePublicSkill(request);
+  if (publicSkillResponse) return publicSkillResponse;
   const isReview =
     request.nextUrl.pathname === '/blog/review' ||
     request.nextUrl.pathname.startsWith('/blog/review/') ||

@@ -12,6 +12,7 @@ export function isPublicPage(path: string): boolean {
   if (path === '/blog/review' || path.startsWith('/blog/review/')) return false;
   return (
     path === '/' ||
+    /^\/skills\/[^/]+\/\d+\.\d+\.\d+\/?$/.test(path) ||
     /^\/(skills|agents|blog)(\/[^/]+)?\/?$/.test(path) ||
     /^\/(cli|privacy|terms)\/?$/.test(path)
   );

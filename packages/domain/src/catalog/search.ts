@@ -7,4 +7,5 @@ export interface SearchHit {
   description: string;
   type: SearchHitType;
   badge?: string;
+  version?: string;
 }

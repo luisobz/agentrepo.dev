@@ -17,7 +17,9 @@ const hit = (type: SearchHit['type'], id: string): SearchHit => ({
 
 describe('hitHref', () => {
   it('builds the public route for each content type', () => {
-    expect(hitHref(hit('skill', 'a'))).toBe('/skills/slug-a');
+    expect(hitHref({ ...hit('skill', 'a'), version: '1.0.0' })).toBe(
+      '/skills/slug-a/1.0.0',
+    );
     expect(hitHref(hit('agent', 'b'))).toBe('/agents/slug-b');
     expect(hitHref(hit('blog', 'c'))).toBe('/blog/slug-c');
   });

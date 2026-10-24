@@ -36,7 +36,7 @@ async function fetchLatest(
         kind: 'skill',
         title: skill.title,
         description: skill.description,
-        href: `/skills/${skill.slug}`,
+        href: `/skills/${skill.slug}/${skill.version}`,
         createdAt: skill.createdAt,
         imageUrl: skill.headerImageUrl,
         skillType: skill.type,

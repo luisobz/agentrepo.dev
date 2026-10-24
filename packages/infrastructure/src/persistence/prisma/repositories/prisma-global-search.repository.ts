@@ -12,6 +12,7 @@ interface SkillHitRow {
   title: string;
   description: string | null;
   type: string;
+  version: string;
 }
 interface AgentHitRow {
   id: string;
@@ -52,7 +53,7 @@ export class PrismaGlobalSearchRepository implements GlobalSearchRepository {
         : Prisma.raw('"' + field + '"');
     const [skills, agents, posts] = await Promise.all([
       this.prisma.$queryRaw<SkillHitRow[]>(Prisma.sql`
-        SELECT "id", "slug", ${translated('title')} AS "title", ${translated('description')} AS "description", "type" FROM "Skill"
+        SELECT "id", "slug", ${translated('title')} AS "title", ${translated('description')} AS "description", "type", "version" FROM "Skill"
         WHERE "isPublished" = true AND ${match('Skill')}
         ORDER BY "updatedAt" DESC LIMIT ${limitPerType}
       `),
@@ -77,6 +78,7 @@ export class PrismaGlobalSearchRepository implements GlobalSearchRepository {
           description: skill.description ?? '',
           type: 'skill',
           badge: skill.type,
+          version: skill.version,
         }),
       ),
       ...agents.map(

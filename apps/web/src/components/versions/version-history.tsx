@@ -14,9 +14,10 @@ export interface VersionHistoryEntry {
 interface VersionHistoryProps {
   locale?: 'en' | 'es';
   versions: VersionHistoryEntry[];
-  /** Detail page path, e.g. /skills/my-skill; versions link as ?version=x.y.z */
+  /** Detail page path, e.g. /skills/my-skill; agents keep query links; skills use version paths */
   basePath: string;
   currentVersion: string;
+  versionedPaths?: boolean;
 }
 
 /** npm-style version history: every release with its downloads and tag. */
@@ -25,6 +26,7 @@ export function VersionHistory({
   locale = 'en',
   basePath,
   currentVersion,
+  versionedPaths = false,
 }: VersionHistoryProps) {
   if (versions.length === 0) {
     return null;
@@ -70,9 +72,11 @@ export function VersionHistory({
                     <div className="flex items-center gap-2">
                       <Link
                         href={
-                          entry.isLatest
-                            ? basePath
-                            : `${basePath}?version=${entry.version}`
+                          versionedPaths
+                            ? `${basePath}/${entry.version}`
+                            : entry.isLatest
+                              ? basePath
+                              : `${basePath}?version=${entry.version}`
                         }
                         className="font-mono font-semibold text-[var(--color-brand-garnet)] hover:underline"
                       >

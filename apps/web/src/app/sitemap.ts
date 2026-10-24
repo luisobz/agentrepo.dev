@@ -32,7 +32,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     return [
       ...staticEntries,
       ...skills.map((skill) => ({
-        url: `${SITE_URL}/skills/${skill.slug}`,
+        url: `${SITE_URL}/skills/${skill.slug}/${skill.version}`,
         lastModified: skill.updatedAt,
       })),
       ...agents.map((agent) => ({

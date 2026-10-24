@@ -97,3 +97,18 @@ block direct Supabase data API access; the backend retains its existing trusted
 database role. Revisions prevent overwriting concurrent edits. Private routes
 and API responses are no-store/noindex and omitted from public analytics.
 No personal preferences are seeded or committed; owners create them privately.
+
+## Pinned skill URLs
+
+Public skill links use `/skills/<slug>/<version>`, including catalogue cards,
+home entries, search results, the Writer recommendation and every history row.
+Bare `/skills/<slug>` links resolve to the current latest release; existing
+`?version=x.y.z` links resolve to the corresponding version path. These redirects
+are temporary so the bare alias can follow later releases. `/latest` is also a
+moving alias. Canonical and Open Graph URLs identify the exact release.
+
+The version route reads only the published snapshot. Missing, invalid or
+mismatched snapshots render not-found, even if the parent still has a working
+copy. Preview, raw/copy and download all use that snapshot; language selection
+uses its saved translations. The page shows the snapshot's publication date.
+Private skills keep their existing owner-protected routes.

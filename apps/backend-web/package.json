@@ -23,7 +23,7 @@
         "rxjs": "^7.8.2",
         "superjson": "^2.2.6",
         "swagger-ui-express": "^5.0.1",
-        "zod": "^4.4.3"
+        "zod": "4.6.6"
     },
     "devDependencies": {
         "@nestjs/schematics": "^11.0.0",

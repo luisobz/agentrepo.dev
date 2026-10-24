@@ -30,7 +30,7 @@
     "react-markdown": "^10.1.0",
     "remark-gfm": "^4.0.1",
     "superjson": "^2.2.6",
-    "zod": "^4.4.3"
+    "zod": "4.6.6"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4.3.0",

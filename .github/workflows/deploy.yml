@@ -93,6 +93,9 @@ jobs:
       - name: Build (todas las apps y paquetes)
         run: pnpm build
 
+      - name: Validate reproducible backend bundles
+        run: bash scripts/check-backend-bundles.sh
+
       - name: Install UI test browser
         run: pnpm exec playwright install --with-deps chromium
 

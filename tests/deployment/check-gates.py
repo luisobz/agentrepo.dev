@@ -32,3 +32,12 @@ assert '--verify-tag --latest=false' in cli_workflow, 'CLI releases must not rep
 assert 'SSH_' not in cli_workflow and 'migrate' not in cli_workflow, 'CLI publication must not deploy services'
 assert 'packages/cli' not in workflow, 'Platform deployment must not package CLI releases'
 print('CLI release: independent tags, version validation, tests and no service deployment')
+
+for path in (Path('.github/workflows/ci.yml'), Path('.github/workflows/deploy.yml')):
+    text = path.read_text()
+    verify = re.search(r'^  verify:\n(.*?)(?=^  [\w-]+:|\Z)', text, re.M | re.S).group(1)
+    assert 'bash scripts/check-backend-bundles.sh' in verify, f'{path}: validate backend bundles before deployment prerequisites'
+packaging = Path('scripts/check-backend-bundles.sh').read_text()
+assert 'backend-web backend-ai' in packaging, 'validate both deployable backends'
+assert '--prod --frozen-lockfile' in packaging and '--no-frozen-lockfile' not in packaging, 'backend bundle installs must stay reproducible'
+print('Backend bundles: both reproducible production installs run in CI and before deployment')

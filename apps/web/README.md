@@ -117,3 +117,16 @@ Public skill routing checks the selected snapshot (or latest-tag metadata for al
 aliases return HTTP 307; unavailable releases return an uncached HTTP 404 page
 before the root loading boundary can stream a 200 response. An unavailable
 metadata service returns HTTP 503 with Retry-After instead of a false 404.
+
+## Crawler-readable public content
+
+Public routes render their primary content in visible server HTML without a
+root loading/Suspense boundary. This prevents clients without JavaScript from
+receiving only a loading placeholder with the real content in hidden streamed
+blocks. Client navigation, search and the animated avatar remain interactive.
+The home introduces the whole catalogue in EN/ES before the latest feed and
+includes WebSite/WebApplication JSON-LD with stable public identifiers. JSON-LD
+serialization escapes HTML script boundaries; it contains no adoption or rating
+claims. Browser regressions cover home, catalogues and details with JavaScript
+disabled. This improves readability; indexing and search placement remain up to
+the search engines.

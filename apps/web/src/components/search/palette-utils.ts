@@ -9,7 +9,8 @@ const HREF_PREFIX: Record<SearchHit['type'], string> = {
 };
 
 export function hitHref(hit: SearchHit): string {
-  return `${HREF_PREFIX[hit.type]}/${hit.slug}`;
+  const path = `${HREF_PREFIX[hit.type]}/${hit.slug}`;
+  return hit.type === 'skill' && hit.version ? `${path}/${hit.version}` : path;
 }
 
 const GROUP_ORDER: { type: SearchHit['type']; label: string }[] = [
@@ -38,7 +39,7 @@ export function flattenGroups(groups: HitGroup[]): SearchHit[] {
 export function moveSelection(
   current: number,
   delta: number,
-  length: number
+  length: number,
 ): number {
   if (length === 0) {
     return 0;

@@ -41,7 +41,19 @@ const shared = {
 function read(path) {
   if (path === 'skills.byVersion') return read('skills.bySlug');
   if (path === 'agents.byVersion') return read('agents.bySlug');
+  if (path === 'skills.versions')
+    return ['1.0.0', '0.9.0'].map((version, index) => ({
+      id: version,
+      version,
+      changelog: null,
+      createdAt: shared.createdAt,
+      downloadsTotal: 0,
+      downloadsWeekly: 0,
+      isLatest: index === 0,
+    }));
   if (path.endsWith('.versions')) return [];
+  if (path === 'skills.catalog')
+    return { items: [read('skills.bySlug')], total: 1, page: 1, pageSize: 100 };
   if (path === 'agents.catalog')
     return {
       items: [
@@ -95,7 +107,7 @@ function read(path) {
     };
   return { items: [], total: 0, page: 1, pageSize: 6 };
 }
-function localizedRead(path, locale, slug) {
+function localizedRead(path, locale, slug, version) {
   let value = read(path);
   if (path === 'skills.bySlug' && slug === 'draft-head')
     value = { ...value, slug, content: '# Unreleased draft' };
@@ -103,6 +115,12 @@ function localizedRead(path, locale, slug) {
     value = { ...value, slug, readmeContent: '# Unreleased README' };
   if (path === 'agents.byVersion' && slug === 'draft-head')
     value = { ...value, fileTree: [], readmeContent: null };
+  if (path === 'skills.byVersion' && version === '0.9.0')
+    value = {
+      ...value,
+      version,
+      content: '# Original release\n\nKeep the original instructions.',
+    };
   if (locale !== 'es') return value;
   const translate = (item) => ({
     ...item,
@@ -144,36 +162,64 @@ createServer((request, response) => {
   const input = JSON.parse(
     new URL(request.url, 'http://localhost').searchParams.get('input') ?? '{}',
   );
-  const results = paths.map((path, index) => ({
-    result: {
-      data: {
-        json: localizedRead(
-          path,
-          input[index]?.json?.locale ?? input.json?.locale,
-          input[index]?.json?.slug ?? input.json?.slug,
-        ),
-        ...(path === 'agents.catalog'
-          ? {
-              meta: {
-                values: {
-                  'items.0.createdAt': ['Date'],
-                  'items.0.updatedAt': ['Date'],
+  const results = paths.map((path, index) => {
+    const args = input[index]?.json ?? input.json ?? {};
+    if (
+      path === 'skills.byVersion' &&
+      (!['1.0.0', '0.9.0'].includes(args.version) ||
+        args.slug === 'missing-snapshot')
+    )
+      return {
+        error: {
+          json: {
+            message: 'Skill version not found',
+            code: -32004,
+            data: { code: 'NOT_FOUND', httpStatus: 404, path },
+          },
+        },
+      };
+    return {
+      result: {
+        data: {
+          json: localizedRead(
+            path,
+            input[index]?.json?.locale ?? input.json?.locale,
+            input[index]?.json?.slug ?? input.json?.slug,
+            args.version,
+          ),
+          ...(path === 'skills.versions'
+            ? {
+                meta: {
+                  values: { '0.createdAt': ['Date'], '1.createdAt': ['Date'] },
+                  v: 1,
                 },
-                v: 1,
-              },
-            }
-          : {}),
-        ...(path.endsWith('bySlug') || path.endsWith('getPostBySlug')
-          ? {
-              meta: {
-                values: { createdAt: ['Date'], updatedAt: ['Date'] },
-                v: 1,
-              },
-            }
-          : {}),
+              }
+            : {}),
+          ...(['agents.catalog', 'skills.catalog'].includes(path)
+            ? {
+                meta: {
+                  values: {
+                    'items.0.createdAt': ['Date'],
+                    'items.0.updatedAt': ['Date'],
+                  },
+                  v: 1,
+                },
+              }
+            : {}),
+          ...(path.endsWith('bySlug') ||
+          path.endsWith('byVersion') ||
+          path.endsWith('getPostBySlug')
+            ? {
+                meta: {
+                  values: { createdAt: ['Date'], updatedAt: ['Date'] },
+                  v: 1,
+                },
+              }
+            : {}),
+        },
       },
-    },
-  }));
+    };
+  });
   response.writeHead(200, { 'content-type': 'application/json' });
   response.end(JSON.stringify(results));
 }).listen(4000, '127.0.0.1');

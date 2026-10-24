@@ -1,4 +1,6 @@
 import Link from 'next/link';
+import { getPublishedSkillBySlug } from '../../lib/skills';
+import { skillVersionHref } from '../../lib/skill-release';
 import { getServerT } from '../../lib/i18n/server';
 import { ContributorLogin } from '../../components/creator/contributor-login';
 import type { Metadata } from 'next';
@@ -14,6 +16,7 @@ export const metadata: Metadata = {
 
 export default async function CreatorPage() {
   const t = await getServerT();
+  const writer = await getPublishedSkillBySlug('writer').catch(() => null);
   const user = await getAuthenticatedUser();
   const metadataName =
     user?.user_metadata?.full_name ?? user?.user_metadata?.name;
@@ -35,18 +38,20 @@ export default async function CreatorPage() {
           {t('creator.pageInfo')}
         </p>
       </header>
-      <aside className="mb-8 rounded-xl border border-[var(--color-border-soft)] bg-[var(--color-bg-surface)] p-4 text-sm text-[var(--color-text-secondary)]">
-        <p>
-          {t('creator.writerRecommendation')}{' '}
-          <Link
-            href="/skills/writer"
-            className="font-semibold text-[var(--color-brand-garnet)] underline underline-offset-4"
-          >
-            Writer
-          </Link>
-          {t('creator.writerBenefit')}
-        </p>
-      </aside>
+      {writer && (
+        <aside className="mb-8 rounded-xl border border-[var(--color-border-soft)] bg-[var(--color-bg-surface)] p-4 text-sm text-[var(--color-text-secondary)]">
+          <p>
+            {t('creator.writerRecommendation')}{' '}
+            <Link
+              href={skillVersionHref('writer', writer.version)}
+              className="font-semibold text-[var(--color-brand-garnet)] underline underline-offset-4"
+            >
+              Writer
+            </Link>
+            {t('creator.writerBenefit')}
+          </p>
+        </aside>
+      )}
       {user ? (
         <>
           <CreatorSession authorName={authorName} />

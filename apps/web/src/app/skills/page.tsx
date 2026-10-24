@@ -39,7 +39,7 @@ export default async function SkillsPage() {
           {skills.map((skill) => (
             <Link
               key={skill.id}
-              href={`/skills/${skill.slug}`}
+              href={`/skills/${skill.slug}/${skill.version}`}
               className="group flex flex-col overflow-hidden rounded-[12px] border border-[var(--color-border-soft)] bg-[var(--color-bg-warm-white)] shadow-[var(--shadow-xs)] transition-all hover:-translate-y-[2px] hover:border-[var(--color-border-medium)] hover:shadow-[var(--shadow-sm)]"
             >
               <ContentCover

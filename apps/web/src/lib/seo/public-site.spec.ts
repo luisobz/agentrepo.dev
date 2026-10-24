@@ -13,3 +13,6 @@ it.each(['/skills', '/skills/public-example'])(
   'retains public skill analytics: %s',
   (path) => expect(isPublicPage(path)).toBe(true),
 );
+
+it('measures versioned public releases while excluding private skills', () =>
+  expect(isPublicPage('/skills/writer/1.0.0')).toBe(true));

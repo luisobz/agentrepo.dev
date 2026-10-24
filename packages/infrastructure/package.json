@@ -16,7 +16,7 @@
     "@react-pdf/renderer": "^4.5.1",
     "nodemailer": "^10.0.6",
     "react": "^19.2.0",
-    "zod": "4.4.3"
+    "zod": "4.6.6"
   },
   "devDependencies": {
     "@swc/helpers": "~0.5.18",

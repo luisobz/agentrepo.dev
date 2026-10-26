@@ -92,8 +92,8 @@ const LUISBZ: LocalizedPortfolioProfile = {
       role: { en: 'Head of Engineering', es: 'Head of Engineering' },
       company: 'ClickDefense',
       achievement: {
-        en: 'Product development and cross-functional ownership of cloud infrastructure, security and technical process automation. Designed and automated AWS and Azure infrastructure with Terraform and Ansible for staging, production and internal company needs. Centralised secrets management, short-lived certificate access and federated deployment authentication. Standardised CI/CD pipelines and implemented self-hosted runners. Analysed and optimised AWS and Azure costs through service optimisation and resource removal or replacement. Improved application and API performance, security and observability through retries, fallbacks and query optimisation. Research and development in fingerprinting and signal analysis for automated traffic detection. Technical coordination, documentation, knowledge transfer and task delegation. Technologies: AWS, Azure, Terraform, Ansible, GitHub Actions, OpenBao, Microsoft 365, Entra ID, Intune, Next.js, React, MongoDB, Traefik and nginx.',
-        es: 'Desarrollo de producto y responsabilidad transversal sobre infraestructura cloud, seguridad y automatización de procesos técnicos. Diseño y automatización de infraestructura en AWS y Azure con Terraform y Ansible para staging, producción y necesidades internas de la empresa. Gestión centralizada de secretos, acceso mediante certificados de corta duración y autenticación federada para despliegues. Estandarización de CI/CD e implementación de runners propios. Análisis y optimización de costes en AWS y Azure mediante optimización de servicios y retirada o cambio de recursos. Mejoras de rendimiento, seguridad y observabilidad en aplicaciones y APIs con reintentos, fallbacks y optimización de consultas. Investigación y desarrollo de fingerprinting y análisis de señales para detectar tráfico automatizado. Coordinación técnica, documentación, transferencia de conocimiento y distribución del trabajo. Tecnologías: AWS, Azure, Terraform, Ansible, GitHub Actions, OpenBao, Microsoft 365, Entra ID, Intune, Next.js, React, MongoDB, Traefik y nginx.',
+        en: 'Product development and technical leadership, with cross-functional responsibility for infrastructure, security and automation. Design and evolution of cloud platforms and internal infrastructure. Improvements to security, identity and access management. Automation of development and software delivery processes. Cost and resource optimisation. Improvements to application and API performance, reliability and observability. Analysis and identification of automated traffic. Technical coordination, documentation and knowledge transfer.',
+        es: 'Desarrollo de producto y liderazgo técnico, con responsabilidad transversal sobre infraestructura, seguridad y automatización. Diseño y evolución de plataformas cloud e infraestructura interna. Mejora de la seguridad, la gestión de identidades y los accesos. Automatización de procesos de desarrollo y entrega de software. Optimización de costes y uso de recursos. Mejora del rendimiento, la fiabilidad y la observabilidad de aplicaciones y APIs. Análisis e identificación de tráfico automatizado. Coordinación técnica, documentación y transferencia de conocimiento.',
       },
     },
     {
@@ -172,8 +172,8 @@ const LUISBZ: LocalizedPortfolioProfile = {
         es: 'Backend Robusto y Cloud',
       },
       description: {
-        en: 'Microservices and APIs built to be operated: typed, tested, observable.',
-        es: 'Microservicios y APIs pensados para operarse: tipados, testeados, observables.',
+        en: 'Cloud infrastructure and APIs: delivery automation, security, identity and observability. Analysis and identification of automated traffic.',
+        es: 'Infraestructura cloud y APIs: automatización de entrega, seguridad, identidad y observabilidad. Análisis e identificación de tráfico automatizado.',
       },
       technologies: [
         'Node.js (NestJS, Fastify)',
@@ -184,6 +184,7 @@ const LUISBZ: LocalizedPortfolioProfile = {
         'Terraform · Ansible · Docker',
         'GitHub Actions · self-hosted runners',
         'OpenBao · Microsoft 365 · Entra ID · Intune',
+        'Short-lived certificates · federated authentication',
         'Traefik · nginx',
       ],
     },

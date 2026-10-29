@@ -2,7 +2,7 @@
 
 import { motion } from 'framer-motion';
 import { ArrowLeft } from 'lucide-react';
-import Link from 'next/link';
+import Link from '../localized-link';
 import type { PortfolioProfile } from '../../lib/portfolio';
 import { useT } from '../../lib/i18n/use-t';
 

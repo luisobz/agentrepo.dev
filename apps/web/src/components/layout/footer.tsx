@@ -1,6 +1,6 @@
 'use client';
 
-import Link from 'next/link';
+import Link from '../localized-link';
 import { usePathname } from 'next/navigation';
 import { AvatarSlot } from '@agentrepo/avatar';
 import { cn } from '@agentrepo/ui';

@@ -1,4 +1,5 @@
 'use client';
+import { localizedHref } from '../../lib/i18n/routing';
 
 import { AvatarSlot, useAvatar } from '@agentrepo/avatar';
 import { skillTypeSchema } from '@agentrepo/trpc/schemas';
@@ -107,7 +108,7 @@ export function CommandPalette() {
 
   const openHit = (hit: SearchHit) => {
     close();
-    router.push(hitHref(hit));
+    router.push(localizedHref(hitHref(hit), locale));
   };
 
   const handleKeyDown = (event: React.KeyboardEvent) => {

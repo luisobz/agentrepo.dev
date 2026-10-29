@@ -1,4 +1,4 @@
-import Link from 'next/link';
+import Link from '../../../../components/localized-link';
 import { BlogArticle } from '../../../../components/blog/blog-article';
 import { PublishBlogButton } from '../../../../components/blog/publish-button';
 import {

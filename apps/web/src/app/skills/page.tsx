@@ -1,4 +1,4 @@
-import Link from 'next/link';
+import Link from '../../components/localized-link';
 import { PrivateSkillsLink } from '../../components/skills/private-link';
 import type { Metadata } from 'next';
 import { ContentCover, TypeChip } from '@agentrepo/ui';

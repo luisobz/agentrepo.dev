@@ -143,7 +143,7 @@ test('creators can open Writer before preparing a contribution', async ({
 }) => {
   await page.goto('/creator');
   const writer = page.getByRole('link', { name: 'Writer', exact: true });
-  await expect(writer).toHaveAttribute('href', '/skills/writer/1.0.0');
+  await expect(writer).toHaveAttribute('href', '/en/skills/writer/1.0.0');
   await writer.click();
   await expect(page).toHaveURL(/\/skills\/writer\/1\.0\.0$/);
 });

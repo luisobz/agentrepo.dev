@@ -1,8 +1,10 @@
+import { localizedAlternates } from '../../../lib/seo/localized-metadata';
+import { localizedHref } from '../../../lib/i18n/routing';
 import { ContentLanguage } from '../../../components/content-language';
 import { getServerLocale } from '../../../lib/i18n/server';
 import { SHARE_IMAGE } from '../../../lib/seo/public-site';
 import { RelatedLinks } from '@agentrepo/ui';
-import Link from 'next/link';
+import Link from '../../../components/localized-link';
 import { notFound } from 'next/navigation';
 import type { Metadata } from 'next';
 import { ContentCover } from '@agentrepo/ui';
@@ -30,6 +32,7 @@ export async function generateMetadata({
   params,
 }: AgentPageProps): Promise<Metadata> {
   const { slug } = await params;
+  const locale = await getServerLocale();
   const agent = await getPublishedAgentBySlug(slug);
   if (!agent) {
     return { title: 'Agent not found | AgentRepo.dev' };
@@ -38,13 +41,14 @@ export async function generateMetadata({
   return {
     title: `${agent.title} | AgentRepo.dev Agents`,
     description: agent.shortDescription,
-    alternates: { canonical: `/agents/${slug}` },
+    alternates: localizedAlternates(`/agents/${slug}`, locale),
     openGraph: {
       images: [SHARE_IMAGE],
+      locale: locale === 'es' ? 'es_ES' : 'en_US',
       title: agent.title,
       description: agent.shortDescription,
       type: 'article',
-      url: `/agents/${agent.slug}`,
+      url: localizedHref(`/agents/${agent.slug}`, locale),
     },
   };
 }

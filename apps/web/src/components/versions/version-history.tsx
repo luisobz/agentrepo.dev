@@ -1,4 +1,4 @@
-import Link from 'next/link';
+import Link from '../localized-link';
 import { formatDate } from '../../lib/public-content';
 
 export interface VersionHistoryEntry {

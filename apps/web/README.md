@@ -130,3 +130,20 @@ serialization escapes HTML script boundaries; it contains no adoption or rating
 claims. Browser regressions cover home, catalogues and details with JavaScript
 disabled. This improves readability; indexing and search placement remain up to
 the search engines.
+
+## Public language URLs
+
+Public catalogue pages use `/es/...` and `/en/...`. The URL fixes the language
+for server HTML, metadata, navigation and downloads, independently of browser
+preferences or cookies. Stable catalogue slugs and pinned skill versions remain
+unchanged. Legacy URLs redirect temporarily to the saved language preference,
+then the browser's weighted Accept-Language preference, with English as fallback.
+Only manual language selection writes the preference cookie.
+
+Middleware validates the public route and forwards the selected language;
+Next.js rewrites the prefix to the existing page implementation. Auth callbacks,
+APIs, Creator and private review/skill tools keep their existing routes and
+access checks. Language-prefixed aliases of those tools return 404. Canonicals,
+reciprocal hreflang links, Open Graph URLs and sitemap entries identify the
+language-specific pages. Share the explicit URL for the intended preview language;
+social platforms may cache previews already attached to older posts.

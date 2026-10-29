@@ -1,12 +1,17 @@
 import type { Metadata } from 'next';
-import { getServerT } from '../../lib/i18n/server';
+import { getServerT, getServerLocale } from '../../lib/i18n/server';
 import { CodeBlock } from '../../components/cli/code-block';
 
-export const metadata: Metadata = {
-  title: 'CLI | AgentRepo.dev',
-  description:
-    'Install pinned skill snapshots with pnpm and agent.json. Choose your tool, verify integrity and reproduce installations.',
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const locale = await getServerLocale();
+  return {
+    title: 'CLI | AgentRepo.dev',
+    description:
+      locale === 'es'
+        ? 'Instala skills con versiones fijadas mediante el CLI y agent.json. Elige tu herramienta y verifica la integridad de la instalación.'
+        : 'Install pinned skills with the CLI and agent.json. Choose your tool and verify installation integrity.',
+  };
+}
 const RELEASE =
   'https://github.com/luisobz/agentrepo.dev/releases/tag/cli-v0.3.1';
 const PACKAGE =

@@ -1,4 +1,4 @@
-import Link from 'next/link';
+import Link from '../../components/localized-link';
 import type { Metadata } from 'next';
 import { ContentCover } from '@agentrepo/ui';
 import { getPublishedPosts } from '../../lib/blog';

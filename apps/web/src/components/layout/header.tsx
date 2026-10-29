@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import Link from 'next/link';
+import Link from '../localized-link';
 import Image from 'next/image';
 import { usePathname } from 'next/navigation';
 import { AvatarSlot, useAvatar } from '@agentrepo/avatar';

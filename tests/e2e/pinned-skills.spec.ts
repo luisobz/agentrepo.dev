@@ -6,7 +6,10 @@ test('catalogue links pin releases and unversioned/legacy links resolve to exact
 }) => {
   await page.goto('/skills');
   const skill = page.getByRole('link', { name: /Linked project/ });
-  await expect(skill).toHaveAttribute('href', '/skills/linked-project/1.0.0');
+  await expect(skill).toHaveAttribute(
+    'href',
+    '/en/skills/linked-project/1.0.0',
+  );
   await skill.click();
   await expect(page).toHaveURL(/\/skills\/linked-project\/1\.0\.0$/);
   await page.goto('/skills/linked-project');
@@ -27,18 +30,18 @@ test('old release content, download and metadata remain pinned when latest diffe
   await expect(page.getByRole('main')).not.toContainText('clear language');
   await expect(page.locator('link[rel="canonical"]')).toHaveAttribute(
     'href',
-    'https://agentrepo.dev/skills/linked-project/0.9.0',
+    'https://agentrepo.dev/en/skills/linked-project/0.9.0',
   );
   await expect(page.locator('meta[property="og:url"]')).toHaveAttribute(
     'content',
-    'https://agentrepo.dev/skills/linked-project/0.9.0',
+    'https://agentrepo.dev/en/skills/linked-project/0.9.0',
   );
   await expect(
     page.getByRole('link', { name: 'View latest (v1.0.0)' }),
-  ).toHaveAttribute('href', '/skills/linked-project/1.0.0');
+  ).toHaveAttribute('href', '/en/skills/linked-project/1.0.0');
   await expect(
     page.getByRole('link', { name: '1.0.0', exact: true }),
-  ).toHaveAttribute('href', '/skills/linked-project/1.0.0');
+  ).toHaveAttribute('href', '/en/skills/linked-project/1.0.0');
   const downloading = page.waitForEvent('download');
   await page.getByRole('button', { name: 'Download .md', exact: true }).click();
   const download = await downloading;
@@ -79,11 +82,11 @@ test('missing or invalid snapshots never display latest or an unreleased draft',
 test('agents receive HTTP redirects without needing JavaScript', async ({
   request,
 }) => {
-  const response = await request.get('/skills/linked-project', {
+  const response = await request.get('/en/skills/linked-project', {
     maxRedirects: 0,
   });
   expect(response.status()).toBe(307);
   expect(response.headers()['location']).toContain(
-    '/skills/linked-project/1.0.0',
+    '/en/skills/linked-project/1.0.0',
   );
 });

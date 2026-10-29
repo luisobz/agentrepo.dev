@@ -1,3 +1,6 @@
+import { localizedAlternates } from '../lib/seo/localized-metadata';
+import { localizedHref, isLocalizedPage } from '../lib/i18n/routing';
+import { LOCALES } from '@agentrepo/ui';
 import type { MetadataRoute } from 'next';
 import { getPublishedAgents } from '../lib/agents';
 import { getPublishedPosts } from '../lib/blog';
@@ -6,6 +9,20 @@ import { getPublishedSkills } from '../lib/skills';
 const SITE_URL = 'https://agentrepo.dev';
 
 export const dynamic = 'force-dynamic';
+
+function localizeEntries(
+  entries: MetadataRoute.Sitemap,
+): MetadataRoute.Sitemap {
+  return entries.flatMap((entry) => {
+    const path = new URL(entry.url).pathname;
+    if (!isLocalizedPage(path)) return [entry];
+    return LOCALES.map((locale) => ({
+      ...entry,
+      url: SITE_URL + localizedHref(path, locale),
+      alternates: { languages: localizedAlternates(path, locale).languages },
+    }));
+  });
+}
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const staticEntries: MetadataRoute.Sitemap = [
@@ -29,7 +46,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       getPublishedAgents(),
       getPublishedPosts(),
     ]);
-    return [
+    return localizeEntries([
       ...staticEntries,
       ...skills.map((skill) => ({
         url: `${SITE_URL}/skills/${skill.slug}/${skill.version}`,
@@ -43,9 +60,9 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
         url: `${SITE_URL}/blog/${post.slug}`,
         lastModified: post.updatedAt,
       })),
-    ];
+    ]);
   } catch {
     // The API may be unreachable (e.g. build time); static routes still ship.
-    return staticEntries;
+    return localizeEntries(staticEntries);
   }
 }

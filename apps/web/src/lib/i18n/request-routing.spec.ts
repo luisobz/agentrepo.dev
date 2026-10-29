@@ -9,6 +9,8 @@ it('preserves POST bodies on operational routes', async () => {
   });
   const routing = prepareLocaleRequest(original);
   expect(routing.redirect).toBeNull();
+  expect(original.bodyUsed).toBe(false);
+  expect(routing.request).toBe(original);
   expect(await routing.request.json()).toEqual({ example: true });
 });
 it('preserves refreshed cookies and cache headers through the locale rewrite', () => {
@@ -25,4 +27,12 @@ it('preserves refreshed cookies and cache headers through the locale rewrite', (
   expect(result.headers.get('x-middleware-request-cookie')).toContain(
     'sb-test-auth-token=refreshed',
   );
+});
+
+it('does not transfer a public server-action body during language routing', async () => {
+  const original = new NextRequest('https://example.test/es/blog/example', { method: 'POST', body: 'action-payload' });
+  const routing = prepareLocaleRequest(original);
+  expect(original.bodyUsed).toBe(false);
+  expect(routing.request.method).toBe('POST');
+  expect(await original.text()).toBe('action-payload');
 });

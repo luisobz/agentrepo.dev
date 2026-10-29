@@ -40,7 +40,11 @@ export function prepareLocaleRequest(original: NextRequest) {
     };
   }
   target.pathname = pathname;
-  const request = new NextRequest(original, { headers });
+  // Constructing a Request from a POST transfers its body; keep operational requests intact.
+  for (const name of [REQUEST_LOCALE, REQUEST_PATH]) original.headers.set(name, headers.get(name) ?? '');
+  const request = locale && ['GET', 'HEAD'].includes(original.method)
+    ? new NextRequest(target, { headers, method: original.method })
+    : original;
   request.nextUrl.pathname = pathname;
   return { request, redirect: null, target: locale ? target : null, headers };
 }

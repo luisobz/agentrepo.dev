@@ -59,7 +59,8 @@ jobs:
   # Puerta de calidad: lint + tests + build ANTES de tocar producción.
   # Un build que compile pero rompa tests no debe llegar a desplegarse.
   verify:
-    runs-on: ubuntu-latest
+    # Match the Linux distribution supported by the pinned Playwright release.
+    runs-on: ubuntu-24.04
     env:
       NEXT_PUBLIC_API_URL: http://localhost:4000
       NEXT_PUBLIC_CLOUDFLARE_ANALYTICS_TOKEN: '11111111111111111111111111111111'

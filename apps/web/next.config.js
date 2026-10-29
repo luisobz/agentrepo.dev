@@ -6,6 +6,9 @@ const { composePlugins, withNx } = require('@nx/next');
  **/
 const nextConfig = {
   output: 'standalone',
+  async rewrites() {
+    return [{ source: '/:locale(en|es)/:path*', destination: '/:path*' }];
+  },
   async headers() {
     return [
       {

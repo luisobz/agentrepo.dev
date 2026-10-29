@@ -25,7 +25,8 @@ env:
 
 jobs:
   verify:
-    runs-on: ubuntu-latest
+    # Match the Linux distribution supported by the pinned Playwright release.
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
 

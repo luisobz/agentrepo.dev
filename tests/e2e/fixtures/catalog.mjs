@@ -99,6 +99,13 @@ function read(path) {
       content:
         '---\nname: linked-project\ndescription: Skill metadata\n---\n\n# Linked skill\n\nUse **clear language**.\n\n---\n\nKeep this separator.',
     };
+  if (path === 'blog.catalog')
+    return {
+      items: [read('blog.getPostBySlug')],
+      total: 1,
+      page: 1,
+      pageSize: 100,
+    };
   if (path === 'blog.getPostBySlug')
     return {
       ...shared,
@@ -195,7 +202,9 @@ createServer((request, response) => {
                 },
               }
             : {}),
-          ...(['agents.catalog', 'skills.catalog'].includes(path)
+          ...(['agents.catalog', 'skills.catalog', 'blog.catalog'].includes(
+            path,
+          )
             ? {
                 meta: {
                   values: {

@@ -1,4 +1,4 @@
-import Link from 'next/link';
+import Link from '../../components/localized-link';
 import { getPublishedSkillBySlug } from '../../lib/skills';
 import { skillVersionHref } from '../../lib/skill-release';
 import { getServerT } from '../../lib/i18n/server';

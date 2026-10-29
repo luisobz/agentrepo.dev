@@ -24,7 +24,7 @@ test('catalogue and home remain readable without JavaScript', async ({
   );
   await page.goto('/skills');
   await expect(page.locator('main h1').first()).toBeVisible();
-  await expect(page.locator('main a[href^="/skills/"]').first()).toBeVisible();
+  await expect(page.locator('main a[href^="/en/skills/"]').first()).toBeVisible();
   await expect(page.getByText('Loading content…')).toHaveCount(0);
 });
 

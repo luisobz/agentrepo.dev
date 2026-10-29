@@ -1,4 +1,3 @@
-import type { Metadata } from 'next';
 import { Hero } from '../components/home/hero';
 import { HomeBackground } from '../components/home/home-background';
 import { CatalogueOverview } from '../components/home/catalogue-overview';
@@ -8,13 +7,6 @@ import {
   serializeStructuredData,
 } from '../lib/seo/structured-data';
 import { LatestSection } from '../components/home/latest-section';
-
-export const metadata: Metadata = {
-  title: { absolute: 'AgentRepo.dev — AI skills, agents and practical guides' },
-  alternates: { canonical: '/' },
-  description:
-    'Curated skills, agents and notes for building with AI — searchable, versioned and ready to reuse.',
-};
 
 export default async function HomePage() {
   const locale = await getServerLocale();

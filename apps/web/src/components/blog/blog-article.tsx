@@ -1,5 +1,5 @@
 import { ContentCover, MarkdownContent, RelatedLinks } from '@agentrepo/ui';
-import Link from 'next/link';
+import Link from '../localized-link';
 import { ContentLanguage } from '../content-language';
 import type { BlogPost } from '../../lib/blog';
 import { formatDate } from '../../lib/public-content';

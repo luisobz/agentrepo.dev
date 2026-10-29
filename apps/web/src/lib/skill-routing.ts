@@ -48,7 +48,10 @@ export async function routePublicSkill(
   try {
     if (!floating && selected) {
       const locale =
-        request.cookies.get('locale')?.value === 'es' ? 'es' : 'en';
+        (request.headers.get('x-agentrepo-locale') ??
+          request.cookies.get('locale')?.value) === 'es'
+          ? 'es'
+          : 'en';
       const pinned = await serverTrpc.skills.byVersion.query({
         slug,
         version: selected,

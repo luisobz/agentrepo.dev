@@ -1,3 +1,5 @@
+import { localizedAlternates } from '../../../lib/seo/localized-metadata';
+import { localizedHref } from '../../../lib/i18n/routing';
 import { BlogArticle } from '../../../components/blog/blog-article';
 import { getServerLocale } from '../../../lib/i18n/server';
 import { SHARE_IMAGE } from '../../../lib/seo/public-site';
@@ -24,6 +26,7 @@ export async function generateMetadata({
   params,
 }: BlogPostPageProps): Promise<Metadata> {
   const { slug } = await params;
+  const locale = await getServerLocale();
   const post = await getPublishedPostBySlug(slug);
   if (!post) {
     return { title: 'Post not found | AgentRepo.dev' };
@@ -33,15 +36,16 @@ export async function generateMetadata({
   return {
     title: `${post.title} | AgentRepo.dev Blog`,
     description,
-    alternates: { canonical: `/blog/${slug}` },
+    alternates: localizedAlternates(`/blog/${slug}`, locale),
     openGraph: {
       images: [SHARE_IMAGE],
+      locale: locale === 'es' ? 'es_ES' : 'en_US',
       title: post.title,
       description,
       type: 'article',
       publishedTime: post.createdAt.toISOString(),
       modifiedTime: post.updatedAt.toISOString(),
-      url: `/blog/${post.slug}`,
+      url: localizedHref(`/blog/${post.slug}`, locale),
     },
     twitter: {
       card: 'summary_large_image',

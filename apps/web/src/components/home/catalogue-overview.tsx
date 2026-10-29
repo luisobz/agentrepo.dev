@@ -1,4 +1,4 @@
-import Link from 'next/link';
+import Link from '../localized-link';
 import { getServerLocale } from '../../lib/i18n/server';
 
 const copy = {

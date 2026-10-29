@@ -1,5 +1,5 @@
 'use client';
-import Link from 'next/link';
+import Link from '../localized-link';
 import { useLocale } from '@agentrepo/ui';
 import { useAdminAccess } from '../layout/admin-link';
 export function PrivateSkillsLink() {

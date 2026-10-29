@@ -1,12 +1,14 @@
+import { splitLocalePath } from '../i18n/routing';
 import type { Metadata } from 'next';
 export const SITE_URL = 'https://agentrepo.dev';
 export const SHARE_IMAGE = {
   url: '/og-cover.jpg',
   width: 1280,
   height: 672,
-  alt: 'AgentRepo.dev — Discover, learn and build with AI skills and agents',
+  alt: 'AgentRepo.dev: Discover, learn and build with AI skills and agents',
 };
-export function isPublicPage(path: string): boolean {
+export function isPublicPage(input: string): boolean {
+  const { pathname: path } = splitLocalePath(input);
   if (path === '/skills/private' || path.startsWith('/skills/private/'))
     return false;
   if (path === '/blog/review' || path.startsWith('/blog/review/')) return false;
@@ -22,7 +24,7 @@ const description =
 export const PUBLIC_SITE_METADATA: Metadata = {
   metadataBase: new URL(SITE_URL),
   title: {
-    default: 'AgentRepo.dev — AI skills and agents',
+    default: 'AgentRepo.dev: AI skills and agents',
     template: '%s | AgentRepo.dev',
   },
   description,
@@ -31,7 +33,7 @@ export const PUBLIC_SITE_METADATA: Metadata = {
     type: 'website',
     url: SITE_URL,
     siteName: 'AgentRepo.dev',
-    title: 'AgentRepo.dev — AI skills and agents',
+    title: 'AgentRepo.dev: AI skills and agents',
     description,
     locale: 'en_US',
     alternateLocale: ['es_ES'],
@@ -39,7 +41,7 @@ export const PUBLIC_SITE_METADATA: Metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'AgentRepo.dev — AI skills and agents',
+    title: 'AgentRepo.dev: AI skills and agents',
     description,
     images: [SHARE_IMAGE.url],
   },

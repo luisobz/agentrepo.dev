@@ -1,4 +1,4 @@
-import Link from 'next/link';
+import Link from '../localized-link';
 import { ContentCover, TypeChip, type ContentCoverKind } from '@agentrepo/ui';
 import { Inbox } from 'lucide-react';
 import { getServerLocale, getServerT } from '../../lib/i18n/server';

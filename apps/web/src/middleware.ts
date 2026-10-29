@@ -1,3 +1,7 @@
+import {
+  prepareLocaleRequest,
+  finishLocaleResponse,
+} from './lib/i18n/request-routing';
 import { createServerClient } from '@supabase/ssr';
 import { routePublicSkill } from './lib/skill-routing';
 import { NextRequest, NextResponse } from 'next/server';
@@ -17,7 +21,13 @@ import { serverTrpc } from './lib/trpc-server';
  * access tokens with the HttpOnly refresh cookie, and the JS-readable
  * user-info cookie is kept in sync with the (validated) session state.
  */
-export async function middleware(request: NextRequest) {
+export async function middleware(original: NextRequest) {
+  const routing = prepareLocaleRequest(original);
+  if (routing.redirect) return routing.redirect;
+  return finishLocaleResponse(await refreshSession(routing.request), routing);
+}
+
+async function refreshSession(request: NextRequest) {
   const publicSkillResponse = await routePublicSkill(request);
   if (publicSkillResponse) return publicSkillResponse;
   const isReview =

@@ -1,3 +1,6 @@
+import { headers } from 'next/headers';
+import { REQUEST_PATH } from '../lib/i18n/routing';
+import { localizedAlternates } from '../lib/seo/localized-metadata';
 import { GeistSans } from 'geist/font/sans';
 import { GeistMono } from 'geist/font/mono';
 import '@agentrepo/ui/styles/globals.css';
@@ -13,7 +16,33 @@ import type { Metadata } from 'next';
 import { PUBLIC_SITE_METADATA } from '../lib/seo/public-site';
 import { WebAnalytics } from '../components/analytics/web-analytics';
 
-export const metadata: Metadata = PUBLIC_SITE_METADATA;
+export async function generateMetadata(): Promise<Metadata> {
+  const locale = await getServerLocale();
+  const pathname = (await headers()).get(REQUEST_PATH) ?? '/';
+  const title =
+    locale === 'es'
+      ? 'AgentRepo.dev: skills, agentes y guías de IA'
+      : 'AgentRepo.dev: AI skills, agents and practical guides';
+  const description =
+    locale === 'es'
+      ? 'Descubre skills reutilizables, proyectos de agentes y guías prácticas de IA. Instala versiones fijadas con el CLI de AgentRepo.'
+      : 'Discover reusable AI skills, agent projects and practical guides. Install pinned versions with the AgentRepo CLI.';
+  return {
+    ...PUBLIC_SITE_METADATA,
+    title: { default: title, template: '%s | AgentRepo.dev' },
+    description,
+    alternates: localizedAlternates(pathname, locale),
+    openGraph: {
+      ...PUBLIC_SITE_METADATA.openGraph,
+      title,
+      description,
+      url: localizedAlternates(pathname, locale).canonical,
+      locale: locale === 'es' ? 'es_ES' : 'en_US',
+      alternateLocale: [locale === 'es' ? 'en_US' : 'es_ES'],
+    },
+    twitter: { ...PUBLIC_SITE_METADATA.twitter, title, description },
+  };
+}
 
 export default async function RootLayout({
   children,

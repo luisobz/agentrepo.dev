@@ -27,7 +27,7 @@ import { middleware } from './middleware';
 beforeEach(() => vi.clearAllMocks());
 it('anonymous navigation skips auth entirely and clears stale display information', async () => {
   const response = await middleware(
-    new NextRequest('https://example.test/agents', {
+    new NextRequest('https://example.test/en/agents', {
       headers: { cookie: 'agentrepo_user_info=stale' },
     }),
   );
@@ -43,7 +43,7 @@ it('uses verified claims for session refresh and display without a getUser round
     error: null,
   });
   const response = await middleware(
-    new NextRequest('https://example.test/agents', {
+    new NextRequest('https://example.test/en/agents', {
       headers: { cookie: 'sb-example-auth-token.0=session' },
     }),
   );
@@ -59,7 +59,7 @@ it('invalid claims never populate user display data', async () => {
     error: { message: 'invalid' },
   });
   const response = await middleware(
-    new NextRequest('https://example.test/agents', {
+    new NextRequest('https://example.test/en/agents', {
       headers: {
         cookie: 'sb-example-auth-token=session; agentrepo_user_info=stale',
       },
@@ -135,18 +135,18 @@ it.each([
 it('returns an HTTP temporary redirect for floating skill aliases', async () => {
   versions.mockResolvedValue([{ version: '0.1.0', isLatest: true }]);
   const response = await middleware(
-    new NextRequest('https://example.test/skills/writer'),
+    new NextRequest('https://example.test/en/skills/writer'),
   );
   expect(response.status).toBe(307);
   expect(response.headers.get('cache-control')).toBe('no-store');
   expect(response.headers.get('location')).toBe(
-    'https://example.test/skills/writer/0.1.0',
+    'https://example.test/en/skills/writer/0.1.0',
   );
 });
 it('returns HTTP 404 before streaming when a pinned release does not exist', async () => {
   snapshot.mockResolvedValue(null);
   const response = await middleware(
-    new NextRequest('https://example.test/skills/writer/9.9.9'),
+    new NextRequest('https://example.test/en/skills/writer/9.9.9'),
   );
   expect(response.status).toBe(404);
   expect(response.headers.get('x-robots-tag')).toContain('noindex');
@@ -155,7 +155,7 @@ it('returns HTTP 404 before streaming when a pinned release does not exist', asy
 it('fails with 503 rather than inventing a missing version when metadata is unavailable', async () => {
   snapshot.mockRejectedValue(new TypeError('offline'));
   const response = await middleware(
-    new NextRequest('https://example.test/skills/writer/0.1.0'),
+    new NextRequest('https://example.test/en/skills/writer/0.1.0'),
   );
   expect(response.status).toBe(503);
   expect(response.headers.get('retry-after')).toBe('5');
@@ -167,8 +167,53 @@ it('keeps exact path versions independent from conflicting legacy query paramete
   ]);
   snapshot.mockResolvedValue({ version: '0.1.0' });
   const response = await middleware(
-    new NextRequest('https://example.test/skills/writer/0.1.0?version=0.1.1'),
+    new NextRequest(
+      'https://example.test/en/skills/writer/0.1.0?version=0.1.1',
+    ),
   );
   expect(response.status).toBe(200);
   expect(response.headers.get('location')).toBeNull();
 });
+
+it('redirects new Spanish visitors and preserves legacy query parameters', async () => {
+  const response = await middleware(
+    new NextRequest('https://example.test/blog/example?ref=shared', {
+      headers: { 'accept-language': 'es-ES,es;q=0.9,en;q=0.5' },
+    }),
+  );
+  expect(response.headers.get('location')).toBe(
+    'https://example.test/es/blog/example?ref=shared',
+  );
+  expect(response.headers.get('vary')).toContain('Accept-Language');
+});
+it('explicit language wins over cookie, browser language and forged internal headers', async () => {
+  const response = await middleware(
+    new NextRequest('https://example.test/es/blog/example', {
+      headers: {
+        cookie: 'locale=en',
+        'accept-language': 'en-US',
+        'x-agentrepo-locale': 'en',
+      },
+    }),
+  );
+  expect(response.headers.get('x-middleware-next')).toBe('1');
+  expect(response.headers.get('x-middleware-request-x-agentrepo-locale')).toBe(
+    'es',
+  );
+});
+it.each([
+  '/es/blog/review/id',
+  '/en/skills/private/id',
+  '/es/api/creator/submit',
+  '/es/skills/%70rivate/id',
+  '/en/blog/%72eview/id',
+])(
+  'never rewrites localized private or operational aliases: %s',
+  async (path) => {
+    const response = await middleware(
+      new NextRequest('https://example.test' + path),
+    );
+    expect(response.status).toBe(404);
+    expect(response.headers.get('x-middleware-rewrite')).toBeNull();
+  },
+);

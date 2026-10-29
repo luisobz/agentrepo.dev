@@ -1,8 +1,10 @@
+import { localizedAlternates } from '../../../../lib/seo/localized-metadata';
+import { localizedHref } from '../../../../lib/i18n/routing';
 import { ContentLanguage } from '../../../../components/content-language';
 import { getServerLocale } from '../../../../lib/i18n/server';
 import { SHARE_IMAGE } from '../../../../lib/seo/public-site';
 import { RelatedLinks } from '@agentrepo/ui';
-import Link from 'next/link';
+import Link from '../../../../components/localized-link';
 import { notFound } from 'next/navigation';
 import type { Metadata } from 'next';
 import { ContentCover, TypeChip } from '@agentrepo/ui';
@@ -25,6 +27,7 @@ export async function generateMetadata({
   params,
 }: SkillPageProps): Promise<Metadata> {
   const { slug, version } = await params;
+  const locale = await getServerLocale();
   if (version === 'latest') redirect(`/skills/${encodeURIComponent(slug)}`);
   const release = await getPinnedSkillRelease(slug, version);
   if (!release) notFound();
@@ -32,17 +35,19 @@ export async function generateMetadata({
   const path = skillVersionHref(slug, version);
 
   const description =
-    skill.description ?? `${skill.title} — a reusable ${skill.type} skill.`;
+    skill.description ??
+    `${skill.title}: ${locale === 'es' ? 'una skill reutilizable' : 'a reusable skill'}.`;
   return {
     title: `${skill.title} v${version} | AgentRepo.dev Skills`,
     description,
-    alternates: { canonical: path },
+    alternates: localizedAlternates(path, locale),
     openGraph: {
       images: [SHARE_IMAGE],
+      locale: locale === 'es' ? 'es_ES' : 'en_US',
       title: `${skill.title} v${version}`,
       description,
       type: 'article',
-      url: path,
+      url: localizedHref(path, locale),
     },
   };
 }

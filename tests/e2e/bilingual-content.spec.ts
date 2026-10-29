@@ -12,10 +12,6 @@ test('language selection refreshes skill prose and its actual download', async (
   if (isMobile)
     await page.getByRole('button', { name: 'Open menu', exact: true }).click();
   await page.getByRole('button', { name: 'es', exact: true }).click();
-  if (isMobile)
-    await page
-      .getByRole('button', { name: 'Cerrar menú', exact: true })
-      .click();
   await expect(
     page.getByRole('heading', { name: 'Skill enlazada', exact: true }),
   ).toBeVisible();

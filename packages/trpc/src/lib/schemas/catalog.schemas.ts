@@ -145,8 +145,15 @@ function requirePriceWhenPremium(
 }
 
 export const contentLocaleSchema = z.enum(['en', 'es']);
+export const readingSummarySchema = z
+  .object({
+    summary: z.string().trim().min(1).max(1200),
+    points: z.array(z.string().trim().min(1).max(120)).max(3).default([]),
+  })
+  .strict();
 const proseTranslationSchema = z
   .object({
+    lazyRead: readingSummarySchema.nullable().optional(),
     title: z.string().trim().min(1).max(200).optional(),
     description: z.string().max(500).optional(),
     shortDescription: z.string().max(500).optional(),
@@ -199,7 +206,7 @@ const agentTranslationsSchema = translatedLocales(
 );
 const blogTranslationsSchema = translatedLocales(
   proseTranslationSchema
-    .pick({ title: true, excerpt: true, content: true })
+    .pick({ title: true, excerpt: true, content: true, lazyRead: true })
     .required({ title: true, content: true }),
 );
 
@@ -302,6 +309,7 @@ export const updateAgentSchema = agentBaseSchema
 // ─── BlogPost ───────────────────────────────────
 
 const blogPostBaseSchema = z.object({
+  lazyRead: readingSummarySchema.nullable().optional(),
   sourceLocale: contentLocaleSchema.optional(),
   translations: blogTranslationsSchema.optional(),
   relatedLinks: relatedLinksSchema,

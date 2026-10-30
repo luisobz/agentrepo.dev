@@ -147,3 +147,18 @@ access checks. Language-prefixed aliases of those tools return 404. Canonicals,
 reciprocal hreflang links, Open Graph URLs and sitemap entries identify the
 language-specific pages. Share the explicit URL for the intended preview language;
 social platforms may cache previews already attached to older posts.
+
+## Lazy Read
+
+Every article includes a native, initially collapsed summary disclosure, usable
+with touch or keyboard without client JavaScript. Store `lazyRead` as
+`{ summary, points }` on the source article and on each translated body. Summaries
+use plain text (up to 1,200 characters) and up to three points (120 characters
+each). Explain the article in simple terms without adding claims absent from its
+sources. Administrators can edit these fields in the blog form and preview the
+result before publication. No model is called when a reader opens the panel.
+
+Legacy articles and new submissions without a curated summary use their localized
+excerpt or first prose paragraph. A missing translated summary falls back to the
+translated prose, never to a summary in another language. Catalogue listings omit
+summary bodies; article detail and authorized draft previews include them.

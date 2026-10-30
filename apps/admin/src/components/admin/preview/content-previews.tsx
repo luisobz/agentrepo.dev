@@ -1,6 +1,11 @@
 'use client';
 
-import { ContentCover, MarkdownContent, TypeChip } from '@agentrepo/ui';
+import {
+  ContentCover,
+  LazyRead,
+  MarkdownContent,
+  TypeChip,
+} from '@agentrepo/ui';
 import type { SkillType } from '@agentrepo/trpc/schemas';
 
 const CARD_CLASSES =
@@ -28,15 +33,24 @@ export function BlogSummaryPreview({
     <PreviewFrame>
       <div className={`mx-auto max-w-xl ${CARD_CLASSES}`}>
         {headerImageUrl && (
-          <ContentCover title={title} kind="blog" imageUrl={headerImageUrl} className="h-36 w-full" />
+          <ContentCover
+            title={title}
+            kind="blog"
+            imageUrl={headerImageUrl}
+            className="h-36 w-full"
+          />
         )}
         <article className="p-6">
           <time className="font-mono text-xs uppercase tracking-[0.08em] text-[var(--color-text-muted)]">
             {new Date().toLocaleDateString()}
           </time>
-          <h2 className="mt-2 text-xl font-semibold leading-snug">{title || 'Untitled post'}</h2>
+          <h2 className="mt-2 text-xl font-semibold leading-snug">
+            {title || 'Untitled post'}
+          </h2>
           {excerpt && (
-            <p className="mt-3 leading-relaxed text-[var(--color-text-secondary)]">{excerpt}</p>
+            <p className="mt-3 leading-relaxed text-[var(--color-text-secondary)]">
+              {excerpt}
+            </p>
           )}
           <span className="mt-4 inline-block text-sm font-medium text-[var(--color-brand-garnet)]">
             Read post →
@@ -53,11 +67,17 @@ export function BlogDetailPreview({
   excerpt,
   content,
   headerImageUrl,
+  lazyReadSummary = '',
+  lazyReadPoints = '',
+  locale = 'en',
 }: {
   title: string;
   excerpt: string;
   content: string;
   headerImageUrl: string;
+  lazyReadSummary?: string;
+  lazyReadPoints?: string;
+  locale?: 'es' | 'en';
 }) {
   return (
     <PreviewFrame>
@@ -68,11 +88,18 @@ export function BlogDetailPreview({
         <h1 className="mt-3 text-3xl font-semibold leading-tight tracking-tight">
           {title || 'Untitled post'}
         </h1>
-        {excerpt && (
-          <p className="mt-4 text-lg leading-relaxed text-[var(--color-text-secondary)]">{excerpt}</p>
-        )}
+        <LazyRead
+          summary={lazyReadSummary || excerpt}
+          points={lazyReadPoints.split('\n').filter(Boolean)}
+          locale={locale}
+        />
         {headerImageUrl && (
-          <ContentCover title={title} kind="blog" imageUrl={headerImageUrl} className="mt-8 h-48 w-full rounded-[12px]" />
+          <ContentCover
+            title={title}
+            kind="blog"
+            imageUrl={headerImageUrl}
+            className="mt-8 h-48 w-full rounded-[12px]"
+          />
         )}
         <div className="mt-8">
           <MarkdownContent content={content || '_No content yet…_'} />
@@ -99,7 +126,12 @@ export function SkillSummaryPreview({
   return (
     <PreviewFrame>
       <div className={`mx-auto max-w-sm ${CARD_CLASSES}`}>
-        <ContentCover title={title || 'Untitled skill'} kind="skill" imageUrl={headerImageUrl || null} className="h-28 w-full" />
+        <ContentCover
+          title={title || 'Untitled skill'}
+          kind="skill"
+          imageUrl={headerImageUrl || null}
+          className="h-28 w-full"
+        />
         <div className="flex flex-col p-6">
           <div className="flex items-center justify-between gap-2">
             <TypeChip type={type} />
@@ -109,7 +141,9 @@ export function SkillSummaryPreview({
               </span>
             )}
           </div>
-          <h2 className="mt-3 text-lg font-semibold leading-snug">{title || 'Untitled skill'}</h2>
+          <h2 className="mt-3 text-lg font-semibold leading-snug">
+            {title || 'Untitled skill'}
+          </h2>
           {description && (
             <p className="mt-2 line-clamp-3 text-sm leading-relaxed text-[var(--color-text-secondary)]">
               {description}
@@ -154,16 +188,25 @@ export function SkillDetailPreview({
           {title || 'Untitled skill'}
         </h1>
         {description && (
-          <p className="mt-3 text-lg leading-relaxed text-[var(--color-text-secondary)]">{description}</p>
+          <p className="mt-3 text-lg leading-relaxed text-[var(--color-text-secondary)]">
+            {description}
+          </p>
         )}
-        <ContentCover title={title || 'Untitled skill'} kind="skill" imageUrl={headerImageUrl || null} className="mt-6 h-44 w-full rounded-[12px]" />
+        <ContentCover
+          title={title || 'Untitled skill'}
+          kind="skill"
+          imageUrl={headerImageUrl || null}
+          className="mt-6 h-44 w-full rounded-[12px]"
+        />
         <div className={`mt-6 ${CARD_CLASSES} p-6`}>
           {premiumLabel ? (
             <>
               <p className="mb-3 font-mono text-xs uppercase tracking-[0.08em] text-[var(--color-text-muted)]">
                 Public preview (locked asset)
               </p>
-              <MarkdownContent content={previewContent || '_No public preview yet…_'} />
+              <MarkdownContent
+                content={previewContent || '_No public preview yet…_'}
+              />
             </>
           ) : (
             <MarkdownContent content={content || '_No content yet…_'} />

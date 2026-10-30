@@ -160,6 +160,7 @@ model AgentVersionDownloadDay {
 }
 
 model BlogPost {
+  lazyRead Json?
   sourceLocale String @default("en")
   translations Json @default("{}")
   relatedLinks Json @default("[]")

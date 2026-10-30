@@ -29,7 +29,9 @@ export function skillSummary<
   const { content: _content, previewContent: _preview, ...summary } = skill;
   return summary;
 }
-export function postSummary<T extends { content: string }>(post: T) {
-  const { content: _content, ...summary } = post;
+export function postSummary<T extends { content: string; lazyRead?: unknown }>(
+  post: T,
+) {
+  const { content: _content, lazyRead: _lazyRead, ...summary } = post;
   return summary;
 }

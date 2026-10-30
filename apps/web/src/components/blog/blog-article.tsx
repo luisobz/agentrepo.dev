@@ -30,7 +30,7 @@ export function BlogArticle({
         {locale === 'es' ? '← Volver al blog' : '← Back to blog'}
       </Link>
 
-      <header className="mb-10 mt-8">
+      <header className="mb-4 mt-8">
         <time
           dateTime={post.createdAt.toISOString()}
           className="font-mono text-xs uppercase tracking-[0.08em] text-[var(--color-text-muted)]"

@@ -26,7 +26,7 @@ export function LazyRead({
       lang={locale}
       data-testid="lazy-read"
     >
-      <summary className="flex cursor-pointer list-none items-center gap-2.5 rounded-[10px] bg-[var(--color-brand-garnet-ghost)] px-3 py-2.5 outline-none transition-colors hover:bg-[var(--color-bg-base)] focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-[var(--color-brand-garnet)] [&::-webkit-details-marker]:hidden">
+      <summary className="flex cursor-pointer list-none items-center gap-2.5 bg-[var(--color-brand-garnet-ghost)] px-3 py-2.5 outline-none transition-colors hover:bg-[var(--color-bg-base)] focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-[var(--color-brand-garnet)] [&::-webkit-details-marker]:hidden">
         <span
           className="shrink-0 text-[var(--color-brand-garnet)]"
           aria-hidden="true"

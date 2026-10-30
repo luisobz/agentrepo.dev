@@ -1,3 +1,4 @@
+import { readingSummaryFromJson, type ReadingSummary } from './reading-summary';
 import type { FileTree } from './file-tree';
 
 export const CONTENT_LOCALES = ['en', 'es'] as const;
@@ -5,6 +6,7 @@ export type ContentLocale = (typeof CONTENT_LOCALES)[number];
 
 /** Translatable prose; executable files and identifiers stay in the source. */
 export type ContentTranslation = {
+  lazyRead?: ReadingSummary | null;
   title?: string;
   description?: string;
   shortDescription?: string;
@@ -51,6 +53,8 @@ export function contentTranslationsFromJson(
     for (const field of fields) {
       if (typeof row[field] === 'string') translation[field] = row[field];
     }
+    const lazyRead = readingSummaryFromJson(row['lazyRead']);
+    if (lazyRead) translation.lazyRead = lazyRead;
     if (isRecord(row['files'])) {
       translation.files = {};
       for (const [path, body] of Object.entries(row['files'])) {

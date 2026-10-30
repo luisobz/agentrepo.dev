@@ -1,4 +1,4 @@
-import { localizeContent } from '@agentrepo/domain';
+import { localizeBlogPost } from '@agentrepo/domain';
 import { TRPCError } from '@trpc/server';
 import { z } from 'zod';
 import { paginationSchema, idInputSchema } from '../schemas/catalog.schemas';
@@ -32,14 +32,14 @@ export const blogReviewRouter = router({
       return {
         ...page,
         items: page.items.map((post) =>
-          postSummary(localizeContent(post, input.locale)),
+          postSummary(localizeBlogPost(post, input.locale)),
         ),
       };
     }),
   byId: reviewProcedure
     .input(idInputSchema.extend({ locale: z.enum(['es', 'en']).optional() }))
     .mutation(async ({ ctx, input }) =>
-      localizeContent(
+      localizeBlogPost(
         await ctx.catalog.blogPosts.getById.execute(input.id),
         input.locale,
       ),

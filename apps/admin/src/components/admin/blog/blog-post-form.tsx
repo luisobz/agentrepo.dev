@@ -1,4 +1,5 @@
 'use client';
+import { LazyReadFields } from '../form/lazy-read-fields';
 
 import {
   ContentLanguages,
@@ -37,6 +38,8 @@ export function BlogPostForm({ post }: { post?: BlogPost }) {
   const [view, setView] = useState<FormView>('edit');
   const [slugTouched, setSlugTouched] = useState(Boolean(post));
   const [values, setValues] = useState({
+    lazyReadSummary: post?.lazyRead?.summary ?? '',
+    lazyReadPoints: post?.lazyRead?.points.join('\n') ?? '',
     title: post?.title ?? '',
     slug: post?.slug ?? '',
     excerpt: post?.excerpt ?? '',
@@ -65,8 +68,19 @@ export function BlogPostForm({ post }: { post?: BlogPost }) {
     event.preventDefault();
     setError(null);
 
+    const { lazyReadSummary, lazyReadPoints, ...fields } = values;
     const parsed = createBlogPostSchema.safeParse({
-      ...values,
+      ...fields,
+      lazyRead:
+        lazyReadSummary.trim() || lazyReadPoints.trim()
+          ? {
+              summary: lazyReadSummary,
+              points: lazyReadPoints
+                .split('\n')
+                .map((line) => line.trim())
+                .filter(Boolean),
+            }
+          : null,
       sourceLocale: languages.sourceLocale,
       translations: languages.translations,
       relatedLinks,
@@ -102,6 +116,9 @@ export function BlogPostForm({ post }: { post?: BlogPost }) {
           title={values.title}
           excerpt={values.excerpt}
           content={values.content}
+          lazyReadSummary={values.lazyReadSummary}
+          lazyReadPoints={values.lazyReadPoints}
+          locale={languages.sourceLocale}
           headerImageUrl={values.headerImageUrl}
         />
       )}
@@ -190,6 +207,17 @@ export function BlogPostForm({ post }: { post?: BlogPost }) {
             Published
           </label>
         </FormField>
+        <LazyReadFields
+          summary={values.lazyReadSummary}
+          points={values.lazyReadPoints}
+          onSummary={(lazyReadSummary) =>
+            setValues((previous) => ({ ...previous, lazyReadSummary }))
+          }
+          onPoints={(lazyReadPoints) =>
+            setValues((previous) => ({ ...previous, lazyReadPoints }))
+          }
+          disabled={isSaving}
+        />
         <MonacoField
           label="Content (Markdown)"
           language="markdown"

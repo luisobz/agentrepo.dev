@@ -9,3 +9,5 @@ export * from './i18n/locale-core';
 export * from './i18n/locale';
 
 export * from './components/content/related-links';
+
+export * from './components/content/lazy-read';

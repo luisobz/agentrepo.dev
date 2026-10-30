@@ -1,4 +1,10 @@
-import { ContentCover, MarkdownContent, RelatedLinks } from '@agentrepo/ui';
+import { blogReadingSummary } from './reading-summary';
+import {
+  ContentCover,
+  LazyRead,
+  MarkdownContent,
+  RelatedLinks,
+} from '@agentrepo/ui';
 import Link from '../localized-link';
 import { ContentLanguage } from '../content-language';
 import type { BlogPost } from '../../lib/blog';
@@ -11,6 +17,7 @@ export function BlogArticle({
   post: BlogPost;
   locale: 'es' | 'en';
 }) {
+  const reading = blogReadingSummary(post);
   return (
     <article
       lang={post.contentLocale}
@@ -38,12 +45,12 @@ export function BlogArticle({
             {locale === 'es' ? 'Autoría:' : 'Author:'} {post.authorName}
           </p>
         )}
-        {post.excerpt && (
-          <p className="mt-4 text-lg leading-relaxed text-[var(--color-text-secondary)]">
-            {post.excerpt}
-          </p>
-        )}
       </header>
+      <LazyRead
+        {...reading}
+        locale={locale}
+        contentLocale={post.contentLocale}
+      />
       <ContentLanguage contentLocale={post.contentLocale} />
       <RelatedLinks links={post.relatedLinks} />
 

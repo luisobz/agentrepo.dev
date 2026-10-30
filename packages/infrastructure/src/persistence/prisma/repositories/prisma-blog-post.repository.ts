@@ -1,4 +1,5 @@
 import {
+  readingSummaryFromJson,
   contentLocaleFromStorage,
   contentTranslationsFromJson,
 } from '@agentrepo/domain';
@@ -53,6 +54,7 @@ export class PrismaBlogPostRepository implements BlogPostRepository {
     return {
       items: items.map((row) => ({
         ...row,
+        lazyRead: readingSummaryFromJson(row.lazyRead),
         sourceLocale: contentLocaleFromStorage(row.sourceLocale),
         translations: contentTranslationsFromJson(row.translations),
         relatedLinks: relatedLinksFromJson(row.relatedLinks),
@@ -72,6 +74,7 @@ export class PrismaBlogPostRepository implements BlogPostRepository {
     return row
       ? {
           ...row,
+          lazyRead: readingSummaryFromJson(row.lazyRead),
           sourceLocale: contentLocaleFromStorage(row.sourceLocale),
           translations: contentTranslationsFromJson(row.translations),
           relatedLinks: relatedLinksFromJson(row.relatedLinks),
@@ -88,6 +91,7 @@ export class PrismaBlogPostRepository implements BlogPostRepository {
     return row
       ? {
           ...row,
+          lazyRead: readingSummaryFromJson(row.lazyRead),
           sourceLocale: contentLocaleFromStorage(row.sourceLocale),
           translations: contentTranslationsFromJson(row.translations),
           relatedLinks: relatedLinksFromJson(row.relatedLinks),
@@ -104,9 +108,18 @@ export class PrismaBlogPostRepository implements BlogPostRepository {
   }
 
   async create(data: CreateBlogPostInput): Promise<BlogPost> {
-    const row = await this.prisma.blogPost.create({ data });
+    const { lazyRead, ...fields } = data;
+    const row = await this.prisma.blogPost.create({
+      data: {
+        ...fields,
+        ...(lazyRead !== undefined
+          ? { lazyRead: lazyRead ?? Prisma.DbNull }
+          : {}),
+      },
+    });
     return {
       ...row,
+      lazyRead: readingSummaryFromJson(row.lazyRead),
       sourceLocale: contentLocaleFromStorage(row.sourceLocale),
       translations: contentTranslationsFromJson(row.translations),
       relatedLinks: relatedLinksFromJson(row.relatedLinks),
@@ -114,9 +127,19 @@ export class PrismaBlogPostRepository implements BlogPostRepository {
   }
 
   async update(id: string, data: UpdateBlogPostInput): Promise<BlogPost> {
-    const row = await this.prisma.blogPost.update({ where: { id }, data });
+    const { lazyRead, ...fields } = data;
+    const row = await this.prisma.blogPost.update({
+      where: { id },
+      data: {
+        ...fields,
+        ...(lazyRead !== undefined
+          ? { lazyRead: lazyRead ?? Prisma.DbNull }
+          : {}),
+      },
+    });
     return {
       ...row,
+      lazyRead: readingSummaryFromJson(row.lazyRead),
       sourceLocale: contentLocaleFromStorage(row.sourceLocale),
       translations: contentTranslationsFromJson(row.translations),
       relatedLinks: relatedLinksFromJson(row.relatedLinks),

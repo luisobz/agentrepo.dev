@@ -1,4 +1,5 @@
 'use client';
+import { LazyReadFields } from './lazy-read-fields';
 
 import {
   contentLocaleSchema,
@@ -156,6 +157,47 @@ export function ContentLanguages({
             </FormField>
           ),
         )}
+      {translation && kind === 'blog' && (
+        <LazyReadFields
+          prefix={`translation-${target}`}
+          summary={translation.lazyRead?.summary ?? ''}
+          points={translation.lazyRead?.points.join('\n') ?? ''}
+          onSummary={(summary) =>
+            value.setTranslations((previous) => ({
+              ...previous,
+              [target]: {
+                ...previous[target],
+                lazyRead:
+                  summary.trim() || previous[target]?.lazyRead?.points.length
+                    ? {
+                        summary,
+                        points: previous[target]?.lazyRead?.points ?? [],
+                      }
+                    : null,
+              },
+            }))
+          }
+          onPoints={(points) =>
+            value.setTranslations((previous) => ({
+              ...previous,
+              [target]: {
+                ...previous[target],
+                lazyRead:
+                  points.trim() || previous[target]?.lazyRead?.summary.trim()
+                    ? {
+                        summary: previous[target]?.lazyRead?.summary ?? '',
+                        points: points
+                          .split('\n')
+                          .map((line) => line.trim())
+                          .filter(Boolean),
+                      }
+                    : null,
+              },
+            }))
+          }
+          disabled={disabled}
+        />
+      )}
       {translation &&
         kind === 'agent' &&
         markdownPaths(fileTree).map((path) => (

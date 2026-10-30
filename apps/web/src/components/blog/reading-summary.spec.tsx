@@ -33,7 +33,7 @@ describe('blog reading summary', () => {
     );
     const details = screen.getByTestId('lazy-read');
     expect(details.hasAttribute('open')).toBe(false);
-    expect(screen.getByText('Un resumen sencillo')).toBeTruthy();
+    expect(screen.queryByText('Un resumen sencillo')).toBeNull();
     expect(container.querySelector('script')).toBeNull();
     expect(screen.getByText('<script>alert(1)</script>')).toBeTruthy();
     fireEvent.click(screen.getByText('Lazy Read'));

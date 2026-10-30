@@ -7,9 +7,9 @@ for (const locale of ['es', 'en']) {
     await expect(panel).toBeVisible();
     await expect(panel).not.toHaveAttribute('open');
     const trigger = panel.locator('summary');
-    await expect(trigger).toContainText(
-      locale === 'es' ? 'Un resumen sencillo' : 'A simple summary',
-    );
+    await expect(trigger).toHaveText('Lazy Read');
+    const bounds = await trigger.boundingBox();
+    expect(bounds?.height).toBeLessThanOrEqual(48);
     await trigger.focus();
     await page.keyboard.press('Enter');
     await expect(panel).toHaveAttribute('open', '');

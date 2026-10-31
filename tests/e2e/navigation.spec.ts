@@ -7,7 +7,7 @@ test('Creator opens the contribution flow and requires authentication', async ({
   await page.goto('/');
   if (isMobile) await page.getByRole('button', { name: 'Open menu' }).click();
   await page
-    .getByRole('link', { name: 'Creator', exact: true })
+    .getByRole('link', { name: 'Contribute', exact: true })
     .filter({ visible: true })
     .click();
   await expect(page).toHaveURL(/\/creator$/);

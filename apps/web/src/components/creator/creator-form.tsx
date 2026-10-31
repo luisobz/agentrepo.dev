@@ -34,12 +34,18 @@ function toSlug(value: string): string {
     .slice(0, 120);
 }
 
-export function CreatorForm({ authorName }: { authorName: string }) {
+export function CreatorForm({
+  authorName,
+  initialKind = 'skill',
+}: {
+  authorName: string;
+  initialKind?: AssetKind;
+}) {
   const t = useT();
   const { locale } = useLocale();
   const [sourceLocale, setSourceLocale] = useState<'en' | 'es'>(locale);
   const [relatedLinks, setRelatedLinks] = useState<ContentRelatedLink[]>([]);
-  const [kind, setKind] = useState<AssetKind>('skill');
+  const [kind, setKind] = useState<AssetKind>(initialKind);
   const [title, setTitle] = useState('');
   const [slug, setSlug] = useState('');
   const [slugEdited, setSlugEdited] = useState(false);

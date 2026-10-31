@@ -1,5 +1,7 @@
 'use client';
 
+import Link from '../localized-link';
+
 import { AvatarSlot, useAvatar } from '@agentrepo/avatar';
 import { Search } from 'lucide-react';
 import { useEffect, useRef } from 'react';
@@ -21,7 +23,7 @@ export function Hero() {
     }
     const observer = new IntersectionObserver(
       ([entry]) => setAvatarPosition(entry.isIntersecting ? 'hero' : 'header'),
-      { threshold: 0.2 }
+      { threshold: 0.2 },
     );
     observer.observe(node);
     return () => {
@@ -35,14 +37,33 @@ export function Hero() {
       ref={heroRef}
       className="flex flex-col items-center gap-6 py-16 text-center sm:py-24"
     >
-      <AvatarSlot id="hero" preserveSpace={false} />
+      <div className="flex flex-col items-center gap-2">
+        <AvatarSlot id="hero" preserveSpace={false} />
+        <Link
+          href="/creator"
+          className="relative rounded-lg border border-[var(--color-border-soft)] bg-[var(--color-bg-warm-white)] px-3 py-2 text-sm text-[var(--color-text-primary)] shadow-[var(--shadow-xs)] transition-colors hover:border-[var(--color-brand-garnet)] focus-visible:outline-2 focus-visible:outline-offset-4"
+        >
+          <span
+            aria-hidden="true"
+            className="absolute -top-1 left-1/2 h-2 w-2 -translate-x-1/2 rotate-45 border-l border-t border-[var(--color-border-soft)] bg-[var(--color-bg-warm-white)]"
+          />
+          <span className="relative block font-medium">
+            {t('contribute.hero')}
+          </span>
+          <span className="mt-0.5 block text-xs text-[var(--color-brand-garnet)]">
+            {t('contribute.heroAction')} →
+          </span>
+        </Link>
+      </div>
 
       <h1 className="max-w-3xl text-4xl font-semibold leading-tight tracking-tight sm:text-6xl">
         {t('hero.titleLead')}{' '}
-        <span className="text-[var(--color-brand-garnet)]">{t('hero.titleAccent')}</span>
+        <span className="text-[var(--color-brand-garnet)]">
+          {t('hero.titleAccent')}
+        </span>
       </h1>
       <p className="max-w-xl text-base leading-relaxed text-[var(--color-text-secondary)] sm:text-lg">
-{t('hero.subtitle')}
+        {t('hero.subtitle')}
       </p>
 
       <button

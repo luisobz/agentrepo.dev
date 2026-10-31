@@ -10,6 +10,10 @@ import {
 } from '@agentrepo/ui';
 import { type FormEvent, useState, useEffect } from 'react';
 import { useT } from '../../lib/i18n/use-t';
+import {
+  contributionHref,
+  type ContributionKind,
+} from '../../lib/contribution';
 import { safeReturnPath } from '../../lib/auth/return-path';
 import { isSupabaseConfigured } from '../../lib/supabase/config';
 
@@ -18,7 +22,11 @@ function returnPath(): string {
   return safeReturnPath(next);
 }
 
-export function ContributorLogin() {
+export function ContributorLogin({
+  contributionType,
+}: {
+  contributionType?: ContributionKind;
+}) {
   const t = useT();
   const configured = isSupabaseConfigured();
   const githubEnabled = process.env.NEXT_PUBLIC_GITHUB_AUTH_ENABLED === 'true';
@@ -42,7 +50,12 @@ export function ContributorLogin() {
     setBusy(true);
     setError(null);
     try {
-      const response = await fetch('/auth/github', { method: 'POST' });
+      const response = await fetch(
+        contributionType
+          ? `/auth/github?type=${contributionType}`
+          : '/auth/github',
+        { method: 'POST' },
+      );
       const data: { url?: string } = await response.json();
       if (!response.ok || !data.url) {
         setError(t('creator.oauthError'));
@@ -67,7 +80,11 @@ export function ContributorLogin() {
         {
           method: 'POST',
           headers: { 'content-type': 'application/json' },
-          body: JSON.stringify({ email, password }),
+          body: JSON.stringify({
+            email,
+            password,
+            ...(mode === 'signup' ? { contributionType } : {}),
+          }),
         },
       );
       if (!response.ok) {
@@ -78,7 +95,10 @@ export function ContributorLogin() {
       if (mode === 'signup') {
         setMessage(t('creator.registered'));
       } else {
-        const destination = new URL(returnPath(), window.location.origin);
+        const destination = new URL(
+          contributionType ? contributionHref(contributionType) : returnPath(),
+          window.location.origin,
+        );
         if (destination.origin === window.location.origin) {
           window.location.assign(destination.href);
         } else {

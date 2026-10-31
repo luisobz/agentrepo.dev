@@ -1,3 +1,4 @@
+import { ContributeLink } from '../../../../components/creator/contribute-link';
 import { localizedAlternates } from '../../../../lib/seo/localized-metadata';
 import { localizedHref } from '../../../../lib/i18n/routing';
 import { ContentLanguage } from '../../../../components/content-language';
@@ -186,6 +187,9 @@ export default async function SkillPage({ params }: SkillPageProps) {
         currentVersion={shownVersion}
         versionedPaths
       />
+      <div className="mt-8 flex justify-end border-t border-[var(--color-border-soft)] pt-3">
+        <ContributeLink kind="skill" />
+      </div>
     </div>
   );
 }

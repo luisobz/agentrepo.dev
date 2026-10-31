@@ -74,3 +74,28 @@ it('uses the public callback behind Passenger instead of its internal URL', asyn
     }),
   );
 });
+
+it.each(['agent', 'blog', 'https://evil.test'])(
+  'keeps a validated contribution context through OAuth: %s',
+  async (type) => {
+    client.mockResolvedValue({ auth: { signInWithOAuth } });
+    signInWithOAuth.mockResolvedValue({
+      data: { url: 'https://project.supabase.co/auth/v1/authorize' },
+      error: null,
+    });
+    const req = new NextRequest(
+      'https://agentrepo.dev/auth/github?type=' + encodeURIComponent(type),
+      { method: 'POST', headers: { origin: 'https://agentrepo.dev' } },
+    );
+    expect((await POST(req)).status).toBe(200);
+    const callback = new URL(
+      signInWithOAuth.mock.lastCall?.[0].options.redirectTo,
+    );
+    expect(callback.origin).toBe('https://agentrepo.dev');
+    expect(callback.searchParams.get('next')).toBe(
+      type === 'agent' || type === 'blog'
+        ? `/creator?type=${type}`
+        : '/creator',
+    );
+  },
+);

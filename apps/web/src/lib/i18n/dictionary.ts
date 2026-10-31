@@ -1,6 +1,18 @@
 import type { Dictionary } from '@agentrepo/ui';
 
 export const webDictionary = {
+  'contribute.skill': { en: 'Propose a skill', es: 'Proponer una skill' },
+  'contribute.agent': { en: 'Propose an agent', es: 'Proponer un agente' },
+  'contribute.blog': { en: 'Propose an article', es: 'Proponer un artículo' },
+  'contribute.hero': {
+    en: 'Have something to share?',
+    es: '¿Tienes algo que compartir?',
+  },
+  'contribute.heroAction': {
+    en: 'Propose a skill, agent or article',
+    es: 'Propón una skill, un agente o un artículo',
+  },
+  'contribute.label': { en: 'Community', es: 'Participa' },
   'footer.privacy': { en: 'Privacy', es: 'Privacidad' },
   'footer.terms': { en: 'Terms', es: 'Condiciones' },
   'footer.donate': { en: 'Support the project', es: 'Apoyar el proyecto' },
@@ -131,8 +143,8 @@ export const webDictionary = {
   },
   'creator.author': { en: 'Author', es: 'Autoría' },
   'creator.heading': {
-    en: 'Contribute to AgentRepo',
-    es: 'Colabora con AgentRepo',
+    en: 'Propose content',
+    es: 'Proponer contenido',
   },
   'creator.pageInfo': {
     en: 'Propose a skill, agent project or article. Your account is recorded as the author and the administrator reviews each proposal before publication.',
@@ -248,16 +260,16 @@ export const webDictionary = {
   'nav.playground': { en: 'Playground', es: 'Playground' },
   'nav.portfolio': { en: 'Portfolio', es: 'Portfolio' },
   'nav.search': { en: 'Search', es: 'Buscar' },
-  'nav.hire': { en: 'Creator', es: 'Creador' },
+  'nav.hire': { en: 'Contribute', es: 'Proponer contenido' },
   'nav.signIn': { en: 'Sign in', es: 'Entrar' },
   'nav.openMenu': { en: 'Open menu', es: 'Abrir menú' },
   'nav.closeMenu': { en: 'Close menu', es: 'Cerrar menú' },
 
   'hero.titleLead': { en: 'Less noise,', es: 'Menos ruido,' },
-  'hero.titleAccent': { en: 'filter better', es: 'filtra mejor' },
+  'hero.titleAccent': { en: 'filter better', es: 'más útil' },
   'hero.subtitle': {
-    en: 'Curated skills, agents and notes for building with AI — no fluff, ready to copy into your own stack.',
-    es: 'Skills, agentes y notas seleccionadas para construir con IA — sin paja, listas para copiar a tu stack.',
+    en: 'Curated skills, agents and articles for building with AI.',
+    es: 'Skills, agentes y artículos seleccionados para construir con IA.',
   },
   'hero.searchPlaceholder': {
     en: 'Search skills, agents and blog posts…',
@@ -274,8 +286,8 @@ export const webDictionary = {
 
   'skills.title': { en: 'Skills', es: 'Skills' },
   'skills.subtitle': {
-    en: 'Reusable prompts, system instructions, configs and templates — ready to copy into your own agents.',
-    es: 'Prompts, instrucciones de sistema, configs y plantillas reutilizables — listas para copiar a tus agentes.',
+    en: 'Reusable prompts, system instructions, configs and templates for your AI agents.',
+    es: 'Prompts, instrucciones de sistema, configuraciones y plantillas reutilizables para tus agentes de IA.',
   },
   'skills.back': { en: '← Back to skills', es: '← Volver a skills' },
   'agents.title': { en: 'Agents', es: 'Agentes' },
@@ -447,8 +459,8 @@ export const webDictionary = {
   },
   'premium.buy': { en: 'Buy access', es: 'Comprar acceso' },
   'premium.checkoutSoon': {
-    en: 'Checkout is almost ready — sign in with GitHub or Google will be required.',
-    es: 'El pago estará disponible muy pronto — requerirá iniciar sesión con GitHub o Google.',
+    en: 'Checkout is almost ready. Signing in with GitHub or Google will be required.',
+    es: 'El pago estará disponible muy pronto. Requerirá iniciar sesión con GitHub o Google.',
   },
   'premium.preview': { en: 'Preview', es: 'Vista previa' },
 
@@ -475,7 +487,7 @@ export const webDictionary = {
 
   'footer.tagline': {
     en: 'Less noise, filter better.',
-    es: 'Menos ruido, filtra mejor.',
+    es: 'Menos ruido, más útil.',
   },
 
   'auth.title': { en: 'Join the community', es: 'Únete a la comunidad' },

@@ -1,3 +1,4 @@
+import { contributionHref } from '../../../lib/contribution';
 import {
   hasTrustedOrigin,
   publicRequestOrigin,
@@ -8,6 +9,7 @@ import { z } from 'zod';
 import { getSupabaseServerClient } from '../../../lib/supabase/server';
 
 const signupSchema = z.object({
+  contributionType: z.enum(['skill', 'agent', 'blog']).optional(),
   email: z.email(),
   password: z.string().min(10).max(128),
 });
@@ -38,11 +40,16 @@ export async function POST(request: NextRequest) {
       { error: 'Authentication unavailable' },
       { status: 503 },
     );
+  const { contributionType, ...credentials } = parsed.data;
+  const callbackPath = contributionType
+    ? '/auth/callback?next=' +
+      encodeURIComponent(contributionHref(contributionType))
+    : '/auth/callback?next=/creator';
   const { error } = await supabase.auth.signUp({
-    ...parsed.data,
+    ...credentials,
     options: {
       emailRedirectTo: new URL(
-        '/auth/callback?next=/creator',
+        callbackPath,
         publicRequestOrigin(request),
       ).toString(),
     },

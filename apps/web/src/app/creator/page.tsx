@@ -1,3 +1,4 @@
+import { contributionKind } from '../../lib/contribution';
 import Link from '../../components/localized-link';
 import { getPublishedSkillBySlug } from '../../lib/skills';
 import { skillVersionHref } from '../../lib/skill-release';
@@ -9,12 +10,17 @@ import { CreatorForm } from '../../components/creator/creator-form';
 import { getAuthenticatedUser } from '../../lib/supabase/server';
 
 export const metadata: Metadata = {
-  title: 'Creator | AgentRepo.dev',
+  title: 'Contribute | AgentRepo.dev',
   robots: { index: false, follow: false },
   description: 'Propose a skill, agent project or article to AgentRepo.dev.',
 };
 
-export default async function CreatorPage() {
+export default async function CreatorPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ type?: string | string[] }>;
+}) {
+  const kind = contributionKind((await searchParams).type);
   const t = await getServerT();
   const writer = await getPublishedSkillBySlug('writer').catch(() => null);
   const user = await getAuthenticatedUser();
@@ -29,10 +35,10 @@ export default async function CreatorPage() {
     <div className="mx-auto w-full max-w-4xl px-4 pb-24 sm:px-6">
       <header className="mb-8 mt-8">
         <p className="text-xs font-semibold uppercase tracking-[0.25em] text-[var(--color-brand-garnet)]">
-          Creator Studio
+          {t('contribute.label')}
         </p>
         <h1 className="mt-3 text-3xl font-semibold tracking-tight sm:text-4xl">
-          {t('creator.heading')}
+          {kind ? t(`contribute.${kind}`) : t('creator.heading')}
         </h1>
         <p className="mt-3 max-w-2xl text-[var(--color-text-secondary)]">
           {t('creator.pageInfo')}
@@ -55,10 +61,10 @@ export default async function CreatorPage() {
       {user ? (
         <>
           <CreatorSession authorName={authorName} />
-          <CreatorForm authorName={authorName} />
+          <CreatorForm authorName={authorName} initialKind={kind} />
         </>
       ) : (
-        <ContributorLogin />
+        <ContributorLogin contributionType={kind} />
       )}
     </div>
   );

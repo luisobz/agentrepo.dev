@@ -1,3 +1,4 @@
+import { contributionHref, contributionKind } from '../../../lib/contribution';
 import {
   hasTrustedOrigin,
   publicRequestOrigin,
@@ -15,12 +16,16 @@ export async function POST(request: NextRequest) {
       { error: 'Authentication unavailable' },
       { status: 503 },
     );
+  const kind = contributionKind(request.nextUrl.searchParams.get('type'));
+  const callbackPath = kind
+    ? '/auth/callback?next=' + encodeURIComponent(contributionHref(kind))
+    : '/auth/callback?next=/creator';
   const { data, error } = await supabase.auth.signInWithOAuth({
     provider: 'github',
     options: {
       scopes: 'read:user user:email',
       redirectTo: new URL(
-        '/auth/callback?next=/creator',
+        callbackPath,
         publicRequestOrigin(request),
       ).toString(),
       skipBrowserRedirect: true,

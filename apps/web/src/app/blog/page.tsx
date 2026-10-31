@@ -1,3 +1,4 @@
+import { ContributeLink } from '../../components/creator/contribute-link';
 import Link from '../../components/localized-link';
 import type { Metadata } from 'next';
 import { ContentCover } from '@agentrepo/ui';
@@ -18,9 +19,12 @@ export default async function BlogPage() {
   return (
     <div className="mx-auto w-full max-w-3xl px-4 pb-24 sm:px-6">
       <header className="mb-12">
-        <h1 className="text-3xl font-semibold tracking-tight sm:text-4xl">
-          {t('blog.title')}
-        </h1>
+        <div className="flex flex-wrap items-center justify-between gap-x-5 gap-y-1">
+          <h1 className="text-3xl font-semibold tracking-tight sm:text-4xl">
+            {t('blog.title')}
+          </h1>
+          <ContributeLink kind="blog" />
+        </div>
         <p className="mt-2 text-[var(--color-text-secondary)]">
           {t('blog.subtitle')}
         </p>

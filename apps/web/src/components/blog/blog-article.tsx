@@ -1,3 +1,4 @@
+import { ContributeLink } from '../creator/contribute-link';
 import { blogReadingSummary } from './reading-summary';
 import {
   ContentCover,
@@ -64,6 +65,9 @@ export function BlogArticle({
       )}
 
       <MarkdownContent content={post.content} className="prose-lg" />
+      <div className="mt-8 flex justify-end border-t border-[var(--color-border-soft)] pt-3">
+        <ContributeLink kind="blog" />
+      </div>
     </article>
   );
 }

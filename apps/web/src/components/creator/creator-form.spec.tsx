@@ -189,3 +189,14 @@ it('keeps an existing source package when a later ZIP is rejected', async () => 
     screen.getByRole('list', { name: 'Source package files' }),
   ).toHaveTextContent('main.py');
 });
+
+it('starts with the contribution type chosen from its catalogue', () => {
+  render(
+    <LocaleProvider>
+      <CreatorForm authorName="Contributor" initialKind="agent" />
+    </LocaleProvider>,
+  );
+  expect(
+    screen.getByRole('radio', { name: 'Agent', exact: true }),
+  ).toBeChecked();
+});

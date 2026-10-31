@@ -1,3 +1,4 @@
+import { AvatarContentScene } from '../../components/avatar-content-scene';
 import { ContributeLink } from '../../components/creator/contribute-link';
 import Link from '../../components/localized-link';
 import { PrivateSkillsLink } from '../../components/skills/private-link';
@@ -34,6 +35,7 @@ export default async function SkillsPage() {
           {t('skills.subtitle')}
         </p>
         <PrivateSkillsLink />
+        <AvatarContentScene kind="skill" />
       </header>
 
       {skills.length === 0 ? (

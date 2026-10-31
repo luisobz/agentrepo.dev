@@ -50,3 +50,7 @@ packages/database/src/seeds/prod.seed.data.json
 # Browser test artifacts
 /test-results/
 /playwright-report/
+
+# Python validation helpers
+__pycache__/
+*.py[cod]

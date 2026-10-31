@@ -150,6 +150,7 @@ export const AVATAR_STAGE_CSS = `
 export function AvatarStage() {
   const {
     currentSlot,
+    isSuspended,
     slotsRef,
     slotVersion,
     setup,
@@ -191,7 +192,8 @@ export function AvatarStage() {
   const setPositionRef = useRef(setAvatarPosition);
   setPositionRef.current = setAvatarPosition;
 
-  const active = currentSlot ? slotsRef.current.get(currentSlot) : undefined;
+  const active =
+    !isSuspended && currentSlot ? slotsRef.current.get(currentSlot) : undefined;
   const activeRef = useRef(active);
   activeRef.current = active;
 

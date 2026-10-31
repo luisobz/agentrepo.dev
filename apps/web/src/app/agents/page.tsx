@@ -1,3 +1,4 @@
+import { AvatarContentScene } from '../../components/avatar-content-scene';
 import { ContributeLink } from '../../components/creator/contribute-link';
 import Link from '../../components/localized-link';
 import type { Metadata } from 'next';
@@ -33,6 +34,7 @@ export default async function AgentsPage() {
         <p className="mt-2 text-[var(--color-text-secondary)]">
           {t('agents.subtitle')}
         </p>
+        <AvatarContentScene kind="agent" />
       </header>
 
       {agents.length === 0 ? (

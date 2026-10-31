@@ -1,3 +1,4 @@
+import { AvatarContentScene } from '../../../../components/avatar-content-scene';
 import { ContributeLink } from '../../../../components/creator/contribute-link';
 import { localizedAlternates } from '../../../../lib/seo/localized-metadata';
 import { localizedHref } from '../../../../lib/i18n/routing';
@@ -155,6 +156,7 @@ export default async function SkillPage({ params }: SkillPageProps) {
           </div>
         </dl>
       </header>
+      <AvatarContentScene kind="skill" slug={skill.slug} />
       <ContentLanguage contentLocale={pinned.contentLocale} />
       <RelatedLinks links={skill.relatedLinks} />
 

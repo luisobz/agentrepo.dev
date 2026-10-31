@@ -13,6 +13,35 @@ export const webDictionary = {
     es: 'Propón una skill, un agente o un artículo',
   },
   'contribute.label': { en: 'Community', es: 'Participa' },
+  'characters.label': {
+    en: 'Explore this resource with the characters',
+    es: 'Explora este recurso con los personajes',
+  },
+  'characters.repo.label': { en: 'Repo', es: 'Repo' },
+  'characters.repo.message': {
+    en: 'Explore the content and choose what is useful for your project.',
+    es: 'Explora el contenido y elige lo que resulte útil para tu proyecto.',
+  },
+  'characters.developer.label': { en: 'Development', es: 'Desarrollo' },
+  'characters.developer.message': {
+    en: 'Look at the implementation, its requirements and how you would test it in your project.',
+    es: 'Fíjate en la implementación, sus requisitos y cómo la probarías en tu proyecto.',
+  },
+  'characters.guardian.label': { en: 'Security', es: 'Seguridad' },
+  'characters.guardian.message': {
+    en: 'Check permissions, untrusted inputs and the limits of what the evidence establishes.',
+    es: 'Revisa los permisos, las entradas no confiables y hasta dónde llegan las evidencias.',
+  },
+  'characters.researcher.label': { en: 'Research', es: 'Investigación' },
+  'characters.researcher.message': {
+    en: 'Compare the sources and separate observations from interpretations and open questions.',
+    es: 'Contrasta las fuentes y separa las observaciones de las interpretaciones y las preguntas abiertas.',
+  },
+  'characters.publisher.label': { en: 'Communication', es: 'Comunicación' },
+  'characters.publisher.message': {
+    en: 'Think about who will use this and explain the idea with clear examples.',
+    es: 'Piensa quién va a usarlo y explica la idea con ejemplos claros.',
+  },
   'footer.privacy': { en: 'Privacy', es: 'Privacidad' },
   'footer.terms': { en: 'Terms', es: 'Condiciones' },
   'footer.donate': { en: 'Support the project', es: 'Apoyar el proyecto' },

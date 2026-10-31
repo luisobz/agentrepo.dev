@@ -42,3 +42,29 @@ motion during travel moves directly to the destination.
 Slots reserve their scaled footprint. Speech bubbles choose a side based on viewport
 space and interactive controls; long content scrolls inside the bubble. A persistent
 message can be dismissed using the avatar button with pointer, Enter or Space.
+
+## Contextual scenes
+
+`CharacterFigure` shares the clip clock between the native `repo` SVG character
+and the `developer`, `guardian`, `researcher` and `publisher` raster characters.
+Serve their atlas files under `/avatars/<id>.png`, or supply `assetBase` for a
+different static directory. Source concepts, previews and exports are preserved
+in `assets/characters`; only the selected 1× atlas is requested at runtime.
+
+`AvatarScene` accepts a tuple of one or two actors, each with a character, label
+and message. Native buttons provide keyboard access. Readers select a speaker;
+one text intervention is visible while the other character can react. Animation
+is paused offscreen, in hidden tabs and for reduced motion.
+
+```tsx
+<AvatarScene actors={[
+  { character: 'developer', label: 'Development', message: 'Inspect the implementation.' },
+  { character: 'guardian', label: 'Security', message: 'Verify its trust boundaries.' },
+]} />
+```
+
+A scene also works independently of the floating provider. Within an
+`AvatarProvider`, a visibility lease suspends the floating mascot and its timed
+messages while the scene is visible. Multiple leases are released independently;
+leaving the scene or unmounting restores the mascot. Focused interactions such as
+menus take precedence and temporarily hide and pause inline actors.

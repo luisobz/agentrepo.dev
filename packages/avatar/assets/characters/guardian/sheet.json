@@ -1,0 +1,68 @@
+{
+  "cellWidth": 32,
+  "cellHeight": 36,
+  "originY": 4,
+  "columns": 8,
+  "rows": [
+    {
+      "name": "idle",
+      "frames": 4,
+      "fps": 2.5,
+      "loop": true,
+      "staticFrame": 0
+    },
+    {
+      "name": "thinking",
+      "frames": 4,
+      "fps": 3,
+      "loop": true,
+      "staticFrame": 3
+    },
+    {
+      "name": "happy",
+      "frames": 8,
+      "fps": 8,
+      "loop": true,
+      "staticFrame": 0
+    },
+    {
+      "name": "surprised",
+      "frames": 5,
+      "fps": 12,
+      "loop": false,
+      "staticFrame": 4
+    },
+    {
+      "name": "poke",
+      "frames": 3,
+      "fps": 14,
+      "loop": false,
+      "staticFrame": 2
+    },
+    {
+      "name": "takeoff",
+      "frames": 2,
+      "fps": 12,
+      "loop": false,
+      "staticFrame": 1
+    },
+    {
+      "name": "fly",
+      "frames": 2,
+      "fps": 6,
+      "loop": true,
+      "staticFrame": 0
+    },
+    {
+      "name": "land",
+      "frames": 3,
+      "fps": 12,
+      "loop": false,
+      "staticFrame": 2
+    }
+  ],
+  "note": "Estructura de frames compatible con la hoja exportada de AgentRepo. El runtime SVG actual no consume este PNG directamente. Revisar pixel-art y animación antes de integrar.",
+  "name": "protector-ciberseguridad",
+  "status": "visual-draft",
+  "artOrigin": "Raster concepts generated and downsampled to 32x36 cells; not the editable TypeScript pixel source."
+}

@@ -26,3 +26,14 @@ export type {
   AvatarTravelPhase,
   AvatarSpriteProps,
 } from './components/avatar-sprite';
+
+export { AvatarScene } from './components/avatar-scene';
+export type {
+  AvatarActor,
+  AvatarCast,
+  AvatarSceneProps,
+} from './components/avatar-scene';
+export { CharacterFigure } from './sprite/character-figure';
+export type { CharacterFigureProps } from './sprite/character-figure';
+export { AVATAR_CHARACTERS, characterSheet } from './characters';
+export type { AvatarCharacterId } from './characters';

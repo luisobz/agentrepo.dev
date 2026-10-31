@@ -56,6 +56,9 @@ export interface AvatarSayOptions {
 export const DEFAULT_MESSAGE_MS = 5000;
 
 export interface AvatarContextValue {
+  hasInteraction: boolean;
+  isSuspended: boolean;
+  suspendAvatar: () => () => void;
   currentSlot: AvatarSlotId | null;
   emotion: AvatarEmotion;
   isShaking: boolean;
@@ -138,10 +141,19 @@ export function AvatarProvider({
   surpriseMessage,
   onSequenceComplete,
 }: AvatarProviderProps) {
+  const [suspensions, setSuspensions] = useState<symbol[]>([]);
+  const suspendAvatar = useCallback(() => {
+    const token = Symbol();
+    setSuspensions((current) => [...current, token]);
+    return () =>
+      setSuspensions((current) => current.filter((value) => value !== token));
+  }, []);
   const [pageSlot, setCurrentSlot] = useState<AvatarSlotId | null>(initialSlot);
   const [focusTargets, setFocusTargets] = useState<
     { token: symbol; slot: AvatarSlotId }[]
   >([]);
+  const hasInteraction = focusTargets.length > 0;
+  const isSuspended = suspensions.length > 0 && !hasInteraction;
   const currentSlot = focusTargets.at(-1)?.slot ?? pageSlot;
   const focusAvatar = useCallback((slot: AvatarSlotId) => {
     const token = Symbol(slot);
@@ -210,15 +222,20 @@ export function AvatarProvider({
 
   // Consume the queue one message at a time, but only once the avatar arrived.
   useEffect(() => {
-    if (arrived && currentMessage === null && messageQueue.length > 0) {
+    if (
+      !isSuspended &&
+      arrived &&
+      currentMessage === null &&
+      messageQueue.length > 0
+    ) {
       setCurrentMessage(messageQueue[0]);
       setMessageQueue((queue) => queue.slice(1));
     }
-  }, [arrived, currentMessage, messageQueue]);
+  }, [arrived, currentMessage, messageQueue, isSuspended]);
 
   // Auto-dismiss timed messages; permanent ones (null) wait for a click.
   useEffect(() => {
-    if (currentMessage && currentMessage.durationMs !== null) {
+    if (!isSuspended && currentMessage && currentMessage.durationMs !== null) {
       messageTimerRef.current = setTimeout(
         () => setCurrentMessage(null),
         currentMessage.durationMs,
@@ -231,7 +248,7 @@ export function AvatarProvider({
       };
     }
     return undefined;
-  }, [currentMessage]);
+  }, [currentMessage, isSuspended]);
 
   const slotsRef = useRef<Map<AvatarSlotId, AvatarSlotTarget>>(new Map());
   const [slotVersion, setSlotVersion] = useState(0);
@@ -325,6 +342,9 @@ export function AvatarProvider({
 
   const value = useMemo<AvatarContextValue>(
     () => ({
+      hasInteraction,
+      isSuspended,
+      suspendAvatar,
       currentSlot,
       emotion,
       isShaking,
@@ -346,6 +366,9 @@ export function AvatarProvider({
       reportArrival,
     }),
     [
+      hasInteraction,
+      isSuspended,
+      suspendAvatar,
       currentSlot,
       emotion,
       isShaking,
@@ -381,4 +404,8 @@ export function useAvatar(): AvatarContextValue {
     throw new Error('useAvatar must be used within an <AvatarProvider>');
   }
   return ctx;
+}
+
+export function useOptionalAvatar(): AvatarContextValue | null {
+  return useContext(AvatarContext);
 }

@@ -50,6 +50,9 @@ jobs:
           node tests/deployment/check-braces.mjs
           pnpm audit --prod --audit-level=high
 
+      - name: Validate sprite atlas limits and assets
+        run: python3 -m unittest discover -s tests/sprites -p 'test_*.py'
+
       - name: Lint + tests
         run: pnpm verify
 

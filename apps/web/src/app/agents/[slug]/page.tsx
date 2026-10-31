@@ -1,3 +1,4 @@
+import { AvatarContentScene } from '../../../components/avatar-content-scene';
 import { ContributeLink } from '../../../components/creator/contribute-link';
 import { localizedAlternates } from '../../../lib/seo/localized-metadata';
 import { localizedHref } from '../../../lib/i18n/routing';
@@ -167,6 +168,7 @@ export default async function AgentPage({
           </p>
         )}
       </header>
+      <AvatarContentScene kind="agent" slug={agent.slug} />
       <ContentLanguage
         contentLocale={pinned?.contentLocale ?? agent.contentLocale}
       />

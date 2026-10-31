@@ -1,3 +1,4 @@
+import { AvatarContentScene } from '../avatar-content-scene';
 import { ContributeLink } from '../creator/contribute-link';
 import { blogReadingSummary } from './reading-summary';
 import {
@@ -47,6 +48,7 @@ export function BlogArticle({
           </p>
         )}
       </header>
+      <AvatarContentScene kind="blog" slug={post.slug} />
       <LazyRead
         {...reading}
         locale={locale}

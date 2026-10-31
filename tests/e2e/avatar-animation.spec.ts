@@ -86,12 +86,15 @@ test('mobile menu docks the animated avatar above its navigation links', async (
   ).toBe(true);
 });
 
-test('the header remains a visible fallback on mobile catalogue pages', async ({
+test('the header returns when contextual actors leave the mobile viewport', async ({
   page,
   isMobile,
 }) => {
   test.skip(!isMobile, 'Mobile fallback');
   await page.goto('/agents');
+  await expect(page.getByTestId('avatar-scene')).toBeVisible();
+  await expect(page.getByTestId('avatar-stage')).toHaveCount(0);
+  await page.evaluate(() => scrollTo(0, document.body.scrollHeight));
   await expect(page.getByTestId('avatar-sprite')).toBeVisible();
   await expect.poll(() => distanceToSlot(page, 'header')).toBeLessThan(4);
 });

@@ -1,3 +1,4 @@
+import { AvatarContentScene } from '../../components/avatar-content-scene';
 import { ContributeLink } from '../../components/creator/contribute-link';
 import Link from '../../components/localized-link';
 import type { Metadata } from 'next';
@@ -29,6 +30,7 @@ export default async function BlogPage() {
           {t('blog.subtitle')}
         </p>
         <BlogReviewLink />
+        <AvatarContentScene kind="blog" />
       </header>
 
       {posts.length === 0 ? (

@@ -3,6 +3,10 @@ import json
 import os
 from pathlib import Path
 import subprocess
+import runpy
+import ast
+from urllib.request import Request
+from urllib.error import HTTPError
 import tempfile
 import unittest
 
@@ -96,6 +100,27 @@ class AuditTest(unittest.TestCase):
         report = json.loads((self.base / 'report/audit.json').read_text())
         self.assertNotIn('Costes locales aportados por el usuario', report['summary'])
         self.assertTrue(any('CSV' in gap for gap in report['data_gaps']))
+
+    def test_cli_response_budget_is_enforced(self):
+        capture = runpy.run_path(str(SCRIPT.with_name('common.py')))['capture']
+        with self.assertRaisesRegex(ValueError, 'size limit'):
+            capture(['python3', '-c', "import sys;sys.stdout.write('x'*(9*1024*1024))"])
+
+    def test_cli_stderr_is_not_copied_to_reports(self):
+        (self.bin / 'gcloud').write_text("#!/usr/bin/env python3\nimport sys\nsys.stderr.write('synthetic-sensitive-marker')\nsys.exit(1)\n")
+        result = self.run_audit('--execute', '--max-metrics', '0', '--out', str(self.base / 'report'))
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertNotIn('synthetic-sensitive-marker', (self.base / 'report/audit.json').read_text())
+
+    def test_monitoring_redirects_are_rejected(self):
+        from urllib.request import HTTPRedirectHandler
+        tree = ast.parse(SCRIPT.read_text())
+        redirect_class = next(node for node in tree.body if isinstance(node, ast.ClassDef) and node.name == 'NoRedirect')
+        namespace = {'HTTPRedirectHandler': HTTPRedirectHandler, 'HTTPError': HTTPError}
+        exec(compile(ast.Module(body=[redirect_class], type_ignores=[]), str(SCRIPT), 'exec'), namespace)
+        request = Request('https://monitoring.googleapis.com/v3/projects/test-project/timeSeries', headers={'Authorization': 'Bearer synthetic-token'})
+        with self.assertRaises(HTTPError):
+            namespace['NoRedirect']().redirect_request(request, None, 302, 'redirect', {}, 'https://example.invalid/')
 
     def test_costs_preserve_currency_and_project_scope(self):
         csv = self.base / 'cost.csv'

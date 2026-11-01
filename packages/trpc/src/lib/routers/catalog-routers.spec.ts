@@ -354,22 +354,20 @@ describe('domain error mapping', () => {
 
 it('public catalogue uses summaries while detail bodies remain on existing endpoints', async () => {
   const catalog = buildCatalogStub();
-  catalog.agents.list.execute = vi
-    .fn()
-    .mockResolvedValue({
-      items: [
-        {
-          slug: 'example',
-          isPremium: false,
-          fileTree: [],
-          readmeContent: 'large body',
-          previewContent: 'preview',
-        },
-      ],
-      total: 1,
-      page: 1,
-      pageSize: 20,
-    });
+  catalog.agents.list.execute = vi.fn().mockResolvedValue({
+    items: [
+      {
+        slug: 'example',
+        isPremium: false,
+        fileTree: [],
+        readmeContent: 'large body',
+        previewContent: 'preview',
+      },
+    ],
+    total: 1,
+    page: 1,
+    pageSize: 20,
+  });
   const caller = appRouter.createCaller(buildContext({ catalog }));
   const page = await caller.agents.catalog({ page: 1, pageSize: 20 });
   expect(page.items[0]).toMatchObject({
@@ -381,4 +379,16 @@ it('public catalogue uses summaries while detail bodies remain on existing endpo
   expect(catalog.agents.list.execute).toHaveBeenCalledWith(
     expect.objectContaining({ publishedOnly: true }),
   );
+});
+
+it('lets the home request creation order without exposing unpublished items', async () => {
+  const catalog = buildCatalogStub();
+  const caller = appRouter.createCaller(buildContext({ catalog }));
+  await caller.skills.catalog({ page: 1, pageSize: 6, orderBy: 'createdAt' });
+  await caller.agents.catalog({ page: 1, pageSize: 6, orderBy: 'createdAt' });
+  for (const group of [catalog.skills, catalog.agents]) {
+    expect(group.list.execute).toHaveBeenCalledWith(
+      expect.objectContaining({ publishedOnly: true, orderBy: 'createdAt' }),
+    );
+  }
 });

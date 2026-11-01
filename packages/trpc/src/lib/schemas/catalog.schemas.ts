@@ -74,6 +74,10 @@ export const paginationSchema = z.object({
   pageSize: z.number().int().min(1).max(100).default(20),
 });
 
+export const catalogPaginationSchema = paginationSchema.extend({
+  orderBy: z.enum(['createdAt', 'updatedAt']).optional(),
+});
+
 export const adminListSchema = paginationSchema.extend({
   search: z.string().trim().min(1).optional(),
   pendingReviewOnly: z.boolean().optional(),

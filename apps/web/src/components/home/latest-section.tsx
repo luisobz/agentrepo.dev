@@ -6,7 +6,7 @@ import { formatDate } from '../../lib/public-content';
 import { formatPrice } from '../../lib/format-price';
 import { serverTrpc } from '../../lib/trpc-server';
 
-interface LatestEntry {
+export interface LatestEntry {
   id: string;
   kind: ContentCoverKind;
   title: string;
@@ -24,9 +24,9 @@ async function fetchLatest(
   locale: Awaited<ReturnType<typeof getServerLocale>>,
 ): Promise<LatestEntry[]> {
   const [skills, agents, posts] = await Promise.all([
-    serverTrpc.skills.catalog.query({ page: 1, pageSize: FEED_SIZE }),
-    serverTrpc.agents.catalog.query({ page: 1, pageSize: FEED_SIZE }),
-    serverTrpc.blog.catalog.query({ page: 1, pageSize: FEED_SIZE }),
+    serverTrpc.skills.catalog.query({ page: 1, pageSize: FEED_SIZE, locale }),
+    serverTrpc.agents.catalog.query({ page: 1, pageSize: FEED_SIZE, locale }),
+    serverTrpc.blog.catalog.query({ page: 1, pageSize: FEED_SIZE, locale }),
   ]);
 
   const entries: LatestEntry[] = [
@@ -109,51 +109,66 @@ export async function LatestSection() {
       ) : (
         <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
           {entries.map((entry) => (
-            <Link
+            <ContentFeedCard
               key={`${entry.kind}-${entry.id}`}
-              href={entry.href}
-              className="group flex flex-col overflow-hidden rounded-[12px] border border-[var(--color-border-soft)] bg-[var(--color-bg-warm-white)] shadow-[var(--shadow-xs)] transition-all hover:-translate-y-[2px] hover:border-[var(--color-border-medium)] hover:shadow-[var(--shadow-sm)]"
-            >
-              <ContentCover
-                title={entry.title}
-                kind={entry.kind}
-                imageUrl={entry.imageUrl}
-                className="h-28 w-full"
-              />
-              <div className="flex flex-1 flex-col p-5">
-                <div className="flex items-center justify-between gap-2">
-                  {entry.skillType ? (
-                    <TypeChip type={entry.skillType} />
-                  ) : (
-                    <span className="rounded-full border border-[var(--color-border-medium)] px-2.5 py-0.5 font-mono text-[11px] text-[var(--color-text-secondary)]">
-                      {entry.kind}
-                    </span>
-                  )}
-                  {entry.premiumPrice && (
-                    <span className="rounded-full bg-[var(--color-brand-garnet-ghost)] px-2.5 py-0.5 text-xs font-medium text-[var(--color-brand-garnet)]">
-                      {t('premium.badge')} · {entry.premiumPrice}
-                    </span>
-                  )}
-                </div>
-                <h3 className="mt-3 text-base font-semibold leading-snug transition-colors group-hover:text-[var(--color-brand-garnet)]">
-                  {entry.title}
-                </h3>
-                {entry.description && (
-                  <p className="mt-2 line-clamp-2 text-sm leading-relaxed text-[var(--color-text-secondary)]">
-                    {entry.description}
-                  </p>
-                )}
-                <time
-                  dateTime={entry.createdAt.toISOString()}
-                  className="mt-auto pt-3 font-mono text-xs text-[var(--color-text-muted)]"
-                >
-                  {formatDate(entry.createdAt)}
-                </time>
-              </div>
-            </Link>
+              entry={entry}
+              premiumLabel={t('premium.badge')}
+            />
           ))}
         </div>
       )}
     </section>
+  );
+}
+
+export function ContentFeedCard({
+  entry,
+  premiumLabel,
+}: {
+  entry: LatestEntry;
+  premiumLabel: string;
+}) {
+  return (
+    <Link
+      href={entry.href}
+      className="group flex flex-col overflow-hidden rounded-[12px] border border-[var(--color-border-soft)] bg-[var(--color-bg-warm-white)] shadow-[var(--shadow-xs)] transition-all hover:-translate-y-[2px] hover:border-[var(--color-border-medium)] hover:shadow-[var(--shadow-sm)]"
+    >
+      <ContentCover
+        title={entry.title}
+        kind={entry.kind}
+        imageUrl={entry.imageUrl}
+        className="h-28 w-full"
+      />
+      <div className="flex flex-1 flex-col p-5">
+        <div className="flex items-center justify-between gap-2">
+          {entry.skillType ? (
+            <TypeChip type={entry.skillType} />
+          ) : (
+            <span className="rounded-full border border-[var(--color-border-medium)] px-2.5 py-0.5 font-mono text-[11px] text-[var(--color-text-secondary)]">
+              {entry.kind}
+            </span>
+          )}
+          {entry.premiumPrice && (
+            <span className="rounded-full bg-[var(--color-brand-garnet-ghost)] px-2.5 py-0.5 text-xs font-medium text-[var(--color-brand-garnet)]">
+              {premiumLabel} · {entry.premiumPrice}
+            </span>
+          )}
+        </div>
+        <h3 className="mt-3 text-base font-semibold leading-snug transition-colors group-hover:text-[var(--color-brand-garnet)]">
+          {entry.title}
+        </h3>
+        {entry.description && (
+          <p className="mt-2 line-clamp-2 text-sm leading-relaxed text-[var(--color-text-secondary)]">
+            {entry.description}
+          </p>
+        )}
+        <time
+          dateTime={entry.createdAt.toISOString()}
+          className="mt-auto pt-3 font-mono text-xs text-[var(--color-text-muted)]"
+        >
+          {formatDate(entry.createdAt)}
+        </time>
+      </div>
+    </Link>
   );
 }

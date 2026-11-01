@@ -68,3 +68,13 @@ A scene also works independently of the floating provider. Within an
 messages while the scene is visible. Multiple leases are released independently;
 leaving the scene or unmounting restores the mascot. Focused interactions such as
 menus take precedence and temporarily hide and pause inline actors.
+
+`cloud` is the infrastructure specialist. `trending` is an independent activity
+indicator, displayed separately from the one- or two-actor thematic cast. Both
+use the shared eight-clip atlas contract and animation accessibility controls.
+
+The two additional source atlases contain alpha pixels in reserved cells.
+`source-sheet.png` preserves the input; `scripts/prepare-character-atlas.py`
+packs only the manifest's active cells into the runtime `sheet.png`, preserving
+all active pixels and clearing reserved cells. The original 4× export is retained
+as a source reference. The strict atlas validator applies to runtime sheets.

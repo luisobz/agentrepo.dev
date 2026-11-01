@@ -1,3 +1,4 @@
+import { ContentPopularity } from '../../../components/content-popularity';
 import { AvatarContentScene } from '../../../components/avatar-content-scene';
 import { ContributeLink } from '../../../components/creator/contribute-link';
 import { localizedAlternates } from '../../../lib/seo/localized-metadata';
@@ -197,6 +198,7 @@ export default async function AgentPage({
               <MarkdownContent content={shownReadme} />
             </section>
           )}
+          <ContentPopularity kind="agent" slug={agent.slug} locale={locale} />
           <details
             open={!agent.repositoryUrl}
             className="mt-8 rounded-xl border border-[var(--color-border-soft)] p-4"

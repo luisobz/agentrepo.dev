@@ -1,3 +1,4 @@
+import { TrendingCatalog } from '../../components/trending-catalog';
 import { AvatarContentScene } from '../../components/avatar-content-scene';
 import { ContributeLink } from '../../components/creator/contribute-link';
 import Link from '../../components/localized-link';
@@ -32,6 +33,7 @@ export default async function BlogPage() {
         <BlogReviewLink />
         <AvatarContentScene kind="blog" />
       </header>
+      <TrendingCatalog kind="blog" />
 
       {posts.length === 0 ? (
         <p className="text-[var(--color-text-muted)]">{t('common.empty')}</p>

@@ -1,5 +1,6 @@
 import { Logger } from '@nestjs/common';
 import {
+  ListTrendingContent,
   createAdminAuthUseCases,
   createCatalogUseCases,
   createPlaygroundUseCases,
@@ -10,6 +11,7 @@ import {
 } from '@agentrepo/application';
 import { BackendEnvironments } from '@agentrepo/config';
 import {
+  PrismaPopularityRepository,
   DeepSeekCoderService,
   InternalWorkflowClient,
   PrismaContributorRepository,
@@ -57,6 +59,11 @@ function extractBearerToken(
  * application use cases and resolves the admin session per request.
  */
 export function buildCreateContext(prisma: PrismaService) {
+  const popularityRepository = new PrismaPopularityRepository(prisma);
+  const popularity = {
+    list: new ListTrendingContent(popularityRepository),
+    recordView: popularityRepository.recordView.bind(popularityRepository),
+  };
   const privateSkills = createPrivateSkillUseCases(
     new PrismaPrivateSkillRepository(prisma),
   );
@@ -150,6 +157,7 @@ export function buildCreateContext(prisma: PrismaService) {
       adminAuth,
       catalog,
       privateSkills,
+      popularity,
       globalSearch,
       portfolio,
       playground,

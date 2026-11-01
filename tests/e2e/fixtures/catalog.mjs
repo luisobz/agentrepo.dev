@@ -39,6 +39,14 @@ const shared = {
   version: '1.0.0',
 };
 function read(path) {
+  if (path === 'popularity.trending')
+    return ['skill', 'agent', 'blog'].map((kind) => ({
+      kind,
+      slug: 'linked-project',
+      views: 12,
+      downloads: kind === 'blog' ? 0 : 3,
+      score: kind === 'blog' ? 12 : 21,
+    }));
   if (path === 'skills.byVersion') return read('skills.bySlug');
   if (path === 'agents.byVersion') return read('agents.bySlug');
   if (path === 'skills.versions')

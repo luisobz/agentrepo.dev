@@ -1,3 +1,4 @@
+import { ContentPopularity } from '../../../components/content-popularity';
 import { localizedAlternates } from '../../../lib/seo/localized-metadata';
 import { localizedHref } from '../../../lib/i18n/routing';
 import { BlogArticle } from '../../../components/blog/blog-article';
@@ -63,5 +64,13 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
     notFound();
   }
 
-  return <BlogArticle post={post} locale={locale} />;
+  return (
+    <BlogArticle
+      post={post}
+      locale={locale}
+      trending={
+        <ContentPopularity kind="blog" slug={post.slug} locale={locale} />
+      }
+    />
+  );
 }

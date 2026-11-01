@@ -162,3 +162,22 @@ Legacy articles and new submissions without a curated summary use their localize
 excerpt or first prose paragraph. A missing translated summary falls back to the
 translated prose, never to a summary in another language. Catalogue listings omit
 summary bodies; article detail and authorized draft previews include them.
+
+## Recent activity and trends
+
+The home separates publication recency from a seven-UTC-day activity ranking.
+A visible public detail read after ten seconds adds one point; a recorded
+skill/agent download adds three. At least three actions qualify an item; the
+six highest scores are shown. Reads combine language and release variants by
+content identity. Drafts, owner-private skills and review previews never enter
+the ranking. Lack of data shows an explicit empty state, without a recency fallback.
+
+Only daily aggregate counts are stored. Session storage reduces repeat reads;
+the backend independently budgets views per IP and per content for one hour.
+IP keys remain in process memory, not the database. These best-effort controls
+do not establish unique visitors or eliminate automated manipulation, and
+multiple backend workers do not share limiter state. Existing download counters
+retain their original semantics. No Cloudflare credentials or private analytics
+are exposed. The independent trending character appears in catalogues, near
+skill/agent downloads and by the public blog heading; it does not consume one
+of the two thematic character slots. Runtime atlas loading remains contextual.

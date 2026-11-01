@@ -1,3 +1,4 @@
+import { TrendingSection } from '../components/home/trending-section';
 import { Hero } from '../components/home/hero';
 import { HomeBackground } from '../components/home/home-background';
 import { CatalogueOverview } from '../components/home/catalogue-overview';
@@ -23,6 +24,7 @@ export default async function HomePage() {
         <Hero />
         <CatalogueOverview />
         <LatestSection />
+        <TrendingSection />
       </div>
     </>
   );

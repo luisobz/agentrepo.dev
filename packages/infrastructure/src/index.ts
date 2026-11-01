@@ -22,3 +22,4 @@ export * from './pdf/react-pdf/pdf-generator.service';
 export * from './auth/supabase/supabase-contributor-verifier';
 export * from './persistence/prisma/repositories/prisma-contributor.repository';
 export * from './persistence/prisma/repositories/prisma-private-skill.repository';
+export * from './persistence/prisma/repositories/prisma-popularity.repository';

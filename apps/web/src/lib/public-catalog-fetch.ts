@@ -1,4 +1,5 @@
 const PUBLIC_READS = new Set([
+  'popularity.trending',
   'agents.catalog',
   'skills.catalog',
   'blog.catalog',

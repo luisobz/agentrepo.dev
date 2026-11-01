@@ -15,9 +15,11 @@ import { formatDate } from '../../lib/public-content';
 export function BlogArticle({
   post,
   locale,
+  trending,
 }: {
   post: BlogPost;
   locale: 'es' | 'en';
+  trending?: React.ReactNode;
 }) {
   const reading = blogReadingSummary(post);
   return (
@@ -49,6 +51,7 @@ export function BlogArticle({
         )}
       </header>
       <AvatarContentScene kind="blog" slug={post.slug} />
+      {trending}
       <LazyRead
         {...reading}
         locale={locale}

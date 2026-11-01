@@ -1,3 +1,4 @@
+import { TrendingCatalog } from '../../components/trending-catalog';
 import { AvatarContentScene } from '../../components/avatar-content-scene';
 import { ContributeLink } from '../../components/creator/contribute-link';
 import Link from '../../components/localized-link';
@@ -36,6 +37,7 @@ export default async function AgentsPage() {
         </p>
         <AvatarContentScene kind="agent" />
       </header>
+      <TrendingCatalog kind="agent" />
 
       {agents.length === 0 ? (
         <p className="text-[var(--color-text-muted)]">{t('common.empty')}</p>

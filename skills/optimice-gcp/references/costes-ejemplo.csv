@@ -1,0 +1,4 @@
+service,cost,currency,project
+Compute Engine,125.50,EUR,mi-proyecto
+Cloud Storage,18.20,EUR,mi-proyecto
+Cloud NAT,8.35,EUR,mi-proyecto

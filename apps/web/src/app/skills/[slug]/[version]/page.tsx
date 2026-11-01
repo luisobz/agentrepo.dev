@@ -1,3 +1,4 @@
+import { ContentPopularity } from '../../../../components/content-popularity';
 import { AvatarContentScene } from '../../../../components/avatar-content-scene';
 import { ContributeLink } from '../../../../components/creator/contribute-link';
 import { localizedAlternates } from '../../../../lib/seo/localized-metadata';
@@ -167,6 +168,7 @@ export default async function SkillPage({ params }: SkillPageProps) {
         className="mb-8 h-44 w-full rounded-[12px] sm:h-56"
       />
 
+      <ContentPopularity kind="skill" slug={skill.slug} locale={locale} />
       {pinned.isLocked ? (
         <PremiumGate
           priceCents={skill.priceCents}

@@ -17,6 +17,16 @@ export const webDictionary = {
     en: 'Explore this resource with the characters',
     es: 'Explora este recurso con los personajes',
   },
+  'characters.cloud.label': { en: 'Infrastructure', es: 'Infraestructura' },
+  'characters.cloud.message': {
+    en: 'Review capacity, costs and reliability together.',
+    es: 'Revisa capacidad, costes y disponibilidad en conjunto.',
+  },
+  'characters.trending.label': { en: 'Trending', es: 'Tendencias' },
+  'characters.trending.message': {
+    en: 'Explore this week’s activity.',
+    es: 'Descubre la actividad de esta semana.',
+  },
   'characters.repo.label': { en: 'Repo', es: 'Repo' },
   'characters.repo.message': {
     en: 'Explore the content and choose what is useful for your project.',
@@ -305,7 +315,7 @@ export const webDictionary = {
     es: 'Busca skills, agentes y artículos…',
   },
 
-  'latest.title': { en: 'Latest', es: 'Lo último' },
+  'latest.title': { en: 'Latest', es: 'Últimos' },
   'latest.tagline': { en: 'fresh from the repo', es: 'recién salido del repo' },
   'latest.empty.title': { en: 'Nothing here yet', es: 'Aún no hay nada aquí' },
   'latest.empty.body': {

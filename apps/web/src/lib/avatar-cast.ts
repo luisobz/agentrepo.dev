@@ -6,6 +6,12 @@ export function contentAvatarCast(
   kind: 'skill' | 'agent' | 'blog',
   slug = '',
 ): ContentCast {
+  if (
+    /gcp|google-cloud|aws|azure|infraestructura|infrastructure|cloud|terraform/.test(
+      slug,
+    )
+  )
+    return ['cloud'];
   if (/sprites/.test(slug)) return ['developer', 'publisher'];
   if (/binance|eip-7702/.test(slug)) return ['researcher', 'guardian'];
   if (/nodejs|brotli|php|obliterated|server-status|linux-agent/.test(slug))

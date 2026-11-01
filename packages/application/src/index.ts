@@ -37,3 +37,4 @@ export * from './playground/playground.use-cases';
 export * from './auth/creator-identity';
 export * from './private-skills/private-skill.repository';
 export * from './private-skills/private-skills';
+export * from './catalog/popularity';

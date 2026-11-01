@@ -4,6 +4,8 @@ export const AVATAR_CHARACTERS = [
   'guardian',
   'researcher',
   'publisher',
+  'cloud',
+  'trending',
 ] as const;
 export type AvatarCharacterId = (typeof AVATAR_CHARACTERS)[number];
 export function characterSheet(

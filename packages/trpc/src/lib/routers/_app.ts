@@ -12,6 +12,8 @@ import { searchRouter } from './search';
 import { skillsRouter } from './skills';
 import { privateSkillsRouter } from './private-skills';
 
+import { popularityRouter } from './popularity';
+
 const helloRouter = router({
   greeting: publicProcedure
     .input(z.object({ name: z.string().nullish() }).nullish())
@@ -24,6 +26,7 @@ const helloRouter = router({
 
 export const appRouter = router({
   hello: helloRouter,
+  popularity: popularityRouter,
   adminAuth: adminAuthRouter,
   search: searchRouter,
   skills: skillsRouter,

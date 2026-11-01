@@ -21,6 +21,13 @@ import type { SearchHit } from '@agentrepo/domain';
 import { FixedWindowRateLimiter } from './auth/login-rate-limit';
 
 export interface TRPCContext {
+  popularity?: {
+    list: import('@agentrepo/application').ListTrendingContent;
+    recordView(
+      kind: import('@agentrepo/application').PopularityKind,
+      slug: string,
+    ): Promise<void>;
+  };
   isAdmin: boolean;
   creatorUserId?: string | null;
   /** Best-effort client IP, used as the key for abuse rate limiting. */

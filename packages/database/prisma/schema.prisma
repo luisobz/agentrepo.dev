@@ -318,3 +318,13 @@ model PlaygroundDeployment {
 
   @@index([createdAt])
 }
+
+// Aggregate public reads only. No visitor identifiers or URLs are retained.
+model ContentViewDay {
+  kind String
+  contentId String
+  day DateTime @db.Date
+  count Int @default(0)
+  @@id([kind, contentId, day])
+  @@index([day])
+}

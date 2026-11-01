@@ -91,6 +91,9 @@ jobs:
       - name: Validate sprite atlas limits and assets
         run: python3 -m unittest discover -s tests/sprites -p 'test_*.py'
 
+      - name: Validate GCP audit with synthetic data
+        run: python3 -m unittest discover -s tests/gcp -p 'test_*.py'
+
       - name: Lint + tests
         run: pnpm verify
 

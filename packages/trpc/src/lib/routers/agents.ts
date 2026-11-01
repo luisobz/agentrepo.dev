@@ -6,6 +6,7 @@ import {
   createAgentSchema,
   idInputSchema,
   paginationSchema,
+  catalogPaginationSchema,
   publishVersionSchema,
   recordDownloadSchema,
   setLatestVersionSchema,
@@ -18,7 +19,7 @@ import { toVersionSummary } from './version-dto';
 
 export const agentsRouter = router({
   catalog: publicProcedure
-    .input(paginationSchema)
+    .input(catalogPaginationSchema)
     .query(async ({ input, ctx }) => {
       const page = await ctx.catalog.agents.list.execute({
         ...input,

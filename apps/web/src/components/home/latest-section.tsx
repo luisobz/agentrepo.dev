@@ -24,8 +24,18 @@ async function fetchLatest(
   locale: Awaited<ReturnType<typeof getServerLocale>>,
 ): Promise<LatestEntry[]> {
   const [skills, agents, posts] = await Promise.all([
-    serverTrpc.skills.catalog.query({ page: 1, pageSize: FEED_SIZE, locale }),
-    serverTrpc.agents.catalog.query({ page: 1, pageSize: FEED_SIZE, locale }),
+    serverTrpc.skills.catalog.query({
+      page: 1,
+      pageSize: FEED_SIZE,
+      locale,
+      orderBy: 'createdAt',
+    }),
+    serverTrpc.agents.catalog.query({
+      page: 1,
+      pageSize: FEED_SIZE,
+      locale,
+      orderBy: 'createdAt',
+    }),
     serverTrpc.blog.catalog.query({ page: 1, pageSize: FEED_SIZE, locale }),
   ]);
 
@@ -121,13 +131,14 @@ export async function LatestSection() {
   );
 }
 
-export function ContentFeedCard({
+export async function ContentFeedCard({
   entry,
   premiumLabel,
 }: {
   entry: LatestEntry;
   premiumLabel: string;
 }) {
+  const locale = await getServerLocale();
   return (
     <Link
       href={entry.href}
@@ -166,7 +177,7 @@ export function ContentFeedCard({
           dateTime={entry.createdAt.toISOString()}
           className="mt-auto pt-3 font-mono text-xs text-[var(--color-text-muted)]"
         >
-          {formatDate(entry.createdAt)}
+          {formatDate(entry.createdAt, locale)}
         </time>
       </div>
     </Link>

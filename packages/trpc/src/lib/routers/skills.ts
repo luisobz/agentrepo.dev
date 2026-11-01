@@ -6,6 +6,7 @@ import {
   createSkillSchema,
   idInputSchema,
   paginationSchema,
+  catalogPaginationSchema,
   publishVersionSchema,
   recordDownloadSchema,
   searchSkillsSchema,
@@ -19,7 +20,7 @@ import { toVersionSummary } from './version-dto';
 
 export const skillsRouter = router({
   catalog: publicProcedure
-    .input(paginationSchema)
+    .input(catalogPaginationSchema)
     .query(async ({ input, ctx }) => {
       const page = await ctx.catalog.skills.list.execute({
         ...input,

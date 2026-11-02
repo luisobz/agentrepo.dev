@@ -56,6 +56,9 @@ jobs:
       - name: Validate GCP audit with synthetic data
         run: python3 -m unittest discover -s tests/gcp -p 'test_*.py'
 
+      - name: Validate Azure audit with synthetic data
+        run: python3 -m unittest discover -s tests/azure -p 'test_*.py'
+
       - name: Lint + tests
         run: pnpm verify
 

@@ -23,12 +23,17 @@ elif args[:2]==['vm','list']:
  data=[{'id':f'/subscriptions/{scope}/resourceGroups/test/providers/Microsoft.Compute/virtualMachines/test-vm','name':'test-vm','hardwareProfile':{'vmSize':'Standard_B2s'},'location':'westeurope','resourceGroup':'test'}]
 elif args[:2]==['disk','list']:
  data=[{'name':'shared-disk','diskState':'Unattached','managedByExtended':['/subscriptions/'+sub+'/vm/test'],'diskSizeGb':8}]
+ if mode=='long-disks':data=data*100+[{'name':'candidate-101','diskState':'Unattached','diskSizeGb':8}]
 elif args[:3]==['network','public-ip','list']:
  data=[{'name':'nat-ip','natGateway':{'id':'synthetic-nat'}}]
+ if mode=='long-ips':data=data*100+[{'name':'candidate-101'}]
 elif args[:3]==['monitor','metrics','list']:
  days=2 if mode=='sparse' else 30
  today=datetime.now(timezone.utc).replace(hour=0,minute=0,second=0,microsecond=0)
  data={'value':[{'timeseries':[{'data':[{'timeStamp':(today-timedelta(days=n+1)).isoformat(),'average':5,'maximum':95} for n in range(days)]}]}]}
+elif args[:3]==['advisor','recommendation','list']:
+ data=[{'resourceMetadata':{'resourceId':'synthetic-resource'},'shortDescription':{'problem':'Underused','solution':'Review sizing'}}]
+ if mode=='advisor-nested':data=[{'properties':data[0]}]
 elif args and args[0]=='rest':
  data={'properties':{'columns':[{'name':'PreTaxCost' if mode!='columns' else 'Other','type':'Number'},{'name':'ServiceName','type':'String'},{'name':'Currency','type':'String'}],'rows':[[12.5,'Virtual Machines','EUR']],'nextLink':'https://example.invalid/do-not-follow' if mode=='pagination' else None}}
 else:data=[]
@@ -150,6 +155,26 @@ class AzureAuditTest(unittest.TestCase):
         self.assertNotEqual(result.returncode, 0)
         self.assertEqual(victim.read_text(), 'preserve me')
         self.assertFalse(self.log.exists())
+
+    def test_disk_scan_does_not_silently_drop_candidate_101(self):
+        result = self.execute(mode='long-disks')
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertTrue(any(f['resource'] == 'candidate-101' for f in self.report()['findings']))
+
+    def test_ip_scan_does_not_silently_drop_candidate_101(self):
+        result = self.execute(mode='long-ips')
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertTrue(any(f['resource'] == 'candidate-101' for f in self.report()['findings']))
+
+    def test_flat_advisor_metadata_is_retained(self):
+        result = self.execute()
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertEqual(self.report()['summary']['Azure Advisor Cost']['sample'][0]['description']['problem'], 'Underused')
+
+    def test_nested_advisor_metadata_is_retained(self):
+        result = self.execute(mode='advisor-nested')
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertEqual(self.report()['summary']['Azure Advisor Cost']['sample'][0]['description']['problem'], 'Underused')
 
     def test_cli_errors_do_not_expose_raw_stderr(self):
         result = self.execute(mode='error')

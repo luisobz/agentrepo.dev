@@ -61,13 +61,15 @@ def collect_inventory(audit, args):
              'region': row.get('location')} for row in vms]
     audit.record('VM', {'total_observed': len(rows), 'resources': rows[:65]})
     disks = inventory(audit, args, ['disk', 'list'], 'Discos administrados')
-    for row in disks[:100]:
+    audit.record('Discos administrados', {'total_observed': len(disks), 'reviewed': len(disks)})
+    for row in disks:
         if not row.get('managedBy') and not row.get('managedByExtended') and str(row.get('diskState', '')).lower() == 'unattached':
             audit.find('P2', 'Disco sin adjuntar', row.get('name'),
                        'Sin asociaciones observadas; DiskState Unattached.',
                        'Validar propietario, restauración, dependencias y coste por SKU antes de proponer cambios.')
     ips = inventory(audit, args, ['network', 'public-ip', 'list'], 'IP públicas')
-    for row in ips[:100]:
+    audit.record('IP públicas', {'total_observed': len(ips), 'reviewed': len(ips)})
+    for row in ips:
         if not any(row.get(key) for key in ['ipConfiguration', 'natGateway', 'linkedPublicIPAddress', 'servicePublicIPAddress']):
             audit.find('P2', 'IP pública sin binding', row.get('name'),
                        'Sin asociaciones en los campos observados.',
@@ -82,9 +84,14 @@ def collect_inventory(audit, args):
         audit.record(label, {'total_observed': len(items), 'resources': [
             {'name': item.get('name'), 'sku': item.get('sku'), 'region': item.get('location')} for item in items[:40]]})
     recommendations = inventory(audit, args, ['advisor', 'recommendation', 'list', '--category', 'Cost'], 'Azure Advisor Cost')
-    audit.record('Azure Advisor Cost', {'total_observed': len(recommendations), 'sample': [
-        {'resource': (item.get('properties') or {}).get('resourceMetadata'),
-         'description': (item.get('properties') or {}).get('shortDescription')} for item in recommendations[:35]]})
+    recommendation_sample = []
+    for item in recommendations[:35]:
+        fields = item.get('properties') or item
+        description = fields.get('shortDescription')
+        if not isinstance(description, dict):
+            audit.gaps.append('Azure Advisor: formato de descripción desconocido; metadatos incompletos.')
+        recommendation_sample.append({'resource': fields.get('resourceMetadata'), 'description': description})
+    audit.record('Azure Advisor Cost', {'total_observed': len(recommendations), 'sample': recommendation_sample})
     return rows
 
 

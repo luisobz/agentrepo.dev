@@ -99,6 +99,8 @@ class AzureAuditTest(unittest.TestCase):
             else:
                 self.assertTrue('list' in command or command[:2] == ['account', 'show'])
         self.assertEqual(len(rest), 1)
+        cpu = next(f for f in self.report()['findings'] if f['category'] == 'Posible VM sobredimensionada')
+        self.assertIn('95', cpu['evidence'])
         self.assertEqual((self.base / 'report').stat().st_mode & 0o777, 0o700)
         self.assertEqual((self.base / 'report/audit.json').stat().st_mode & 0o777, 0o600)
 

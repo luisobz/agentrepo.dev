@@ -144,6 +144,7 @@ def collect_cpu(audit, args, vms, start, end):
         if not isinstance(metrics, dict):
             continue
         samples = {}
+        peaks = []
         duplicate = False
         for metric in metrics.get('value', []):
             for series in metric.get('timeseries', []):
@@ -156,13 +157,16 @@ def collect_cpu(audit, args, vms, start, end):
                         day = stamp.date().isoformat()
                         duplicate = duplicate or day in samples
                         samples[day] = average
+                        peak = point.get('maximum')
+                        if type(peak) in (int, float) and math.isfinite(peak) and 0 <= peak <= 100:
+                            peaks.append(peak)
                     except (KeyError, TypeError, ValueError):
                         continue
         if duplicate or len(samples) < math.ceil(args.days * 0.8):
             audit.gaps.append(f'VM {vm.get("name")}: cobertura diaria insuficiente o series duplicadas; sin evaluación.')
         elif sum(samples.values()) / len(samples) < 12:
             audit.find('P2', 'Posible VM sobredimensionada', vm.get('name'),
-                       f'CPU media diaria {sum(samples.values()) / len(samples):.1f} % sobre {len(samples)} días; tamaño {vm.get("size")}.',
+                       f'CPU media diaria {sum(samples.values()) / len(samples):.1f} % sobre {len(samples)} días; pico observado {max(peaks) if peaks else "sin dato"} %; tamaño {vm.get("size")}.',
                        'Validar máximos, memoria, I/O, p95, calendario del negocio y SLO antes de dimensionar.',
                        'Indicio por medias de CPU; no demuestra capacidad prescindible')
     if len(vms) > args.max_metrics:

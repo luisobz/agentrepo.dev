@@ -1,0 +1,29 @@
+{
+  "Name": "Cloud FinOps Auditor Consulta",
+  "IsCustom": true,
+  "Description": "Lectura de recursos Azure y consulta de costes (query/action: consulta no mutadora).",
+  "Actions": [
+    "Microsoft.Resources/subscriptions/read",
+    "Microsoft.Resources/subscriptions/resources/read",
+    "Microsoft.Resources/subscriptions/resourceGroups/read",
+    "Microsoft.Resources/subscriptions/providers/read",
+    "Microsoft.Compute/virtualMachines/read",
+    "Microsoft.Compute/disks/read",
+    "Microsoft.Network/publicIPAddresses/read",
+    "Microsoft.Network/natGateways/read",
+    "Microsoft.Network/applicationGateways/read",
+    "Microsoft.Network/privateEndpoints/read",
+    "Microsoft.Web/serverfarms/read",
+    "Microsoft.Storage/storageAccounts/read",
+    "Microsoft.Advisor/recommendations/read",
+    "Microsoft.Insights/metrics/read",
+    "Microsoft.CostManagement/query/read",
+    "Microsoft.CostManagement/query/action"
+  ],
+  "NotActions": [],
+  "DataActions": [],
+  "NotDataActions": [],
+  "AssignableScopes": [
+    "/subscriptions/REEMPLAZAR_POR_SUBSCRIPTION_ID"
+  ]
+}

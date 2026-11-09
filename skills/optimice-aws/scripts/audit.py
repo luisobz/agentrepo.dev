@@ -22,6 +22,7 @@ p.add_argument('--out',default='./audit-aws-local',help='Carpeta local de salida
 a=p.parse_args()
 if a.days<7 or a.days>90 or a.max_metrics<0 or a.max_metrics>100: p.error('days entre 7 y 90; max-metrics entre 0 y 100')
 regions=[x.strip() for x in a.regions.split(',') if x.strip()]
+if any(r.startswith(('us-gov-','us-iso')) for r in regions): p.error('Solo regiones comerciales AWS')
 if not regions or len(regions)>20 or any(not all(c.isalnum() or c=='-' for c in r) for r in regions): p.error('regiones no válidas o más de 20')
 if not re.fullmatch(r'[0-9]{12}',a.account_id): p.error('account-id debe tener 12 dígitos')
 if any(not re.fullmatch(r'(?:us|eu|ap|sa|ca|me|af|il|mx)-(?:[a-z]+-)*[a-z]+-[0-9]+',region) for region in regions) or len(set(regions))!=len(regions): p.error('Regiones inválidas o repetidas')

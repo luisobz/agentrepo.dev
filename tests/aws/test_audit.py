@@ -47,6 +47,9 @@ class AuditTest(unittest.TestCase):
   cpu=next(f for f in self.report()['findings'] if 'right-sizing' in f['category']);self.assertIn('95',cpu['evidence'])
  def test_pagination_is_reported_without_following(self):
   r=self.run_audit('--execute',mode='pagination');self.assertEqual(r.returncode,0,r.stderr);self.assertTrue(any('paginación' in x for x in self.report()['data_gaps']));self.assertFalse(any('--next-token' in c for c in self.calls()))
+ def test_noncommercial_regions_never_call_cli(self):
+  for region in ['us-gov-west-1','cn-north-1','us-iso-east-1']:
+   r=self.run_audit('--regions',region,'--execute');self.assertNotEqual(r.returncode,0);self.assertFalse(self.log.exists())
  def test_invalid_account_never_calls_cli(self):
   r=self.run_audit('--account-id','invalid','--execute');self.assertNotEqual(r.returncode,0);self.assertFalse(self.log.exists())
  def test_symlink_output_rejected(self):

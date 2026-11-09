@@ -97,6 +97,9 @@ jobs:
       - name: Validate Azure audit with synthetic data
         run: python3 -m unittest discover -s tests/azure -p 'test_*.py'
 
+      - name: Validate AWS audit with synthetic data
+        run: python3 -m unittest discover -s tests/aws -p 'test_*.py'
+
       - name: Lint + tests
         run: pnpm verify
 

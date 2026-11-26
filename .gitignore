@@ -54,3 +54,6 @@ packages/database/src/seeds/prod.seed.data.json
 # Python validation helpers
 __pycache__/
 *.py[cod]
+
+# Local editorial exports. The catalogue is stored in the database.
+/content/agents/

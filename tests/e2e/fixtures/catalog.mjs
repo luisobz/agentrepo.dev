@@ -1,9 +1,18 @@
 import { createServer } from 'node:http';
-import { readFileSync } from 'node:fs';
-const projectGuide = readFileSync(
-  new URL('../../../content/agents/01-NANOBOT.md', import.meta.url),
-  'utf8',
-);
+
+const projectGuide = [
+  '## Example agent installation and operation guide',
+  '',
+  'Configure the example agent in a workspace you can reset.',
+  '',
+  '| Setting | Value | Purpose |',
+  '| --- | --- | --- |',
+  '| Workspace | `/example/workspaces/documentation-preview/linked-project/default-workspace` | Stores example files. |',
+  '',
+  '```text',
+  'example-agent --workspace /example/workspaces/documentation-preview/linked-project/default-workspace --mode read-only',
+  '```',
+].join('\n');
 
 // Read-only catalogue fixture. Auth and mutations are deliberately unavailable.
 const relatedLinks = [

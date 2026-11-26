@@ -37,8 +37,9 @@ Skills, agents and blog details display labelled related links (web, GitHub, X,
 documentation, community, video and other references). Creator supports the same
 editor; submitted links follow the usual admin review process. Project agents
 with an upstream repository display the readable guide before a collapsible
-files/downloads section. Initial editorial guides and metadata live in
-`content/agents/`; their version numbers describe the AgentRepo guide, not upstream.
+files/downloads section. Editorial guides and their metadata are managed through
+the catalogue API and stored in the database. A guide version describes the
+AgentRepo publication.
 
 ## CLI guide and navigation
 

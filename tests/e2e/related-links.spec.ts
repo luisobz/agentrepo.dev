@@ -15,7 +15,7 @@ for (const kind of ['agents', 'skills', 'blog']) {
     if (kind === 'agents')
       await expect(
         page.getByRole('heading', {
-          name: 'nanobot — guía técnica de instalación, VPS y operación',
+          name: 'Example agent installation and operation guide',
           exact: true,
         }),
       ).toBeVisible();
@@ -36,13 +36,13 @@ for (const kind of ['agents', 'skills', 'blog']) {
   });
 }
 
-test('full guide fits a narrow viewport after fonts load', async ({ page }) => {
+test('guide with long content fits a narrow viewport after fonts load', async ({ page }) => {
   await page.setViewportSize({ width: 393, height: 950 });
   await page.goto('/agents/linked-project', { waitUntil: 'networkidle' });
   await page.evaluate(() => document.fonts.ready);
   await expect(
     page.getByRole('heading', {
-      name: 'nanobot — guía técnica de instalación, VPS y operación',
+      name: 'Example agent installation and operation guide',
       exact: true,
     }),
   ).toBeVisible();
